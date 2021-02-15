@@ -18,15 +18,17 @@ type Stage struct {
 
 type Inputs map[string]StageInput
 
-type StageInput struct {
+type InputStageBase struct {
 	Type string `json:"type"`
 	// Origin should be either 'org.osbuild.source' or 'org.osbuild.pipeline'
 	// TODO: Enum?
 	Origin string `json:"origin"`
 
 	References Reference `json:"references"`
+}
 
-	Options InputOptions `json:"options"`
+type StageInput interface {
+	isStageInput()
 }
 
 // NOTE: [Array of string] or [object]

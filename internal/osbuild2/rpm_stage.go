@@ -22,9 +22,10 @@ type RPMPackage struct {
 func (RPMStageOptions) isStageOptions() {}
 
 // NewRPMStage creates a new RPM stage.
-func NewRPMStage(options *RPMStageOptions) *Stage {
+func NewRPMStage(options *RPMStageOptions, inputs Inputs) *Stage {
 	return &Stage{
 		Type:    "org.osbuild.rpm",
+		Inputs:  inputs,
 		Options: options,
 	}
 }
