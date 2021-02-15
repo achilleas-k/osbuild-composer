@@ -9,11 +9,8 @@ import (
 type Sources map[string]Source
 
 // Source specifies the operations of a given source-type.
-type Source struct {
-	Items   *Reference    `json:"items"`
-	Options SourceOptions `json:"options,omitempty"`
-
-	// isSource()
+type Source interface {
+	isSource()
 }
 
 type SourceOptions interface {
