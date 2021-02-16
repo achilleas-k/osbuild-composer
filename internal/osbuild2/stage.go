@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-// A Stage transforms a filesystem tree.
+// Single stage of a pipeline executing one step
 type Stage struct {
 	// Well-known name in reverse domain-name notation, uniquely identifying
 	// the stage type.
@@ -16,15 +16,22 @@ type Stage struct {
 	Options StageOptions `json:"options"`
 }
 
-type Inputs map[string]StageInput
+// Collection of Inputs for a Stage
+type Inputs map[string]Input
 
-type InputStageBase struct {
+// Single Input for a Stage
+type Input interface {
+	isInput()
+}
+
+// Fields shared between all Input types (should be embedded in each instance)
+type inputCommon struct {
 	Type string `json:"type"`
 	// Origin should be either 'org.osbuild.source' or 'org.osbuild.pipeline'
 	// TODO: Enum?
 	Origin string `json:"origin"`
 
-	References Reference `json:"references"`
+	References map[string]Reference `json:"references"`
 }
 
 type StageInput interface {
