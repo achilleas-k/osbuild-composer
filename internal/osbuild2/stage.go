@@ -11,13 +11,15 @@ type Stage struct {
 	// the stage type.
 	Type string `json:"type"`
 	// Stage-type specific options fully determining the operations of the
-	// stage.
-	Inputs  Inputs       `json:"inputs"`
-	Options StageOptions `json:"options"`
+
+	Inputs  Inputs       `json:"inputs,omitempty"`
+	Options StageOptions `json:"options,omitempty"`
 }
 
 // Collection of Inputs for a Stage
-type Inputs map[string]Input
+type Inputs interface {
+	isStageInputs()
+}
 
 // Single Input for a Stage
 type Input interface {
@@ -31,15 +33,16 @@ type inputCommon struct {
 	// TODO: Enum?
 	Origin string `json:"origin"`
 
-	References map[string]Reference `json:"references"`
+	// References References `json:"references"`
 }
 
 type StageInput interface {
 	isStageInput()
 }
 
-// NOTE: [Array of string] or [object]
-type Reference interface{}
+type References interface {
+	isReferences()
+}
 
 // StageOptions specify the operations of a given stage-type.
 type StageOptions interface {
@@ -93,8 +96,8 @@ func (stage *Stage) UnmarshalJSON(data []byte) error {
 		options = new(RHSMStageOptions)
 	case "org.osbuild.rpm":
 		options = new(RPMStageOptions)
-	case "org.osbuild.rpm-ostree":
-		options = new(RPMOSTreeStageOptions)
+	// case "org.osbuild.rpm-ostree":
+	// 	options = new(RPMOSTreeStageOptions)
 	case "org.osbuild.systemd":
 		options = new(SystemdStageOptions)
 	case "org.osbuild.script":

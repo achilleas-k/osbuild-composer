@@ -1,13 +1,18 @@
 package osbuild2
 
-// The RPMStageOptions describe the operations of the RPM stage.
-//
-// The RPM stage installs a given set of packages, identified by their
-// content hash. This ensures that given a set of RPM stage options,
-// the output is be reproducible, if the underlying tools are.
 type RPMStageOptions struct {
-	GPGKeys  []string     `json:"gpgkeys,omitempty"`
-	Packages []RPMPackage `json:"packages"`
+	// Array of GPG key contents to import
+	GPGKeys []string `json:"gpgkeys,omitempty"`
+
+	// Prevent dracut from running
+	DisableDracut bool `json:"disable_dracut,omitempty"`
+
+	Exclude *Exclude `json:"exclude,omitempty"`
+}
+
+type Exclude struct {
+	// Do not install documentation.
+	Docs bool `json:"docs,omitempty"`
 }
 
 // RPMPackage represents one RPM, as referenced by its content hash
@@ -21,8 +26,25 @@ type RPMPackage struct {
 
 func (RPMStageOptions) isStageOptions() {}
 
+type RPMStageInputs struct {
+	Packages *RPMStageInput `json:"packages"`
+}
+
+func (RPMStageInputs) isStageInputs() {}
+
+type RPMStageInput struct {
+	inputCommon
+	References RPMStageReferences `json:"references"`
+}
+
+func (RPMStageInput) isStageInput() {}
+
+type RPMStageReferences []string
+
+func (RPMStageReferences) isReferences() {}
+
 // NewRPMStage creates a new RPM stage.
-func NewRPMStage(options *RPMStageOptions, inputs Inputs) *Stage {
+func NewRPMStage(options *RPMStageOptions, inputs *RPMStageInputs) *Stage {
 	return &Stage{
 		Type:    "org.osbuild.rpm",
 		Inputs:  inputs,

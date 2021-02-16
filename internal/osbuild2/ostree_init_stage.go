@@ -12,18 +12,18 @@ const (
 // Options for the org.osbuild.ostree.init stage.
 type OSTreeInitStageOptions struct {
 	// The Mode in which to initialise the repo
-	Mode InitMode
+	Mode InitMode `json:"mode,omitempty"`
+
 	// Location in which to create the repo
-	Path string
+	Path string `json:"path,omitempty"`
 }
 
 func (OSTreeInitStageOptions) isStageOptions() {}
 
-// A new org.osbuild.ostree.init stage with given options and inputs.
-func NewOSTreeInitStage(options *OSTreeInitStageOptions, inputs Inputs) *Stage {
+// A new org.osbuild.ostree.init stage to create an OSTree repository
+func NewOSTreeInitStage(options *OSTreeInitStageOptions) *Stage {
 	return &Stage{
 		Type:    "org.osbuild.ostree.init",
-		Inputs:  inputs,
 		Options: options,
 	}
 }

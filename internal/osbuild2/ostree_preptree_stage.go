@@ -8,7 +8,7 @@ func (RPMOSTreePrepTreeStageOptions) isStageOptions() {}
 
 // The RPM OSTree PrepTree (org.osbuild.ostree.preptree) stage transforms the
 // tree to an ostree layout.
-func NewRPMOstreePrepTree(options *RPMOSTreePrepTreeStageOptions) *Stage {
+func NewRPMOSTreePrepTreeStage(options *RPMOSTreePrepTreeStageOptions) *Stage {
 	return &Stage{
 		Type:    "org.osbuild.ostree.preptree",
 		Options: options,
