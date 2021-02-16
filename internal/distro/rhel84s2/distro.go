@@ -8,7 +8,6 @@ import (
 
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/distro"
-	"github.com/osbuild/osbuild-composer/internal/osbuild1"
 	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild2"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
@@ -209,23 +208,22 @@ func (d *distribution) ModulePlatformID() string {
 	return modulePlatformID
 }
 
-func sources(packages []rpmmd.PackageSpec) osbuild1.Sources {
-	files := &osbuild1.FilesSource{
-		URLs: make(map[string]osbuild1.FileSource),
+func sources(packages []rpmmd.PackageSpec) osbuild.Sources {
+	source := &osbuild.CurlSource{
+		Items: make(map[string]osbuild.CurlSourceItem),
 	}
 	for _, pkg := range packages {
-		fileSource := osbuild1.FileSource{
-			URL: pkg.RemoteLocation,
-		}
+		item := new(osbuild.URLWithSecrets)
+		item.URL = pkg.RemoteLocation
 		if pkg.Secrets == "org.osbuild.rhsm" {
-			fileSource.Secrets = &osbuild1.Secret{
+			item.Secrets = &osbuild.URLSecrets{
 				Name: "org.osbuild.rhsm",
 			}
 		}
-		files.URLs[pkg.Checksum] = fileSource
+		source.Items[pkg.Checksum] = item
 	}
-	return osbuild1.Sources{
-		"org.osbuild.files": files,
+	return osbuild.Sources{
+		"org.osbuild.curl": source,
 	}
 }
 
