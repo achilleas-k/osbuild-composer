@@ -2,12 +2,10 @@
 // OSBuild (schema v1) types.
 package osbuild2
 
-import "github.com/osbuild/osbuild-composer/internal/osbuild1"
-
 // A Manifest represents an OSBuild source and pipeline manifest
 type Manifest struct {
-	Pipelines []Pipeline       `json:"pipelines"`
-	Sources   osbuild1.Sources `json:"sources"`
+	Pipelines []Pipeline `json:"pipelines"`
+	Sources   Sources    `json:"sources"`
 }
 
 // A Pipeline represents an OSBuild pipeline
