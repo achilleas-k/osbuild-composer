@@ -53,20 +53,21 @@ type InputOptions interface {
 }
 
 type rawStage struct {
-	Name    string          `json:"name"`
+	Type    string          `json:"type"`
 	Options json.RawMessage `json:"options"`
+	Inputs  json.RawMessage `json:"inputs"`
 }
 
 // UnmarshalJSON unmarshals JSON into a Stage object. Each type of stage has
 // a custom unmarshaller for its options, selected based on the stage name.
 func (stage *Stage) UnmarshalJSON(data []byte) error {
 	var rawStage rawStage
-	err := json.Unmarshal(data, &rawStage)
-	if err != nil {
+	if err := json.Unmarshal(data, &rawStage); err != nil {
 		return err
 	}
 	var options StageOptions
-	switch rawStage.Name {
+	var inputs Inputs
+	switch rawStage.Type {
 	case "org.osbuild.fix-bls":
 		// TODO: verify that we can unmarshall this also if "options" is omitted
 		options = new(FixBLSStageOptions)
@@ -94,24 +95,39 @@ func (stage *Stage) UnmarshalJSON(data []byte) error {
 		options = new(FirewallStageOptions)
 	case "org.osbuild.rhsm":
 		options = new(RHSMStageOptions)
-	case "org.osbuild.rpm":
-		options = new(RPMStageOptions)
-	// case "org.osbuild.rpm-ostree":
-	// 	options = new(RPMOSTreeStageOptions)
 	case "org.osbuild.systemd":
 		options = new(SystemdStageOptions)
 	case "org.osbuild.script":
 		options = new(ScriptStageOptions)
+	case "org.osbuild.rpm":
+		options = new(RPMStageOptions)
+		inputs = new(RPMStageInputs)
+	case "org.osbuild.oci-archive":
+		options = new(OCIArchiveStageOptions)
+		inputs = new(OCIArchiveStageInputs)
+	case "org.osbuild.ostree.commit":
+		options = new(OSTreeCommitStageOptions)
+		inputs = new(OSTreeCommitStageInputs)
+	case "org.osbuild.ostree.pull":
+		options = new(OSTreePullStageOptions)
+		inputs = new(OSTreePullStageInputs)
+	case "org.osbuild.ostree.preptree":
+		options = new(RPMOSTreePrepTreeStageOptions)
 	default:
-		return fmt.Errorf("unexpected stage name: %s", rawStage.Name)
+		return fmt.Errorf("unexpected stage type: %s", rawStage.Type)
 	}
-	err = json.Unmarshal(rawStage.Options, options)
-	if err != nil {
+	if err := json.Unmarshal(rawStage.Options, options); err != nil {
 		return err
 	}
+	if inputs != nil && rawStage.Inputs != nil {
+		if err := json.Unmarshal(rawStage.Inputs, inputs); err != nil {
+			return err
+		}
+	}
 
-	stage.Type = rawStage.Name
+	stage.Type = rawStage.Type
 	stage.Options = options
+	stage.Inputs = inputs
 
 	return nil
 }
