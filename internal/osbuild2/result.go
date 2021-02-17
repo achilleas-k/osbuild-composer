@@ -6,15 +6,15 @@ import (
 	"io"
 )
 
-type rawAssemblerResult struct {
-	Name    string          `json:"name"`
-	Options json.RawMessage `json:"options"`
-	Success bool            `json:"success"`
-	Output  string          `json:"output"`
+type PipelineResult struct {
+	Name   string        `json:"name"`
+	Build  string        `json:"string"`
+	Runner string        `json:"runner"`
+	Stages []StageResult `json:"stages"`
 }
 
 type StageResult struct {
-	Name     string          `json:"name"`
+	Type     string          `json:"name"`
 	Options  json.RawMessage `json:"options"`
 	Success  bool            `json:"success"`
 	Output   string          `json:"output"`
@@ -27,26 +27,18 @@ type StageMetadata interface {
 }
 
 type rawStageResult struct {
-	Name     string          `json:"name"`
+	Type     string          `json:"name"`
 	Options  json.RawMessage `json:"options"`
 	Success  bool            `json:"success"`
 	Output   string          `json:"output"`
 	Metadata json.RawMessage `json:"metadata"`
 }
 
-type buildResult struct {
-	Stages  []StageResult `json:"stages"`
-	TreeID  string        `json:"tree_id"`
-	Success bool          `json:"success"`
-}
-
 type Result struct {
-	TreeID    string              `json:"tree_id"`
-	OutputID  string              `json:"output_id"`
-	Build     *buildResult        `json:"build"`
-	Stages    []StageResult       `json:"stages"`
-	Assembler *rawAssemblerResult `json:"assembler"`
-	Success   bool                `json:"success"`
+	TreeID    string           `json:"tree_id"`
+	OutputID  string           `json:"output_id"`
+	Pipelines []PipelineResult `json:"pipelines"`
+	Success   bool             `json:"success"`
 }
 
 func (result *StageResult) UnmarshalJSON(data []byte) error {
@@ -56,7 +48,7 @@ func (result *StageResult) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	var metadata StageMetadata
-	switch rawStageResult.Name {
+	switch rawStageResult.Type {
 	case "org.osbuild.rpm":
 		metadata = new(RPMStageMetadata)
 		err = json.Unmarshal(rawStageResult.Metadata, metadata)
@@ -67,7 +59,7 @@ func (result *StageResult) UnmarshalJSON(data []byte) error {
 		metadata = nil
 	}
 
-	result.Name = rawStageResult.Name
+	result.Type = rawStageResult.Type
 	result.Options = rawStageResult.Options
 	result.Success = rawStageResult.Success
 	result.Output = rawStageResult.Output
@@ -77,29 +69,17 @@ func (result *StageResult) UnmarshalJSON(data []byte) error {
 }
 
 func (cr *Result) Write(writer io.Writer) error {
-	if cr.Build == nil && len(cr.Stages) == 0 && cr.Assembler == nil {
+	if len(cr.Pipelines) == 0 {
 		fmt.Fprintf(writer, "The compose result is empty.\n")
+		return nil
 	}
 
-	if cr.Build != nil {
-		fmt.Fprintf(writer, "Build pipeline:\n")
-
-		for _, stage := range cr.Build.Stages {
-			fmt.Fprintf(writer, "Stage %s\n", stage.Name)
-			enc := json.NewEncoder(writer)
-			enc.SetIndent("", "  ")
-			err := enc.Encode(stage.Options)
-			if err != nil {
-				return err
-			}
-			fmt.Fprintf(writer, "\nOutput:\n%s\n", stage.Output)
-		}
-	}
-
-	if len(cr.Stages) > 0 {
+	fmt.Fprintf(writer, "Pipelines:\n")
+	for _, pipeline := range cr.Pipelines {
+		fmt.Fprintf(writer, "Pipeline: %s\n", pipeline.Name)
 		fmt.Fprintf(writer, "Stages:\n")
-		for _, stage := range cr.Stages {
-			fmt.Fprintf(writer, "Stage: %s\n", stage.Name)
+		for _, stage := range pipeline.Stages {
+			fmt.Fprintf(writer, "Stage: %s\n", stage.Type)
 			enc := json.NewEncoder(writer)
 			enc.SetIndent("", "  ")
 			err := enc.Encode(stage.Options)
@@ -108,17 +88,6 @@ func (cr *Result) Write(writer io.Writer) error {
 			}
 			fmt.Fprintf(writer, "\nOutput:\n%s\n", stage.Output)
 		}
-	}
-
-	if cr.Assembler != nil {
-		fmt.Fprintf(writer, "Assembler %s:\n", cr.Assembler.Name)
-		enc := json.NewEncoder(writer)
-		enc.SetIndent("", "  ")
-		err := enc.Encode(cr.Assembler.Options)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(writer, "\nOutput:\n%s\n", cr.Assembler.Output)
 	}
 
 	return nil
