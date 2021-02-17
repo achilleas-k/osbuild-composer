@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"sort"
 
-	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild2"
 
@@ -34,20 +33,19 @@ type architecture struct {
 }
 
 type imageType struct {
-	arch                    *architecture
-	name                    string
-	filename                string
-	mimeType                string
-	packages                []string
-	excludedPackages        []string
-	enabledServices         []string
-	disabledServices        []string
-	defaultTarget           string
-	kernelOptions           string
-	bootable                bool
-	rpmOstree               bool
-	defaultSize             uint64
-	partitionTableGenerator func(imageOptions distro.ImageOptions, arch distro.Arch, rng *rand.Rand) disk.PartitionTable
+	arch             *architecture
+	name             string
+	filename         string
+	mimeType         string
+	packages         []string
+	excludedPackages []string
+	enabledServices  []string
+	disabledServices []string
+	defaultTarget    string
+	kernelOptions    string
+	bootable         bool
+	rpmOstree        bool
+	defaultSize      uint64
 }
 
 func (a *architecture) Distro() distro.Distro {
@@ -116,20 +114,19 @@ func (a *architecture) setImageTypes(imageTypes ...imageType) {
 	a.imageTypes = map[string]imageType{}
 	for _, it := range imageTypes {
 		a.imageTypes[it.name] = imageType{
-			arch:                    a,
-			name:                    it.name,
-			filename:                it.filename,
-			mimeType:                it.mimeType,
-			packages:                it.packages,
-			excludedPackages:        it.excludedPackages,
-			enabledServices:         it.enabledServices,
-			disabledServices:        it.disabledServices,
-			defaultTarget:           it.defaultTarget,
-			kernelOptions:           it.kernelOptions,
-			bootable:                it.bootable,
-			rpmOstree:               it.rpmOstree,
-			defaultSize:             it.defaultSize,
-			partitionTableGenerator: it.partitionTableGenerator,
+			arch:             a,
+			name:             it.name,
+			filename:         it.filename,
+			mimeType:         it.mimeType,
+			packages:         it.packages,
+			excludedPackages: it.excludedPackages,
+			enabledServices:  it.enabledServices,
+			disabledServices: it.disabledServices,
+			defaultTarget:    it.defaultTarget,
+			kernelOptions:    it.kernelOptions,
+			bootable:         it.bootable,
+			rpmOstree:        it.rpmOstree,
+			defaultSize:      it.defaultSize,
 		}
 	}
 }
