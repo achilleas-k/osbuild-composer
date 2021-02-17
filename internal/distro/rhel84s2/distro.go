@@ -13,7 +13,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
-const name = "rhel-84-s2"
+const name = "rhel-84"
 const modulePlatformID = "platform:el8"
 
 type distribution struct {
