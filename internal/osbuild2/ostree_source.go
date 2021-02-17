@@ -7,6 +7,8 @@ type OSTreeSource struct {
 	GPGKeys []string `json:"secrets,omitempty"`
 }
 
+func (OSTreeSource) isSource() {}
+
 // The commits to fetch indexed their checksum
 type OSTreeSoures struct {
 	Items map[string]OSTreeSource
