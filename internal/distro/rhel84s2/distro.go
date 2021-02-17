@@ -235,7 +235,7 @@ func (t *imageType) pipelines(c *blueprint.Customizations, options distro.ImageO
 		pipelines = append(pipelines, *t.ostreeCommitPipeline(options))
 	}
 
-	pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSpecs, options, c))
+	pipelines = append(pipelines, *t.containerTreePipeline(repos, buildPackageSpecs, options, c))
 	pipelines = append(pipelines, *t.containerPipeline())
 
 	return pipelines, nil
@@ -511,6 +511,9 @@ func New() distro.Distro {
 			"tar",
 			"xfsprogs",
 			"xz",
+
+			// for the container
+			"httpd",
 		},
 	}
 	x8664 := architecture{
