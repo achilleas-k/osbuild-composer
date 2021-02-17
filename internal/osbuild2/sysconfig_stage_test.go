@@ -8,7 +8,7 @@ import (
 
 func TestNewSysconfigStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.sysconfig",
+		Type:    "org.osbuild.sysconfig",
 		Options: &SysconfigStageOptions{},
 	}
 	actualStage := NewSysconfigStage(&SysconfigStageOptions{})

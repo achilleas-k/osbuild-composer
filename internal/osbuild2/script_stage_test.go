@@ -16,7 +16,7 @@ func TestNewScriptStageOptions(t *testing.T) {
 
 func TestNewScriptStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.script",
+		Type:    "org.osbuild.script",
 		Options: &ScriptStageOptions{},
 	}
 	actualStage := NewScriptStage(&ScriptStageOptions{})

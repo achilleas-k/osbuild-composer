@@ -8,7 +8,7 @@ import (
 
 func TestNewLocaleStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.locale",
+		Type:    "org.osbuild.locale",
 		Options: &LocaleStageOptions{},
 	}
 	actualStage := NewLocaleStage(&LocaleStageOptions{})

@@ -8,7 +8,7 @@ import (
 
 func TestNewKernelCmdlineStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.kernel-cmdline",
+		Type:    "org.osbuild.kernel-cmdline",
 		Options: &KernelCmdlineStageOptions{},
 	}
 	actualStage := NewKernelCmdlineStage(&KernelCmdlineStageOptions{})

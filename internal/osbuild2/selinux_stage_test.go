@@ -16,7 +16,7 @@ func TestNewSELinuxStageOptions(t *testing.T) {
 
 func TestNewSELinuxStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.selinux",
+		Type:    "org.osbuild.selinux",
 		Options: &SELinuxStageOptions{},
 	}
 	actualStage := NewSELinuxStage(&SELinuxStageOptions{})

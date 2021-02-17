@@ -8,7 +8,7 @@ import (
 
 func TestNewGroupsStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.groups",
+		Type:    "org.osbuild.groups",
 		Options: &GroupsStageOptions{},
 	}
 	actualStage := NewGroupsStage(&GroupsStageOptions{})

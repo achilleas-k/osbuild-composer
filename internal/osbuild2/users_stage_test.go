@@ -8,7 +8,7 @@ import (
 
 func TestNewUsersStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.users",
+		Type:    "org.osbuild.users",
 		Options: &UsersStageOptions{},
 	}
 	actualStage := NewUsersStage(&UsersStageOptions{})

@@ -8,7 +8,7 @@ import (
 
 func TestNewChronyStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.chrony",
+		Type:    "org.osbuild.chrony",
 		Options: &ChronyStageOptions{},
 	}
 	actualStage := NewChronyStage(&ChronyStageOptions{})

@@ -8,7 +8,7 @@ import (
 
 func TestNewRhsmStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.rhsm",
+		Type:    "org.osbuild.rhsm",
 		Options: &RHSMStageOptions{},
 	}
 	actualStage := NewRHSMStage(&RHSMStageOptions{})

@@ -16,7 +16,7 @@ func TestNewZiplStageOptions(t *testing.T) {
 
 func TestNewZiplStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.zipl",
+		Type:    "org.osbuild.zipl",
 		Options: &ZiplStageOptions{},
 	}
 	actualStage := NewZiplStage(&ZiplStageOptions{})

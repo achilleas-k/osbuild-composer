@@ -8,7 +8,7 @@ import (
 
 func TestNewFixBLSStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.fix-bls",
+		Type:    "org.osbuild.fix-bls",
 		Options: &FixBLSStageOptions{},
 	}
 	actualStage := NewFixBLSStage()

@@ -8,7 +8,7 @@ import (
 
 func TestNewFirewallStage(t *testing.T) {
 	expectedFirewall := &Stage{
-		Name:    "org.osbuild.firewall",
+		Type:    "org.osbuild.firewall",
 		Options: &FirewallStageOptions{},
 	}
 	actualFirewall := NewFirewallStage(&FirewallStageOptions{})

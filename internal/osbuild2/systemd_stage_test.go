@@ -8,7 +8,7 @@ import (
 
 func TestNewSystemdStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.systemd",
+		Type:    "org.osbuild.systemd",
 		Options: &SystemdStageOptions{},
 	}
 	actualStage := NewSystemdStage(&SystemdStageOptions{})

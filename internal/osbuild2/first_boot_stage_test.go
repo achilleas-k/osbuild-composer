@@ -8,7 +8,7 @@ import (
 
 func TestNewFirstBootStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.first-boot",
+		Type:    "org.osbuild.first-boot",
 		Options: &FirstBootStageOptions{},
 	}
 	actualStage := NewFirstBootStage(&FirstBootStageOptions{})

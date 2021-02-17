@@ -8,7 +8,7 @@ import (
 
 func TestNewKeymapStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.keymap",
+		Type:    "org.osbuild.keymap",
 		Options: &KeymapStageOptions{},
 	}
 	actualStage := NewKeymapStage(&KeymapStageOptions{})

@@ -12,7 +12,7 @@ import (
 func TestStage_UnmarshalJSON(t *testing.T) {
 	nullUUID := uuid.MustParse("00000000-0000-0000-0000-000000000000")
 	type fields struct {
-		Name    string
+		Type    string
 		Options StageOptions
 	}
 	type args struct {
@@ -27,21 +27,21 @@ func TestStage_UnmarshalJSON(t *testing.T) {
 		{
 			name: "invalid json",
 			args: args{
-				data: []byte(`{"name":"org.osbuild.foo","options":{"bar":null}`),
+				data: []byte(`{"type":"org.osbuild.foo","options":{"bar":null}}`),
 			},
 			wantErr: true,
 		},
 		{
 			name: "unknown stage",
 			args: args{
-				data: []byte(`{"name":"org.osbuild.foo","options":{"bar":null}}`),
+				data: []byte(`{"type":"org.osbuild.foo","options":{"bar":null}}`),
 			},
 			wantErr: true,
 		},
 		{
 			name: "missing options",
 			args: args{
-				data: []byte(`{"name":"org.osbuild.locale"}`),
+				data: []byte(`{"type":"org.osbuild.locale"}`),
 			},
 			wantErr: true,
 		},
@@ -55,69 +55,69 @@ func TestStage_UnmarshalJSON(t *testing.T) {
 		{
 			name: "chrony",
 			fields: fields{
-				Name:    "org.osbuild.chrony",
+				Type:    "org.osbuild.chrony",
 				Options: &ChronyStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.chrony","options":{"timeservers":null}}`),
+				data: []byte(`{"type":"org.osbuild.chrony","options":{"timeservers":null}}`),
 			},
 		},
 		{
 			name: "firewall",
 			fields: fields{
-				Name:    "org.osbuild.firewall",
+				Type:    "org.osbuild.firewall",
 				Options: &FirewallStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.firewall","options":{}}`),
+				data: []byte(`{"type":"org.osbuild.firewall","options":{}}`),
 			},
 		},
 		{
 			name: "fix-bls",
 			fields: fields{
-				Name:    "org.osbuild.fix-bls",
+				Type:    "org.osbuild.fix-bls",
 				Options: &FixBLSStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.fix-bls","options":{}}`),
+				data: []byte(`{"type":"org.osbuild.fix-bls","options":{}}`),
 			},
 		},
 		{
 			name: "fstab",
 			fields: fields{
-				Name:    "org.osbuild.fstab",
+				Type:    "org.osbuild.fstab",
 				Options: &FSTabStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.fstab","options":{"filesystems":null}}`),
+				data: []byte(`{"type":"org.osbuild.fstab","options":{"filesystems":null}}`),
 			},
 		},
 		{
 			name: "groups",
 			fields: fields{
-				Name:    "org.osbuild.groups",
+				Type:    "org.osbuild.groups",
 				Options: &GroupsStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.groups","options":{"groups":null}}`),
+				data: []byte(`{"type":"org.osbuild.groups","options":{"groups":null}}`),
 			},
 		},
 		{
 			name: "grub2",
 			fields: fields{
-				Name: "org.osbuild.grub2",
+				Type: "org.osbuild.grub2",
 				Options: &GRUB2StageOptions{
 					RootFilesystemUUID: nullUUID,
 				},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.grub2","options":{"root_fs_uuid":"00000000-0000-0000-0000-000000000000"}}`),
+				data: []byte(`{"type":"org.osbuild.grub2","options":{"root_fs_uuid":"00000000-0000-0000-0000-000000000000"}}`),
 			},
 		},
 		{
 			name: "grub2-uefi",
 			fields: fields{
-				Name: "org.osbuild.grub2",
+				Type: "org.osbuild.grub2",
 				Options: &GRUB2StageOptions{
 					RootFilesystemUUID: nullUUID,
 					UEFI: &GRUB2UEFI{
@@ -126,66 +126,66 @@ func TestStage_UnmarshalJSON(t *testing.T) {
 				},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.grub2","options":{"root_fs_uuid":"00000000-0000-0000-0000-000000000000","uefi":{"vendor":"vendor"}}}`),
+				data: []byte(`{"type":"org.osbuild.grub2","options":{"root_fs_uuid":"00000000-0000-0000-0000-000000000000","uefi":{"vendor":"vendor"}}}`),
 			},
 		},
 		{
 			name: "grub2-separate-boot",
 			fields: fields{
-				Name: "org.osbuild.grub2",
+				Type: "org.osbuild.grub2",
 				Options: &GRUB2StageOptions{
 					RootFilesystemUUID: nullUUID,
 					BootFilesystemUUID: &nullUUID,
 				},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.grub2","options":{"root_fs_uuid":"00000000-0000-0000-0000-000000000000","boot_fs_uuid":"00000000-0000-0000-0000-000000000000"}}`),
+				data: []byte(`{"type":"org.osbuild.grub2","options":{"root_fs_uuid":"00000000-0000-0000-0000-000000000000","boot_fs_uuid":"00000000-0000-0000-0000-000000000000"}}`),
 			},
 		},
 		{
 			name: "hostname",
 			fields: fields{
-				Name:    "org.osbuild.hostname",
+				Type:    "org.osbuild.hostname",
 				Options: &HostnameStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.hostname","options":{"hostname":""}}`),
+				data: []byte(`{"type":"org.osbuild.hostname","options":{"hostname":""}}`),
 			},
 		},
 		{
 			name: "keymap",
 			fields: fields{
-				Name:    "org.osbuild.keymap",
+				Type:    "org.osbuild.keymap",
 				Options: &KeymapStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.keymap","options":{"keymap":""}}`),
+				data: []byte(`{"type":"org.osbuild.keymap","options":{"keymap":""}}`),
 			},
 		},
 		{
 			name: "locale",
 			fields: fields{
-				Name:    "org.osbuild.locale",
+				Type:    "org.osbuild.locale",
 				Options: &LocaleStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.locale","options":{"language":""}}`),
+				data: []byte(`{"type":"org.osbuild.locale","options":{"language":""}}`),
 			},
 		},
 		{
 			name: "rhsm-empty",
 			fields: fields{
-				Name:    "org.osbuild.rhsm",
+				Type:    "org.osbuild.rhsm",
 				Options: &RHSMStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.rhsm","options":{}}`),
+				data: []byte(`{"type":"org.osbuild.rhsm","options":{}}`),
 			},
 		},
 		{
 			name: "rhsm",
 			fields: fields{
-				Name: "org.osbuild.rhsm",
+				Type: "org.osbuild.rhsm",
 				Options: &RHSMStageOptions{
 					DnfPlugins: &RHSMStageOptionsDnfPlugins{
 						ProductID: &RHSMStageOptionsDnfPlugin{
@@ -198,126 +198,81 @@ func TestStage_UnmarshalJSON(t *testing.T) {
 				},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.rhsm","options":{"dnf-plugins":{"product-id":{"enabled":false},"subscription-manager":{"enabled":false}}}}`),
-			},
-		},
-		{
-			name: "rpm-empty",
-			fields: fields{
-				Name:    "org.osbuild.rpm",
-				Options: &RPMStageOptions{},
-			},
-			args: args{
-				data: []byte(`{"name":"org.osbuild.rpm","options":{"packages":null}}`),
-			},
-		},
-		{
-			name: "rpm",
-			fields: fields{
-				Name: "org.osbuild.rpm",
-				Options: &RPMStageOptions{
-					GPGKeys: []string{"key1", "key2"},
-					Packages: []RPMPackage{
-						{
-							Checksum: "checksum1",
-						},
-						{
-							Checksum: "checksum2",
-							CheckGPG: true,
-						},
-					},
-				},
-			},
-			args: args{
-				data: []byte(`{"name":"org.osbuild.rpm","options":{"gpgkeys":["key1","key2"],"packages":[{"checksum":"checksum1"},{"checksum":"checksum2","check_gpg":true}]}}`),
-			},
-		},
-		{
-			name: "rpm-ostree",
-			fields: fields{
-				Name: "org.osbuild.rpm-ostree",
-				Options: &RPMOSTreeStageOptions{
-					EtcGroupMembers: []string{
-						"wheel",
-					},
-				},
-			},
-			args: args{
-				data: []byte(`{"name":"org.osbuild.rpm-ostree","options":{"etc_group_members":["wheel"]}}`),
+				data: []byte(`{"type":"org.osbuild.rhsm","options":{"dnf-plugins":{"product-id":{"enabled":false},"subscription-manager":{"enabled":false}}}}`),
 			},
 		},
 		{
 			name: "script",
 			fields: fields{
-				Name:    "org.osbuild.script",
+				Type:    "org.osbuild.script",
 				Options: &ScriptStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.script","options":{"script":""}}`),
+				data: []byte(`{"type":"org.osbuild.script","options":{"script":""}}`),
 			},
 		},
 		{
 			name: "selinux",
 			fields: fields{
-				Name:    "org.osbuild.selinux",
+				Type:    "org.osbuild.selinux",
 				Options: &SELinuxStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.selinux","options":{"file_contexts":""}}`),
+				data: []byte(`{"type":"org.osbuild.selinux","options":{"file_contexts":""}}`),
 			},
 		},
 		{
 			name: "systemd",
 			fields: fields{
-				Name:    "org.osbuild.systemd",
+				Type:    "org.osbuild.systemd",
 				Options: &SystemdStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.systemd","options":{}}`),
+				data: []byte(`{"type":"org.osbuild.systemd","options":{}}`),
 			},
 		},
 		{
 			name: "systemd-enabled",
 			fields: fields{
-				Name: "org.osbuild.systemd",
+				Type: "org.osbuild.systemd",
 				Options: &SystemdStageOptions{
 					EnabledServices: []string{"foo.service"},
 				},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.systemd","options":{"enabled_services":["foo.service"]}}`),
+				data: []byte(`{"type":"org.osbuild.systemd","options":{"enabled_services":["foo.service"]}}`),
 			},
 		},
 		{
 			name: "timezone",
 			fields: fields{
-				Name:    "org.osbuild.timezone",
+				Type:    "org.osbuild.timezone",
 				Options: &TimezoneStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.timezone","options":{"zone":""}}`),
+				data: []byte(`{"type":"org.osbuild.timezone","options":{"zone":""}}`),
 			},
 		},
 		{
 			name: "users",
 			fields: fields{
-				Name:    "org.osbuild.users",
+				Type:    "org.osbuild.users",
 				Options: &UsersStageOptions{},
 			},
 			args: args{
-				data: []byte(`{"name":"org.osbuild.users","options":{"users":null}}`),
+				data: []byte(`{"type":"org.osbuild.users","options":{"users":null}}`),
 			},
 		},
 	}
-	for _, tt := range tests {
+	for idx, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			stage := &Stage{
-				Name:    tt.fields.Name,
+				Type:    tt.fields.Type,
 				Options: tt.fields.Options,
 			}
 			var gotStage Stage
 			if err := gotStage.UnmarshalJSON(tt.args.data); (err != nil) != tt.wantErr {
-				t.Errorf("Stage.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("Stage.UnmarshalJSON() error = %v, wantErr %v [idx: %d]", err, tt.wantErr, idx)
 			}
 			if tt.wantErr {
 				return
@@ -327,10 +282,101 @@ func TestStage_UnmarshalJSON(t *testing.T) {
 				t.Errorf("Could not marshal stage: %v", err)
 			}
 			if !bytes.Equal(gotBytes, tt.args.data) {
-				t.Errorf("Expected `%v`, got `%v`", string(tt.args.data), string(gotBytes))
+				t.Errorf("Expected `%v`, got `%v` [idx: %d]", string(tt.args.data), string(gotBytes), idx)
 			}
 			if !reflect.DeepEqual(&gotStage, stage) {
-				t.Errorf("got {%v, %v}, expected {%v, %v}", gotStage.Name, gotStage.Options, stage.Name, stage.Options)
+				t.Errorf("got {%v, %v}, expected {%v, %v} [%d]", gotStage.Type, gotStage.Options, stage.Type, stage.Options, idx)
+			}
+		})
+	}
+}
+
+// Test new stages that have Inputs (osbuild v2 schema)
+func TestStageV2_UnmarshalJSON(t *testing.T) {
+	type fields struct {
+		Type    string
+		Options StageOptions
+		Inputs  Inputs
+	}
+	type args struct {
+		data []byte
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "rpm-empty",
+			fields: fields{
+				Type:    "org.osbuild.rpm",
+				Options: &RPMStageOptions{},
+				Inputs:  &RPMStageInputs{},
+			},
+			args: args{
+				data: []byte(`{"type":"org.osbuild.rpm","inputs":{"packages":null},"options":{}}`),
+			},
+		},
+		{
+			name: "rpm",
+			fields: fields{
+				Type: "org.osbuild.rpm",
+				Inputs: &RPMStageInputs{
+					Packages: &RPMStageInput{
+						References: RPMStageReferences{
+							"checksum1",
+							"checksum2",
+						},
+					},
+				},
+				Options: &RPMStageOptions{
+					GPGKeys: []string{"key1", "key2"},
+				},
+			},
+			args: args{
+				data: []byte(`{"type":"org.osbuild.rpm","inputs":{"packages":{"type":"","origin":"","references":["checksum1","checksum2"]}},"options":{"gpgkeys":["key1","key2"]}}`),
+			},
+		},
+		{
+			name: "ostree-preptree",
+			fields: fields{
+				Type: "org.osbuild.ostree.preptree",
+				Options: &RPMOSTreePrepTreeStageOptions{
+					EtcGroupMembers: []string{
+						"wheel",
+					},
+				},
+			},
+			args: args{
+				data: []byte(`{"type":"org.osbuild.ostree.preptree","options":{"etc_group_members":["wheel"]}}`),
+			},
+		},
+	}
+	for idx, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			stage := &Stage{
+				Type:    tt.fields.Type,
+				Options: tt.fields.Options,
+				Inputs:  tt.fields.Inputs,
+			}
+			var gotStage Stage
+			if err := gotStage.UnmarshalJSON(tt.args.data); (err != nil) != tt.wantErr {
+				println("data: ", string(tt.args.data))
+				t.Errorf("Stage.UnmarshalJSON() error = %v, wantErr %v [idx: %d]", err, tt.wantErr, idx)
+			}
+			if tt.wantErr {
+				return
+			}
+			gotBytes, err := json.Marshal(stage)
+			if err != nil {
+				t.Errorf("Could not marshal stage: %v", err)
+			}
+			if !bytes.Equal(gotBytes, tt.args.data) {
+				t.Errorf("Expected `%v`, got `%v` [idx: %d]", string(tt.args.data), string(gotBytes), idx)
+			}
+			if !reflect.DeepEqual(&gotStage, stage) {
+				t.Errorf("got {%v, %v, %v}, expected {%v, %v, %v} [%d]", gotStage.Type, gotStage.Options, gotStage.Inputs, stage.Type, stage.Options, stage.Inputs, idx)
 			}
 		})
 	}

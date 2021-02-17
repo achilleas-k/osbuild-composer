@@ -8,7 +8,7 @@ import (
 
 func TestNewFSTabStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.fstab",
+		Type:    "org.osbuild.fstab",
 		Options: &FSTabStageOptions{},
 	}
 	actualStage := NewFSTabStage(&FSTabStageOptions{})

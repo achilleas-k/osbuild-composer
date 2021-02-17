@@ -8,7 +8,7 @@ import (
 
 func TestNewHostnameStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.hostname",
+		Type:    "org.osbuild.hostname",
 		Options: &HostnameStageOptions{},
 	}
 	actualStage := NewHostnameStage(&HostnameStageOptions{})

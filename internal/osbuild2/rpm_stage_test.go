@@ -8,9 +8,10 @@ import (
 
 func TestNewRPMStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.rpm",
+		Type:    "org.osbuild.rpm",
 		Options: &RPMStageOptions{},
+		Inputs:  &RPMStageInputs{},
 	}
-	actualStage := NewRPMStage(&RPMStageOptions{})
+	actualStage := NewRPMStage(&RPMStageOptions{}, &RPMStageInputs{})
 	assert.Equal(t, expectedStage, actualStage)
 }

@@ -8,7 +8,7 @@ import (
 
 func TestNewTimezoneStage(t *testing.T) {
 	expectedStage := &Stage{
-		Name:    "org.osbuild.timezone",
+		Type:    "org.osbuild.timezone",
 		Options: &TimezoneStageOptions{},
 	}
 	actualStage := NewTimezoneStage(&TimezoneStageOptions{})
