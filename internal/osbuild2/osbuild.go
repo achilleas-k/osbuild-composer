@@ -4,6 +4,7 @@ package osbuild2
 
 // A Manifest represents an OSBuild source and pipeline manifest
 type Manifest struct {
+	Version   string     `json:"version"`
 	Pipelines []Pipeline `json:"pipelines"`
 	Sources   Sources    `json:"sources"`
 }
