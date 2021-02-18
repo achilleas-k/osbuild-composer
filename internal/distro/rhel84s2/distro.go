@@ -282,10 +282,15 @@ func (t *imageType) ostreeCommitPipeline(options distro.ImageOptions) *osbuild.P
 	commitStageInput.Type = "org.osbuild.tree"
 	commitStageInput.Origin = "org.osbuild.pipeline"
 	commitStageInput.References = osbuild.OSTreeCommitStageReferences{"name:ostree-tree"}
+	ref := options.OSTree.Ref
+	if ref == "" {
+		// TODO: Merge from Tom's PR (#1235)
+		ref = "rhel/8/x86_64/edge"
+	}
 
 	p.AddStage(osbuild.NewOSTreeCommitStage(
 		&osbuild.OSTreeCommitStageOptions{
-			Ref:       options.OSTree.Ref,
+			Ref:       ref,
 			OSVersion: "8.4", // NOTE: Set on image type?
 			Parent:    options.OSTree.Parent,
 		},
@@ -353,11 +358,16 @@ func pkgRefs(specs []rpmmd.PackageSpec) osbuild.RPMStageReferences {
 
 func (t *imageType) ostreePullStageInputs(options distro.ImageOptions) *osbuild.OSTreePullStageInputs {
 	pullStageInput := new(osbuild.OSTreePullStageInput)
-	pullStageInput.Type = "org.osbuild.tree"
+	pullStageInput.Type = "org.osbuild.ostree"
 	pullStageInput.Origin = "org.osbuild.pipeline"
 
 	inputRefs := make(map[string]osbuild.OSTreePullStageReference)
-	inputRefs["name:ostree-commit"] = osbuild.OSTreePullStageReference{Ref: options.OSTree.Ref}
+	ref := options.OSTree.Ref
+	if ref == "" {
+		// TODO: Merge from Tom's PR (#1235)
+		ref = "rhel/8/x86_64/edge"
+	}
+	inputRefs["name:ostree-commit"] = osbuild.OSTreePullStageReference{Ref: ref}
 	pullStageInput.References = inputRefs
 	return &osbuild.OSTreePullStageInputs{Commits: pullStageInput}
 }
