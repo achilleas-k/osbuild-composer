@@ -247,6 +247,7 @@ func (t *imageType) buildPipeline(repos []rpmmd.RepoConfig, buildPackageSpecs []
 	p.Name = "build"
 	p.Runner = "org.osbuild.rhel84"
 	p.AddStage(osbuild.NewRPMStage(t.rpmStageOptions(repos), t.rpmStageInputs(buildPackageSpecs)))
+	p.AddStage(osbuild.NewSELinuxStage(t.selinuxStageOptions()))
 	return p
 }
 
