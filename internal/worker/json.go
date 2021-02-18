@@ -2,10 +2,12 @@ package worker
 
 import (
 	"encoding/json"
+	"io"
 
 	"github.com/google/uuid"
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild1"
+	"github.com/osbuild/osbuild-composer/internal/osbuild2"
 	"github.com/osbuild/osbuild-composer/internal/target"
 )
 
@@ -21,10 +23,47 @@ type OSBuildJob struct {
 }
 
 type OSBuildJobResult struct {
-	Success       bool            `json:"success"`
-	OSBuildOutput *osbuild.Result `json:"osbuild_output,omitempty"`
-	TargetErrors  []string        `json:"target_errors,omitempty"`
-	UploadStatus  string          `json:"upload_status"`
+	Success       bool        `json:"success"`
+	OSBuildOutput BuildResult `json:"osbuild_output,omitempty"`
+	TargetErrors  []string    `json:"target_errors,omitempty"`
+	UploadStatus  string      `json:"upload_status"`
+}
+
+// Custom unmarshaller for the temporary dual implementations of BuildResult.
+func (jr *OSBuildJobResult) UnmarshalJSON(data []byte) error {
+	var rawResult struct {
+		Success       bool            `json:"success"`
+		OSBuildOutput json.RawMessage `json:"osbuild_output,omitempty"`
+		TargetErrors  []string        `json:"target_errors,omitempty"`
+		UploadStatus  string          `json:"upload_status"`
+	}
+
+	if err := json.Unmarshal(data, &rawResult); err != nil {
+		return err
+	}
+
+	// Add the rest of the fields to return even if the result unmarshalling fails
+	jr.Success = rawResult.Success
+	jr.TargetErrors = rawResult.TargetErrors
+	jr.UploadStatus = rawResult.UploadStatus
+
+	var br1 osbuild.Result
+	if err := json.Unmarshal(rawResult.OSBuildOutput, &br1); err == nil && len(br1.Stages) != 0 {
+		jr.OSBuildOutput = &br1
+		return nil
+	}
+
+	var br2 osbuild2.Result
+	if err := json.Unmarshal(rawResult.OSBuildOutput, &br2); err == nil && len(br2.Pipelines) != 0 {
+		jr.OSBuildOutput = &br2
+		return nil
+	}
+	return nil
+}
+
+type BuildResult interface {
+	Write(writer io.Writer) error
+	Succeeded() bool
 }
 
 type KojiInitJob struct {

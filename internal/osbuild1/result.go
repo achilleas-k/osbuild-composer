@@ -123,3 +123,7 @@ func (cr *Result) Write(writer io.Writer) error {
 
 	return nil
 }
+
+func (cr *Result) Succeeded() bool {
+	return cr.Success
+}

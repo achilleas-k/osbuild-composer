@@ -109,7 +109,7 @@ func (s *Server) JobStatus(id uuid.UUID, result interface{}) (*JobStatus, []uuid
 	// top-level `Success` flag. Override it here by looking into the job.
 	if r, ok := result.(*OSBuildJobResult); ok {
 		if !r.Success && r.OSBuildOutput != nil {
-			r.Success = r.OSBuildOutput.Success && len(r.TargetErrors) == 0
+			r.Success = r.OSBuildOutput.Succeeded() && len(r.TargetErrors) == 0
 		}
 	}
 

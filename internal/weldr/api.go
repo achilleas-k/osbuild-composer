@@ -195,7 +195,7 @@ type composeStatus struct {
 	Queued   time.Time
 	Started  time.Time
 	Finished time.Time
-	Result   *osbuild.Result
+	Result   worker.BuildResult
 }
 
 func composeStateFromJobStatus(js *worker.JobStatus, result *worker.OSBuildJobResult) ComposeState {
