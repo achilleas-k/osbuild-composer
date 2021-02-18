@@ -191,6 +191,7 @@ func (t *imageType) Manifest(c *blueprint.Customizations,
 
 	return json.Marshal(
 		osbuild.Manifest{
+			Version:   "2",
 			Pipelines: pipelines,
 			Sources:   sources(append(packageSpecs, buildPackageSpecs...)),
 		},
