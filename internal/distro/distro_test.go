@@ -11,7 +11,6 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/distro/fedora33"
 	"github.com/osbuild/osbuild-composer/internal/distro/rhel8"
 	"github.com/osbuild/osbuild-composer/internal/distro/rhel84"
-	"github.com/osbuild/osbuild-composer/internal/distro/rhel84s2"
 )
 
 func TestDistro_Manifest(t *testing.T) {
@@ -19,7 +18,7 @@ func TestDistro_Manifest(t *testing.T) {
 		t,
 		"../../test/data/manifests/",
 		"*",
-		fedora32.New(), fedora33.New(), rhel8.New(), rhel84.New(), rhel84s2.New(),
+		fedora32.New(), fedora33.New(), rhel8.New(), rhel84.New(),
 	)
 }
 
@@ -30,10 +29,9 @@ func TestDistro_RegistryList(t *testing.T) {
 		"fedora-33",
 		"rhel-8",
 		"rhel-84",
-		"rhel-84-s2",
 	}
 
-	distros, err := distro.NewRegistry(fedora32.New(), fedora33.New(), rhel8.New(), rhel84.New(), rhel84s2.New())
+	distros, err := distro.NewRegistry(fedora32.New(), fedora33.New(), rhel8.New(), rhel84.New())
 	require.NoError(t, err)
 
 	require.Equalf(t, expected, distros.List(), "unexpected list of distros")
