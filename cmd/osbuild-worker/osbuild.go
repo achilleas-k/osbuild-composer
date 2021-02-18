@@ -22,6 +22,7 @@ func RunOSBuild(manifest distro.Manifest, store, outputDirectory string, errorWr
 		"--store", store,
 		"--output-directory", outputDirectory,
 		"--json", "-",
+		ADD EXPORT FLAG
 	)
 	cmd.Stderr = errorWriter
 
@@ -52,6 +53,7 @@ func RunOSBuild(manifest distro.Manifest, store, outputDirectory string, errorWr
 
 	// try to decode the output even though the job could have failed
 	var result osbuild.Result
+	BUILDRESULT INTERFACE FOR BOTH TYPES
 	decodeErr := json.Unmarshal(stdoutBuffer.Bytes(), &result)
 	if decodeErr != nil {
 		return nil, fmt.Errorf("error decoding osbuild output: %v\nthe raw output:\n%s", decodeErr, stdoutBuffer.String())
@@ -64,5 +66,6 @@ func RunOSBuild(manifest distro.Manifest, store, outputDirectory string, errorWr
 		}
 	}
 
+	CHECK RESULT FOR V2 STUFF
 	return &result, nil
 }
