@@ -249,7 +249,7 @@ func composeStatusFromJobStatus(js *worker.JobStatus, initResult *worker.KojiIni
 	}
 
 	for _, buildResult := range buildResults {
-		if buildResult.OSBuildOutput != nil && !buildResult.OSBuildOutput.Success {
+		if buildResult.OSBuildOutput != nil && !buildResult.OSBuildOutput.Succeeded() {
 			return "failure"
 		}
 		if buildResult.KojiError != "" {
@@ -281,7 +281,7 @@ func imageStatusFromJobStatus(js *worker.JobStatus, initResult *worker.KojiInitJ
 		return "building"
 	}
 
-	if buildResult.OSBuildOutput != nil && buildResult.OSBuildOutput.Success && buildResult.KojiError == "" {
+	if buildResult.OSBuildOutput != nil && buildResult.OSBuildOutput.Succeeded() && buildResult.KojiError == "" {
 		return "success"
 	}
 

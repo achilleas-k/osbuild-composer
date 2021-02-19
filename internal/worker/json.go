@@ -2,11 +2,11 @@ package worker
 
 import (
 	"encoding/json"
-	"io"
 
 	"github.com/google/uuid"
 	"github.com/osbuild/osbuild-composer/internal/distro"
-	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild1"
+	"github.com/osbuild/osbuild-composer/internal/osbuild"
+	"github.com/osbuild/osbuild-composer/internal/osbuild1"
 	"github.com/osbuild/osbuild-composer/internal/osbuild2"
 	"github.com/osbuild/osbuild-composer/internal/target"
 )
@@ -23,13 +23,13 @@ type OSBuildJob struct {
 }
 
 type OSBuildJobResult struct {
-	Success       bool        `json:"success"`
-	OSBuildOutput BuildResult `json:"osbuild_output,omitempty"`
-	TargetErrors  []string    `json:"target_errors,omitempty"`
-	UploadStatus  string      `json:"upload_status"`
+	Success       bool           `json:"success"`
+	OSBuildOutput osbuild.Result `json:"osbuild_output,omitempty"`
+	TargetErrors  []string       `json:"target_errors,omitempty"`
+	UploadStatus  string         `json:"upload_status"`
 }
 
-// Custom unmarshaller for the temporary dual implementations of BuildResult.
+// Custom unmarshaller for the temporary dual implementations of osbuild.Result
 func (jr *OSBuildJobResult) UnmarshalJSON(data []byte) error {
 	var rawResult struct {
 		Success       bool            `json:"success"`
@@ -47,7 +47,8 @@ func (jr *OSBuildJobResult) UnmarshalJSON(data []byte) error {
 	jr.TargetErrors = rawResult.TargetErrors
 	jr.UploadStatus = rawResult.UploadStatus
 
-	var br1 osbuild.Result
+	var br1 osbuild1.Result
+	// TODO: Use decoder with DisallowUnknownFields
 	if err := json.Unmarshal(rawResult.OSBuildOutput, &br1); err == nil && len(br1.Stages) != 0 {
 		jr.OSBuildOutput = &br1
 		return nil
@@ -59,11 +60,6 @@ func (jr *OSBuildJobResult) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 	return nil
-}
-
-type BuildResult interface {
-	Write(writer io.Writer) error
-	Succeeded() bool
 }
 
 type KojiInitJob struct {
@@ -88,12 +84,49 @@ type OSBuildKojiJob struct {
 }
 
 type OSBuildKojiJobResult struct {
-	HostOS        string          `json:"host_os"`
-	Arch          string          `json:"arch"`
-	OSBuildOutput *osbuild.Result `json:"osbuild_output"`
-	ImageHash     string          `json:"image_hash"`
-	ImageSize     uint64          `json:"image_size"`
-	KojiError     string          `json:"koji_error"`
+	HostOS        string         `json:"host_os"`
+	Arch          string         `json:"arch"`
+	OSBuildOutput osbuild.Result `json:"osbuild_output"`
+	ImageHash     string         `json:"image_hash"`
+	ImageSize     uint64         `json:"image_size"`
+	KojiError     string         `json:"koji_error"`
+}
+
+// Custom unmarshaller for the temporary dual implementations of osbuild.Result
+func (jr *OSBuildKojiJobResult) UnmarshalJSON(data []byte) error {
+	var rawResult struct {
+		HostOS        string          `json:"host_os"`
+		Arch          string          `json:"arch"`
+		OSBuildOutput json.RawMessage `json:"osbuild_output"`
+		ImageHash     string          `json:"image_hash"`
+		ImageSize     uint64          `json:"image_size"`
+		KojiError     string          `json:"koji_error"`
+	}
+
+	if err := json.Unmarshal(data, &rawResult); err != nil {
+		return err
+	}
+
+	// Add the rest of the fields to return even if the result unmarshalling fails
+	jr.HostOS = rawResult.HostOS
+	jr.Arch = rawResult.Arch
+	jr.ImageHash = rawResult.ImageHash
+	jr.ImageSize = rawResult.ImageSize
+	jr.KojiError = rawResult.KojiError
+
+	var br1 osbuild1.Result
+	// TODO: Use decoder with DisallowUnknownFields
+	if err := json.Unmarshal(rawResult.OSBuildOutput, &br1); err == nil && len(br1.Stages) != 0 {
+		jr.OSBuildOutput = &br1
+		return nil
+	}
+
+	var br2 osbuild2.Result
+	if err := json.Unmarshal(rawResult.OSBuildOutput, &br2); err == nil && len(br2.Pipelines) != 0 {
+		jr.OSBuildOutput = &br2
+		return nil
+	}
+	return nil
 }
 
 type KojiFinalizeJob struct {

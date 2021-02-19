@@ -81,7 +81,8 @@ func (impl *OSBuildJobImpl) Run(job worker.Job) error {
 
 	start_time := time.Now()
 
-	osbuildOutput, err := RunOSBuild(args.Manifest, impl.Store, outputDirectory, os.Stderr)
+	exports := []string{"assembler"} // FIXME: get from manifest
+	osbuildOutput, err := RunOSBuild(args.Manifest, impl.Store, outputDirectory, exports, os.Stderr)
 	if err != nil {
 		return err
 	}
