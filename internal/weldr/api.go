@@ -256,6 +256,7 @@ func (api *API) getComposeStatus(compose store.Compose) *composeStatus {
 	if err != nil {
 		panic(err)
 	}
+
 	return &composeStatus{
 		State:    composeStateFromJobStatus(jobStatus, &result),
 		Queued:   jobStatus.Queued,
@@ -2005,6 +2006,7 @@ func (api *API) composeHandler(writer http.ResponseWriter, request *http.Request
 			Targets:         targets,
 			ImageName:       imageType.Filename(),
 			StreamOptimized: imageType.Name() == "vmdk", // https://github.com/osbuild/osbuild/issues/528
+			Exports:         imageType.Exports(),
 		})
 		if err == nil {
 			err = api.store.PushCompose(composeID, manifest, imageType, bp, size, targets, jobId)
