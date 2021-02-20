@@ -188,6 +188,10 @@ func (t *imageType) BuildPackages() []string {
 	return packages
 }
 
+func (t *imageType) Exports() []string {
+	return []string{"assembler"}
+}
+
 func (t *imageType) Manifest(c *blueprint.Customizations,
 	options distro.ImageOptions,
 	repos []rpmmd.RepoConfig,

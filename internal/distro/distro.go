@@ -79,6 +79,9 @@ type ImageType interface {
 	// Returns the build packages for the output type.
 	BuildPackages() []string
 
+	// Returns the names of the stages that will produce the build output.
+	Exports() []string
+
 	// Returns an osbuild manifest, containing the sources and pipeline necessary
 	// to build an image, given output format with all packages and customizations
 	// specified in the given blueprint.
