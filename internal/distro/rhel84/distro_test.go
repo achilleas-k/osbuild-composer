@@ -468,7 +468,7 @@ func TestArchitecture_ListImageTypes(t *testing.T) {
 				"vhd",
 				"vmdk",
 			},
-			rhelAdditionalImageTypes: []string{"rhel-edge-commit"},
+			rhelAdditionalImageTypes: []string{"rhel-edge-commit", "rhel-edge-container"},
 		},
 		{
 			arch: "aarch64",
@@ -478,7 +478,7 @@ func TestArchitecture_ListImageTypes(t *testing.T) {
 				"openstack",
 				"tar",
 			},
-			rhelAdditionalImageTypes: []string{"rhel-edge-commit"},
+			rhelAdditionalImageTypes: []string{"rhel-edge-commit", "rhel-edge-container"},
 		},
 		{
 			arch: "ppc64le",
