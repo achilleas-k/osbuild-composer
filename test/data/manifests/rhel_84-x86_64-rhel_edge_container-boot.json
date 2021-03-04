@@ -740,13 +740,50 @@
           {
             "type": "org.osbuild.locale",
             "options": {
-              "language": "en_US"
+              "language": "en_US.UTF-8"
+            }
+          },
+          {
+            "type": "org.osbuild.timezone",
+            "options": {
+              "zone": "America/New_York"
+            }
+          },
+          {
+            "type": "org.osbuild.systemd",
+            "options": {
+              "enabled_services": [
+                "NetworkManager.service",
+                "firewalld.service",
+                "sshd.service",
+                "greenboot-grub2-set-counter",
+                "greenboot-grub2-set-success",
+                "greenboot-healthcheck",
+                "greenboot-rpm-ostree-grub2-check-fallback",
+                "greenboot-status",
+                "greenboot-task-runner",
+                "redboot-auto-reboot",
+                "redboot-task-runner"
+              ]
             }
           },
           {
             "type": "org.osbuild.selinux",
             "options": {
               "file_contexts": "etc/selinux/targeted/contexts/files/file_contexts"
+            }
+          },
+          {
+            "type": "org.osbuild.sysconfig",
+            "options": {
+              "kernel": {
+                "update_default": true,
+                "default_kernel": "kernel"
+              },
+              "network": {
+                "networking": true,
+                "no_zero_conf": true
+              }
             }
           },
           {
@@ -8303,5 +8340,6 @@
       "1": "sha256:bfd8cfbc7ab499d9699c564f92303ee241104ce5410b9dacf2e2f6c6623eecde",
       "2": "sha256:21e8f75a343be3b15ee3ddcfde690e9d8d3e71640ec5e8fe7ad9c64fa93ffb77"
     }
-  }
+  },
+  "image-info": {}
 }
