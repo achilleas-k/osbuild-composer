@@ -155,19 +155,19 @@ func (a *architecture) addImageTypes(imageTypes ...imageType) {
 func (a *architecture) addS2ImageTypes(imageTypes ...ImageTypeS2) {
 	for _, it := range imageTypes {
 		a.imageTypes[it.name] = &ImageTypeS2{
-			arch:             a,
-			name:             it.name,
-			filename:         it.filename,
-			mimeType:         it.mimeType,
-			packages:         it.packages,
-			excludedPackages: it.excludedPackages,
-			enabledServices:  it.enabledServices,
-			disabledServices: it.disabledServices,
-			defaultTarget:    it.defaultTarget,
-			kernelOptions:    it.kernelOptions,
-			bootable:         it.bootable,
-			rpmOstree:        it.rpmOstree,
-			defaultSize:      it.defaultSize,
+			arch:                a,
+			name:                it.name,
+			filename:            it.filename,
+			mimeType:            it.mimeType,
+			packageSets:         it.packageSets,
+			excludedPackageSets: it.excludedPackageSets,
+			enabledServices:     it.enabledServices,
+			disabledServices:    it.disabledServices,
+			defaultTarget:       it.defaultTarget,
+			kernelOptions:       it.kernelOptions,
+			bootable:            it.bootable,
+			rpmOstree:           it.rpmOstree,
+			defaultSize:         it.defaultSize,
 		}
 	}
 }
@@ -1229,24 +1229,25 @@ func newDistro(isCentos bool) distro.Distro {
 		uefi:   true,
 	}
 
+	edgeContainerPkgs := []string{"httpd"}
 	edgeOCIImgTypeX86_64 := ImageTypeS2{
-		name:             "rhel-edge-container",
-		filename:         "rhel84-container.tar",
-		mimeType:         "application/x-tar",
-		packages:         edgeImgTypeX86_64.packages,
-		excludedPackages: edgeImgTypeX86_64.excludedPackages,
-		enabledServices:  edgeImgTypeX86_64.enabledServices,
-		rpmOstree:        true,
+		name:                "rhel-edge-container",
+		filename:            "rhel84-container.tar",
+		mimeType:            "application/x-tar",
+		packageSets:         [][]string{edgeImgTypeX86_64.packages, edgeContainerPkgs},
+		excludedPackageSets: [][]string{edgeImgTypeX86_64.excludedPackages},
+		enabledServices:     edgeImgTypeX86_64.enabledServices,
+		rpmOstree:           true,
 	}
 
 	edgeOCIImgTypeAarch64 := ImageTypeS2{
-		name:             "rhel-edge-container",
-		filename:         "rhel84-container.tar",
-		mimeType:         "application/x-tar",
-		packages:         edgeImgTypeAarch64.packages,
-		excludedPackages: edgeImgTypeAarch64.excludedPackages,
-		enabledServices:  edgeImgTypeAarch64.enabledServices,
-		rpmOstree:        true,
+		name:                "rhel-edge-container",
+		filename:            "rhel84-container.tar",
+		mimeType:            "application/x-tar",
+		packageSets:         [][]string{edgeImgTypeAarch64.packages, edgeContainerPkgs},
+		excludedPackageSets: [][]string{edgeImgTypeAarch64.excludedPackages},
+		enabledServices:     edgeImgTypeAarch64.enabledServices,
+		rpmOstree:           true,
 	}
 
 	x8664.addImageTypes(

@@ -14,19 +14,20 @@ import (
 )
 
 type ImageTypeS2 struct {
-	arch             *architecture
-	name             string
-	filename         string
-	mimeType         string
-	packages         []string
-	excludedPackages []string
-	enabledServices  []string
-	disabledServices []string
-	defaultTarget    string
-	kernelOptions    string
-	bootable         bool
-	rpmOstree        bool
-	defaultSize      uint64
+	arch                *architecture
+	name                string
+	filename            string
+	mimeType            string
+	packageSets         [][]string
+	excludedPackageSets [][]string
+	enabledServices     []string
+	disabledServices    []string
+	defaultTarget       string
+	kernelOptions       string
+	bootable            bool
+	rpmOstree           bool
+	defaultSize         uint64
+	depsolve            solver
 }
 
 func (t *ImageTypeS2) Arch() distro.Arch {
