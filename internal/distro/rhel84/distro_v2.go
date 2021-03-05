@@ -28,6 +28,7 @@ type ImageTypeS2 struct {
 	rpmOstree           bool
 	defaultSize         uint64
 	depsolve            solver
+	blueprint           *blueprint.Blueprint
 }
 
 func (t *ImageTypeS2) Arch() distro.Arch {
@@ -422,4 +423,11 @@ func (t *ImageTypeS2) systemdStageOptions(enabledServices, disabledServices []st
 		DisabledServices: disabledServices,
 		DefaultTarget:    target,
 	}
+}
+
+type solver func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, error)
+
+func (t *ImageTypeS2) SetSolver(s solver, bp *blueprint.Blueprint) {
+	t.depsolve = s
+	t.blueprint = bp
 }

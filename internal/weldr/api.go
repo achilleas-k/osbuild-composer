@@ -31,6 +31,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/distro/rhel84"
 	"github.com/osbuild/osbuild-composer/internal/jobqueue"
 	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild1"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
@@ -2734,6 +2735,9 @@ func (api *API) allRepositories() []rpmmd.RepoConfig {
 }
 
 func (api *API) depsolveBlueprint(bp *blueprint.Blueprint, imageType distro.ImageType) ([]rpmmd.PackageSpec, []rpmmd.PackageSpec, error) {
+	if imageType != nil && imageType.Name() == "rhel-edge-container" {
+		return api.bindSolver(bp, imageType)
+	}
 	repos := api.allRepositories()
 
 	specs := bp.GetPackages()
@@ -2759,6 +2763,21 @@ func (api *API) depsolveBlueprint(bp *blueprint.Blueprint, imageType distro.Imag
 	}
 
 	return packages, buildPackages, err
+}
+
+func (api *API) bindSolver(bp *blueprint.Blueprint, imageType distro.ImageType) ([]rpmmd.PackageSpec, []rpmmd.PackageSpec, error) {
+	repos := api.allRepositories()
+
+	its2, ok := imageType.(*rhel84.ImageTypeS2)
+	if !ok {
+		return nil, nil, fmt.Errorf("unexpected ImageType implementation for %q", imageType.Name())
+	}
+
+	its2.SetSolver(func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, error) {
+		pkgs, _, err := api.rpmmd.Depsolve(specs, excludeSpecs, repos, api.distro.ModulePlatformID(), api.arch.Name())
+		return pkgs, err
+	}, bp)
+	return []rpmmd.PackageSpec{}, []rpmmd.PackageSpec{}, nil
 }
 
 func (api *API) uploadsScheduleHandler(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
