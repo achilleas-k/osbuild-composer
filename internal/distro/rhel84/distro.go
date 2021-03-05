@@ -152,9 +152,9 @@ func (a *architecture) addImageTypes(imageTypes ...imageType) {
 // For the secondary implementation of image type.
 // Temporary; for supporting the new Manifest schema, until everything is
 // ported.
-func (a *architecture) addS2ImageTypes(imageTypes ...imageTypeS2) {
+func (a *architecture) addS2ImageTypes(imageTypes ...ImageTypeS2) {
 	for _, it := range imageTypes {
-		a.imageTypes[it.name] = &imageTypeS2{
+		a.imageTypes[it.name] = &ImageTypeS2{
 			arch:             a,
 			name:             it.name,
 			filename:         it.filename,
@@ -1229,7 +1229,7 @@ func newDistro(isCentos bool) distro.Distro {
 		uefi:   true,
 	}
 
-	edgeOCIImgTypeX86_64 := imageTypeS2{
+	edgeOCIImgTypeX86_64 := ImageTypeS2{
 		name:             "rhel-edge-container",
 		filename:         "rhel84-container.tar",
 		mimeType:         "application/x-tar",
@@ -1239,7 +1239,7 @@ func newDistro(isCentos bool) distro.Distro {
 		rpmOstree:        true,
 	}
 
-	edgeOCIImgTypeAarch64 := imageTypeS2{
+	edgeOCIImgTypeAarch64 := ImageTypeS2{
 		name:             "rhel-edge-container",
 		filename:         "rhel84-container.tar",
 		mimeType:         "application/x-tar",

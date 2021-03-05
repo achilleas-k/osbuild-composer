@@ -13,7 +13,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
-type imageTypeS2 struct {
+type ImageTypeS2 struct {
 	arch             *architecture
 	name             string
 	filename         string
@@ -29,30 +29,30 @@ type imageTypeS2 struct {
 	defaultSize      uint64
 }
 
-func (t *imageTypeS2) Arch() distro.Arch {
+func (t *ImageTypeS2) Arch() distro.Arch {
 	return t.arch
 }
 
-func (t *imageTypeS2) Name() string {
+func (t *ImageTypeS2) Name() string {
 	return t.name
 }
 
-func (t *imageTypeS2) Filename() string {
+func (t *ImageTypeS2) Filename() string {
 	return t.filename
 }
 
-func (t *imageTypeS2) MIMEType() string {
+func (t *ImageTypeS2) MIMEType() string {
 	return t.mimeType
 }
 
-func (t *imageTypeS2) OSTreeRef() string {
+func (t *ImageTypeS2) OSTreeRef() string {
 	if t.rpmOstree {
 		return fmt.Sprintf(ostreeRef, t.arch.name)
 	}
 	return ""
 }
 
-func (t *imageTypeS2) Size(size uint64) uint64 {
+func (t *ImageTypeS2) Size(size uint64) uint64 {
 	const MegaByte = 1024 * 1024
 	// Microsoft Azure requires vhd images to be rounded up to the nearest MB
 	if t.name == "vhd" && size%MegaByte != 0 {
@@ -64,40 +64,31 @@ func (t *imageTypeS2) Size(size uint64) uint64 {
 	return size
 }
 
-func (t *imageTypeS2) Packages(bp blueprint.Blueprint) ([]string, []string) {
-	packages := append(t.packages, bp.GetPackages()...)
-	timezone, _ := bp.Customizations.GetTimezoneSettings()
-	if timezone != nil {
-		packages = append(packages, "chrony")
-	}
-	if t.bootable {
-		packages = append(packages, t.arch.bootloaderPackages...)
-	}
-
-	return packages, t.excludedPackages
+func (t *ImageTypeS2) Packages(bp blueprint.Blueprint) ([]string, []string) {
+	// NOTE(akoutsou) 1to2t: rhel-edge-container image types perform their own
+	// depsolving while creating the Manifest.  Returning empty string slices
+	// to avoid unnecessary depsolving.
+	return []string{}, []string{}
 }
 
-func (t *imageTypeS2) BuildPackages() []string {
-	packages := append(t.arch.distro.buildPackages, t.arch.buildPackages...)
-	if t.rpmOstree {
-		packages = append(packages, "rpm-ostree")
-	}
-	//  NOTE(akoutsou) 1to2t: for the container to serve the commit; this should be its
-	//  own package set
-	packages = append(packages, "httpd")
-	return packages
+func (t *ImageTypeS2) BuildPackages() []string {
+	// NOTE(akoutsou) 1to2t: rhel-edge-container image types perform their own
+	// depsolving while creating the Manifest.  Returning empty string slice to
+	// avoid unnecessary depsolving.
+	return []string{}
 }
 
-func (t *imageTypeS2) Exports() []string {
+func (t *ImageTypeS2) Exports() []string {
 	return []string{"assembler"}
 }
 
-func (t *imageTypeS2) Manifest(c *blueprint.Customizations,
+func (t *ImageTypeS2) Manifest(c *blueprint.Customizations,
 	options distro.ImageOptions,
 	repos []rpmmd.RepoConfig,
 	packageSpecs,
 	buildPackageSpecs []rpmmd.PackageSpec,
 	seed int64) (distro.Manifest, error) {
+
 	source := rand.NewSource(seed)
 	rng := rand.New(source)
 	pipelines, err := t.pipelines(c, options, repos, packageSpecs, buildPackageSpecs, rng)
@@ -114,7 +105,7 @@ func (t *imageTypeS2) Manifest(c *blueprint.Customizations,
 	)
 }
 
-func (t *imageTypeS2) sources(packages []rpmmd.PackageSpec) osbuild.Sources {
+func (t *ImageTypeS2) sources(packages []rpmmd.PackageSpec) osbuild.Sources {
 	source := &osbuild.CurlSource{
 		Items: make(map[string]osbuild.CurlSourceItem),
 	}
@@ -133,7 +124,7 @@ func (t *imageTypeS2) sources(packages []rpmmd.PackageSpec) osbuild.Sources {
 	}
 }
 
-func (t *imageTypeS2) pipelines(c *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSpecs, buildPackageSpecs []rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSpecs, buildPackageSpecs []rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
 
 	if kernelOpts := c.GetKernel(); kernelOpts.Append != "" && t.rpmOstree {
 		return nil, fmt.Errorf("kernel boot parameter customizations are not supported for ostree types")
@@ -161,7 +152,7 @@ func (t *imageTypeS2) pipelines(c *blueprint.Customizations, options distro.Imag
 	return pipelines, nil
 }
 
-func (t *imageTypeS2) buildPipeline(repos []rpmmd.RepoConfig, buildPackageSpecs []rpmmd.PackageSpec) *osbuild.Pipeline {
+func (t *ImageTypeS2) buildPipeline(repos []rpmmd.RepoConfig, buildPackageSpecs []rpmmd.PackageSpec) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "build"
 	p.Runner = "org.osbuild.rhel84"
@@ -170,7 +161,7 @@ func (t *imageTypeS2) buildPipeline(repos []rpmmd.RepoConfig, buildPackageSpecs 
 	return p
 }
 
-func (t *imageTypeS2) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, c *blueprint.Customizations) (*osbuild.Pipeline, error) {
+func (t *ImageTypeS2) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, c *blueprint.Customizations) (*osbuild.Pipeline, error) {
 	p := new(osbuild.Pipeline)
 	p.Name = "ostree-tree"
 	p.Build = "name:build"
@@ -242,7 +233,7 @@ func (t *imageTypeS2) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rp
 	return p, nil
 }
 
-func (t *imageTypeS2) ostreeCommitPipeline(options distro.ImageOptions) *osbuild.Pipeline {
+func (t *ImageTypeS2) ostreeCommitPipeline(options distro.ImageOptions) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "ostree-commit"
 	p.Build = "name:build"
@@ -264,7 +255,7 @@ func (t *imageTypeS2) ostreeCommitPipeline(options distro.ImageOptions) *osbuild
 	return p
 }
 
-func (t *imageTypeS2) containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, c *blueprint.Customizations) *osbuild.Pipeline {
+func (t *ImageTypeS2) containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, c *blueprint.Customizations) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "container-tree"
 	p.Build = "name:build"
@@ -284,7 +275,7 @@ func (t *imageTypeS2) containerTreePipeline(repos []rpmmd.RepoConfig, packages [
 	return p
 }
 
-func (t *imageTypeS2) containerPipeline() *osbuild.Pipeline {
+func (t *ImageTypeS2) containerPipeline() *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	// NOTE(akoutsou) 1to2t: final pipeline should always be named "assembler"
 	p.Name = "assembler"
@@ -306,7 +297,7 @@ func (t *imageTypeS2) containerPipeline() *osbuild.Pipeline {
 	return p
 }
 
-func (t *imageTypeS2) rpmStageInputs(specs []rpmmd.PackageSpec) *osbuild.RPMStageInputs {
+func (t *ImageTypeS2) rpmStageInputs(specs []rpmmd.PackageSpec) *osbuild.RPMStageInputs {
 	stageInput := new(osbuild.RPMStageInput)
 	stageInput.Type = "org.osbuild.files"
 	stageInput.Origin = "org.osbuild.source"
@@ -322,7 +313,7 @@ func pkgRefs(specs []rpmmd.PackageSpec) osbuild.RPMStageReferences {
 	return refs
 }
 
-func (t *imageTypeS2) ostreePullStageInputs(options distro.ImageOptions) *osbuild.OSTreePullStageInputs {
+func (t *ImageTypeS2) ostreePullStageInputs(options distro.ImageOptions) *osbuild.OSTreePullStageInputs {
 	pullStageInput := new(osbuild.OSTreePullStageInput)
 	pullStageInput.Type = "org.osbuild.ostree"
 	pullStageInput.Origin = "org.osbuild.pipeline"
@@ -333,7 +324,7 @@ func (t *imageTypeS2) ostreePullStageInputs(options distro.ImageOptions) *osbuil
 	return &osbuild.OSTreePullStageInputs{Commits: pullStageInput}
 }
 
-func (t *imageTypeS2) rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStageOptions {
+func (t *ImageTypeS2) rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStageOptions {
 	var gpgKeys []string
 	for _, repo := range repos {
 		if repo.GPGKey == "" {
@@ -351,13 +342,13 @@ func (t *imageTypeS2) rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStag
 	}
 }
 
-func (t *imageTypeS2) selinuxStageOptions() *osbuild.SELinuxStageOptions {
+func (t *ImageTypeS2) selinuxStageOptions() *osbuild.SELinuxStageOptions {
 	return &osbuild.SELinuxStageOptions{
 		FileContexts: "etc/selinux/targeted/contexts/files/file_contexts",
 	}
 }
 
-func (t *imageTypeS2) userStageOptions(users []blueprint.UserCustomization) (*osbuild.UsersStageOptions, error) {
+func (t *ImageTypeS2) userStageOptions(users []blueprint.UserCustomization) (*osbuild.UsersStageOptions, error) {
 	options := osbuild.UsersStageOptions{
 		Users: make(map[string]osbuild.UsersStageOptionsUser),
 	}
@@ -390,7 +381,7 @@ func (t *imageTypeS2) userStageOptions(users []blueprint.UserCustomization) (*os
 	return &options, nil
 }
 
-func (t *imageTypeS2) groupStageOptions(groups []blueprint.GroupCustomization) *osbuild.GroupsStageOptions {
+func (t *ImageTypeS2) groupStageOptions(groups []blueprint.GroupCustomization) *osbuild.GroupsStageOptions {
 	options := osbuild.GroupsStageOptions{
 		Groups: map[string]osbuild.GroupsStageOptionsGroup{},
 	}
@@ -407,7 +398,7 @@ func (t *imageTypeS2) groupStageOptions(groups []blueprint.GroupCustomization) *
 	return &options
 }
 
-func (t *imageTypeS2) firewallStageOptions(firewall *blueprint.FirewallCustomization) *osbuild.FirewallStageOptions {
+func (t *ImageTypeS2) firewallStageOptions(firewall *blueprint.FirewallCustomization) *osbuild.FirewallStageOptions {
 	options := osbuild.FirewallStageOptions{
 		Ports: firewall.Ports,
 	}
@@ -420,7 +411,7 @@ func (t *imageTypeS2) firewallStageOptions(firewall *blueprint.FirewallCustomiza
 	return &options
 }
 
-func (t *imageTypeS2) systemdStageOptions(enabledServices, disabledServices []string, s *blueprint.ServicesCustomization, target string) *osbuild.SystemdStageOptions {
+func (t *ImageTypeS2) systemdStageOptions(enabledServices, disabledServices []string, s *blueprint.ServicesCustomization, target string) *osbuild.SystemdStageOptions {
 	if s != nil {
 		enabledServices = append(enabledServices, s.Enabled...)
 		disabledServices = append(disabledServices, s.Disabled...)

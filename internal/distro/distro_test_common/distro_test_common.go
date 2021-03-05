@@ -145,6 +145,10 @@ func TestDistro_KernelOption(t *testing.T, d distro.Distro) {
 		arch, err := d.GetArch(archName)
 		assert.NoError(t, err)
 		for _, typeName := range arch.ListImageTypes() {
+			if typeName == "rhel-edge-container" {
+				// NOTE(akoutsou) 1to2t: image type returns no packages
+				continue
+			}
 			imgType, err := arch.GetImageType(typeName)
 			assert.NoError(t, err)
 			nk := kernelCount(imgType)
