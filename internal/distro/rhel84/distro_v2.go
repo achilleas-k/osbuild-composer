@@ -84,6 +84,44 @@ func (t *ImageTypeS2) Exports() []string {
 	return []string{"assembler"}
 }
 
+func (t *ImageTypeS2) depsolvePackageSets() ([][]rpmmd.PackageSpec, error) {
+	if t.depsolve == nil {
+		return [][]rpmmd.PackageSpec{}, nil
+	}
+	commitPackages := t.packageSets[0]
+	if bp := t.blueprint; bp != nil {
+		commitPackages = append(commitPackages, bp.GetPackages()...)
+		if timezone, _ := bp.Customizations.GetTimezoneSettings(); timezone != nil {
+			commitPackages = append(commitPackages, "chrony")
+		}
+	}
+	if t.bootable {
+		commitPackages = append(commitPackages, t.arch.bootloaderPackages...)
+	}
+
+	excludePackages := t.excludedPackageSets[0]
+	containerPackages := t.packageSets[1]
+	commitPackageSpecs, err := t.depsolve(commitPackages, excludePackages)
+	if err != nil {
+		return nil, err
+	}
+
+	containerPackageSpecs, err := t.depsolve(containerPackages, nil)
+	if err != nil {
+		return nil, err
+	}
+	buildPackages := append(t.arch.distro.buildPackages, t.arch.buildPackages...)
+	if t.rpmOstree {
+		buildPackages = append(buildPackages, "rpm-ostree")
+	}
+	buildPackageSpecs, err := t.depsolve(buildPackages, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return [][]rpmmd.PackageSpec{buildPackageSpecs, commitPackageSpecs, containerPackageSpecs}, nil
+}
+
 func (t *ImageTypeS2) Manifest(c *blueprint.Customizations,
 	options distro.ImageOptions,
 	repos []rpmmd.RepoConfig,
@@ -93,16 +131,32 @@ func (t *ImageTypeS2) Manifest(c *blueprint.Customizations,
 
 	source := rand.NewSource(seed)
 	rng := rand.New(source)
-	pipelines, err := t.pipelines(c, options, repos, packageSpecs, buildPackageSpecs, rng)
+
+	// NOTE(akoutsou) 1to2t: package specs coming from the arguments should be
+	// empty, so we depsolve them ourselves
+	var containerPackageSpecs []rpmmd.PackageSpec
+	packageSetsSpecs, err := t.depsolvePackageSets()
+	if err != nil {
+		return nil, err
+	}
+	if len(packageSetsSpecs) > 0 {
+		buildPackageSpecs = packageSetsSpecs[0]
+		packageSpecs = packageSetsSpecs[1]
+		containerPackageSpecs = packageSetsSpecs[2]
+	}
+
+	pipelines, err := t.pipelines(c, options, repos, packageSpecs, buildPackageSpecs, containerPackageSpecs, rng)
 	if err != nil {
 		return distro.Manifest{}, err
 	}
 
+	allPackageSpecs := append(packageSpecs, buildPackageSpecs...)
+	allPackageSpecs = append(allPackageSpecs, containerPackageSpecs...)
 	return json.Marshal(
 		osbuild.Manifest{
 			Version:   "2",
 			Pipelines: pipelines,
-			Sources:   t.sources(append(packageSpecs, buildPackageSpecs...)),
+			Sources:   t.sources(allPackageSpecs),
 		},
 	)
 }
@@ -126,7 +180,7 @@ func (t *ImageTypeS2) sources(packages []rpmmd.PackageSpec) osbuild.Sources {
 	}
 }
 
-func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSpecs, buildPackageSpecs []rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSpecs, buildPackageSpecs, containerPackageSpecs []rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
 
 	if kernelOpts := c.GetKernel(); kernelOpts.Append != "" && t.rpmOstree {
 		return nil, fmt.Errorf("kernel boot parameter customizations are not supported for ostree types")
@@ -146,9 +200,7 @@ func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.Imag
 		pipelines = append(pipelines, *t.ostreeCommitPipeline(options))
 	}
 
-	// NOTE(akoutsou) 1to2t: the container temporarily uses the build package
-	// set but eventually it should get its own defined in the image type
-	pipelines = append(pipelines, *t.containerTreePipeline(repos, buildPackageSpecs, options, c))
+	pipelines = append(pipelines, *t.containerTreePipeline(repos, containerPackageSpecs, options, c))
 	pipelines = append(pipelines, *t.containerPipeline())
 
 	return pipelines, nil
