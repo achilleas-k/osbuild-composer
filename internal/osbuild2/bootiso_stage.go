@@ -1,6 +1,6 @@
 package osbuild2
 
-type BootISOStageOptions struct {
+type BootISOMonoStageOptions struct {
 	Product Product `json:"product"`
 
 	Kernel string `json:"kernel"`
@@ -30,41 +30,45 @@ type ISOLinux struct {
 }
 
 type RootFS struct {
-	Compression struct {
-		Method  string `json:"method"`
-		Options struct {
-			BCJ string `json:"bcj"`
-		} `json:"options,omitempty"`
-	} `json:"compression"`
+	Compression FSCompression `json:"compression"`
 
 	// Size in MiB
 	Size int `json:"size"`
 }
 
-func (BootISOStageOptions) isStageOptions() {}
-
-type BootISOStageInputs struct {
-	RootFS *BootISOStageInput `json:"rootfs"`
-	Kernel *BootISOStageInput `json:"kernel"`
+type FSCompression struct {
+	Method  string               `json:"method"`
+	Options FSCompressionOptions `json:"options,omitempty"`
 }
 
-func (BootISOStageInputs) isStageInputs() {}
+type FSCompressionOptions struct {
+	BCJ string `json:"bcj"`
+}
 
-type BootISOStageInput struct {
+func (BootISOMonoStageOptions) isStageOptions() {}
+
+type BootISOMonoStageInputs struct {
+	RootFS *BootISOMonoStageInput `json:"rootfs"`
+	Kernel *BootISOMonoStageInput `json:"kernel"`
+}
+
+func (BootISOMonoStageInputs) isStageInputs() {}
+
+type BootISOMonoStageInput struct {
 	inputCommon
 	References BootISOStageReferences `json:"references"`
 }
 
-func (BootISOStageInput) isStageInput() {}
+func (BootISOMonoStageInput) isStageInput() {}
 
 type BootISOStageReferences []string
 
 func (BootISOStageReferences) isReferences() {}
 
 // Assemble a file system tree for a bootable ISO
-func NewBootISOStage(options *BootISOStageOptions, inputs *BootISOStageInputs) *Stage {
+func NewBootISOMonoStage(options *BootISOMonoStageOptions, inputs *BootISOMonoStageInputs) *Stage {
 	return &Stage{
-		Type:    "org.osbuild.bootiso",
+		Type:    "org.osbuild.bootiso.mono",
 		Options: options,
 		Inputs:  inputs,
 	}

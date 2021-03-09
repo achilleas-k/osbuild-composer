@@ -21,7 +21,7 @@ type OSTreeOptions struct {
 func (KickstartStageOptions) isStageOptions() {}
 
 // Creates an Anaconda kickstart file
-func NewKickstartStageOption(options *KickstartStageOptions) *Stage {
+func NewKickstartStage(options *KickstartStageOptions) *Stage {
 	return &Stage{
 		Type:    "org.osbuild.kickstart",
 		Options: options,

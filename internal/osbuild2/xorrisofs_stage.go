@@ -7,12 +7,7 @@ type XorrisofsStageOptions struct {
 	// Volume ID to set
 	VolID string `json:"volid"`
 
-	Boot struct {
-		// Path to the boot image (on the ISO)
-		Image string `json:"image"`
-		// Path to the boot catalog file (on the ISO)
-		Catalog string `json:"catalog"`
-	} `json:"boot,omitempty"`
+	Boot XorrisofsBoot `json:"boot,omitempty"`
 
 	EFI string `json:"efi,omitempty"`
 
@@ -21,6 +16,13 @@ type XorrisofsStageOptions struct {
 
 	// The ISO 9660 version (limits data size and filenames; min: 1, max: 4)
 	ISOLevel int `json:"isolevel"`
+}
+
+type XorrisofsBoot struct {
+	// Path to the boot image (on the ISO)
+	Image string `json:"image"`
+	// Path to the boot catalog file (on the ISO)
+	Catalog string `json:"catalog"`
 }
 
 func (XorrisofsStageOptions) isStageOptions() {}
