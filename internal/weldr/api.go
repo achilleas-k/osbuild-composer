@@ -2735,9 +2735,12 @@ func (api *API) allRepositories() []rpmmd.RepoConfig {
 }
 
 func (api *API) depsolveBlueprint(bp *blueprint.Blueprint, imageType distro.ImageType) ([]rpmmd.PackageSpec, []rpmmd.PackageSpec, error) {
-	if imageType != nil && imageType.Name() == "rhel-edge-container" {
-		err := api.bindSolver(bp, imageType)
-		return []rpmmd.PackageSpec{}, []rpmmd.PackageSpec{}, err
+	if imageType != nil {
+		its2, ok := imageType.(*rhel84.ImageTypeS2)
+		if ok {
+			err := api.bindSolver(bp, its2)
+			return []rpmmd.PackageSpec{}, []rpmmd.PackageSpec{}, err
+		}
 	}
 	repos := api.allRepositories()
 
@@ -2766,15 +2769,10 @@ func (api *API) depsolveBlueprint(bp *blueprint.Blueprint, imageType distro.Imag
 	return packages, buildPackages, err
 }
 
-func (api *API) bindSolver(bp *blueprint.Blueprint, imageType distro.ImageType) error {
+func (api *API) bindSolver(bp *blueprint.Blueprint, imageType *rhel84.ImageTypeS2) error {
 	repos := api.allRepositories()
 
-	its2, ok := imageType.(*rhel84.ImageTypeS2)
-	if !ok {
-		return fmt.Errorf("unexpected ImageType implementation for %q", imageType.Name())
-	}
-
-	its2.SetSolver(func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, map[string]string, error) {
+	imageType.SetSolver(func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, map[string]string, error) {
 		pkgs, checksums, err := api.rpmmd.Depsolve(specs, excludeSpecs, repos, api.distro.ModulePlatformID(), api.arch.Name())
 		return pkgs, checksums, err
 	}, bp)
