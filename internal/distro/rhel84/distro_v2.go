@@ -84,9 +84,9 @@ func (t *ImageTypeS2) Exports() []string {
 	return []string{"assembler"}
 }
 
-func (t *ImageTypeS2) depsolvePackageSets() ([][]rpmmd.PackageSpec, error) {
+func (t *ImageTypeS2) DepsolvePackageSets() ([][]rpmmd.PackageSpec, map[string]string, error) {
 	if t.depsolve == nil {
-		return [][]rpmmd.PackageSpec{}, nil
+		return [][]rpmmd.PackageSpec{}, map[string]string{}, nil
 	}
 	commitPackages := t.packageSets[0]
 	if bp := t.blueprint; bp != nil {
@@ -101,25 +101,25 @@ func (t *ImageTypeS2) depsolvePackageSets() ([][]rpmmd.PackageSpec, error) {
 
 	excludePackages := t.excludedPackageSets[0]
 	containerPackages := t.packageSets[1]
-	commitPackageSpecs, err := t.depsolve(commitPackages, excludePackages)
+	commitPackageSpecs, checksums, err := t.depsolve(commitPackages, excludePackages)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	containerPackageSpecs, err := t.depsolve(containerPackages, nil)
+	containerPackageSpecs, _, err := t.depsolve(containerPackages, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	buildPackages := append(t.arch.distro.buildPackages, t.arch.buildPackages...)
 	if t.rpmOstree {
 		buildPackages = append(buildPackages, "rpm-ostree")
 	}
-	buildPackageSpecs, err := t.depsolve(buildPackages, nil)
+	buildPackageSpecs, _, err := t.depsolve(buildPackages, nil)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return [][]rpmmd.PackageSpec{buildPackageSpecs, commitPackageSpecs, containerPackageSpecs}, nil
+	return [][]rpmmd.PackageSpec{buildPackageSpecs, commitPackageSpecs, containerPackageSpecs}, checksums, nil
 }
 
 func (t *ImageTypeS2) Manifest(c *blueprint.Customizations,
@@ -135,11 +135,13 @@ func (t *ImageTypeS2) Manifest(c *blueprint.Customizations,
 	// NOTE(akoutsou) 1to2t: package specs coming from the arguments should be
 	// empty, so we depsolve them ourselves
 	var containerPackageSpecs []rpmmd.PackageSpec
-	packageSetsSpecs, err := t.depsolvePackageSets()
+	packageSetsSpecs, _, err := t.DepsolvePackageSets()
 	if err != nil {
 		return nil, err
 	}
 	if len(packageSetsSpecs) > 0 {
+		// NOTE(akoutsou) 1to2t: the names of these sets are specific to the
+		// image type we build now (rhel-edge-container, rhel-edge-installer)
 		buildPackageSpecs = packageSetsSpecs[0]
 		packageSpecs = packageSetsSpecs[1]
 		containerPackageSpecs = packageSetsSpecs[2]
@@ -477,7 +479,7 @@ func (t *ImageTypeS2) systemdStageOptions(enabledServices, disabledServices []st
 	}
 }
 
-type solver func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, error)
+type solver func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, map[string]string, error)
 
 func (t *ImageTypeS2) SetSolver(s solver, bp *blueprint.Blueprint) {
 	t.depsolve = s

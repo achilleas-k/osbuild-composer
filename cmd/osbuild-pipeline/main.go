@@ -124,20 +124,46 @@ func main() {
 		panic("os.UserHomeDir(): " + err.Error())
 	}
 
-	rpmmd := rpmmd.NewRPMMD(path.Join(home, ".cache/osbuild-composer/rpmmd"), "/usr/libexec/osbuild-composer/dnf-json")
-	packageSpecs, checksums, err := rpmmd.Depsolve(packages, excludePkgs, repos, d.ModulePlatformID(), arch.Name())
+	rpm := rpmmd.NewRPMMD(path.Join(home, ".cache/osbuild-composer/rpmmd"), "/usr/libexec/osbuild-composer/dnf-json")
+	packageSpecs, checksums, err := rpm.Depsolve(packages, excludePkgs, repos, d.ModulePlatformID(), arch.Name())
 	if err != nil {
 		panic("Could not depsolve: " + err.Error())
 	}
 
 	buildPkgs := imageType.BuildPackages()
-	buildPackageSpecs, _, err := rpmmd.Depsolve(buildPkgs, nil, repos, d.ModulePlatformID(), arch.Name())
+	buildPackageSpecs, _, err := rpm.Depsolve(buildPkgs, nil, repos, d.ModulePlatformID(), arch.Name())
 	if err != nil {
 		panic("Could not depsolve build packages: " + err.Error())
+	}
+	if imageType.Name() == "rhel-edge-container" {
+		its2, ok := imageType.(*rhel84.ImageTypeS2)
+		if !ok {
+			panic(fmt.Errorf("unexpected ImageType implementation for %q", imageType.Name()))
+		}
+
+		its2.SetSolver(func(specs []string, excludeSpecs []string) ([]rpmmd.PackageSpec, map[string]string, error) {
+			pkgs, csums, err := rpm.Depsolve(specs, excludeSpecs, repos, d.ModulePlatformID(), arch.Name())
+			return pkgs, csums, err
+		}, nil)
 	}
 
 	var bytes []byte
 	if rpmmdArg {
+		if imageType.Name() == "rhel-edge-container" {
+			// NOTE(akoutsou) 1to2t: new image type returns empty slices for Packages() and BuildPackages()
+			// Since it defines package *sets*, we depsolve each set and use those for the 'rpmMDInfo'
+			its2, ok := imageType.(*rhel84.ImageTypeS2)
+			if !ok {
+				panic(fmt.Errorf("unexpected ImageType implementation for %q", imageType.Name()))
+			}
+			pkgSpecs, csums, err := its2.DepsolvePackageSets()
+			if err != nil {
+				panic(err)
+			}
+			buildPackageSpecs = pkgSpecs[0]
+			packageSpecs = pkgSpecs[1]
+			checksums = csums
+		}
 		rpmMDInfo := rpmMD{
 			BuildPackages: buildPackageSpecs,
 			Packages:      packageSpecs,
