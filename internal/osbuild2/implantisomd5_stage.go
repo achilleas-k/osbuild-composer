@@ -2,7 +2,7 @@ package osbuild2
 
 type Implantisomd5StageOptions struct {
 	// Path in the ISO where the md5 checksum will be implanted
-	Filename string `json:"string"`
+	Filename string `json:"filename"`
 }
 
 func (Implantisomd5StageOptions) isStageOptions() {}

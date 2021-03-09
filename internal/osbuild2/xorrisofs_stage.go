@@ -12,10 +12,10 @@ type XorrisofsStageOptions struct {
 	EFI string `json:"efi,omitempty"`
 
 	// Install the argument (buildroot) as ISOLINUX isohybrid MBR
-	IsohybridMBR string `json:"isohybridmbr"`
+	IsohybridMBR string `json:"isohybridmbr,omitempty"`
 
 	// The ISO 9660 version (limits data size and filenames; min: 1, max: 4)
-	ISOLevel int `json:"isolevel"`
+	ISOLevel int `json:"isolevel,omitempty"`
 }
 
 type XorrisofsBoot struct {

@@ -49,7 +49,7 @@ func (BootISOMonoStageOptions) isStageOptions() {}
 
 type BootISOMonoStageInputs struct {
 	RootFS *BootISOMonoStageInput `json:"rootfs"`
-	Kernel *BootISOMonoStageInput `json:"kernel"`
+	Kernel *BootISOMonoStageInput `json:"kernel,omitempty"`
 }
 
 func (BootISOMonoStageInputs) isStageInputs() {}
