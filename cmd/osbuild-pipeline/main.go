@@ -160,8 +160,8 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			buildPackageSpecs = pkgSpecs[0]
-			packageSpecs = pkgSpecs[1]
+			buildPackageSpecs = pkgSpecs["bulid"]
+			packageSpecs = pkgSpecs["commit"]
 			checksums = csums
 		}
 		rpmMDInfo := rpmMD{

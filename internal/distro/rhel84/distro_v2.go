@@ -18,8 +18,8 @@ type ImageTypeS2 struct {
 	name                string
 	filename            string
 	mimeType            string
-	packageSets         [][]string
-	excludedPackageSets [][]string
+	packageSets         map[string][]string
+	excludedPackageSets map[string][]string
 	enabledServices     []string
 	disabledServices    []string
 	defaultTarget       string
@@ -85,42 +85,51 @@ func (t *ImageTypeS2) Exports() []string {
 	return []string{"assembler"}
 }
 
-func (t *ImageTypeS2) DepsolvePackageSets() ([][]rpmmd.PackageSpec, map[string]string, error) {
+func (t *ImageTypeS2) DepsolvePackageSets() (map[string][]rpmmd.PackageSpec, map[string]string, error) {
 	if t.depsolve == nil {
-		return [][]rpmmd.PackageSpec{}, map[string]string{}, nil
+		return map[string][]rpmmd.PackageSpec{}, map[string]string{}, nil
 	}
-	commitPackages := t.packageSets[0]
-	if bp := t.blueprint; bp != nil {
-		commitPackages = append(commitPackages, bp.GetPackages()...)
-		if timezone, _ := bp.Customizations.GetTimezoneSettings(); timezone != nil {
-			commitPackages = append(commitPackages, "chrony")
+
+	pkgSpecs := make(map[string][]rpmmd.PackageSpec, len(t.packageSets)+1)
+	var checksums map[string]string
+	for name, pkgSet := range t.packageSets {
+		if name == "commit" {
+			// the main package set to be delivered
+			// include blueprint and bootloader
+			if bp := t.blueprint; bp != nil {
+				pkgSet = append(pkgSet, bp.GetPackages()...)
+				if timezone, _ := bp.Customizations.GetTimezoneSettings(); timezone != nil {
+					pkgSet = append(pkgSet, "chrony")
+				}
+			}
+			if t.bootable {
+				pkgSet = append(pkgSet, t.arch.bootloaderPackages...)
+			}
 		}
-	}
-	if t.bootable {
-		commitPackages = append(commitPackages, t.arch.bootloaderPackages...)
-	}
-
-	excludePackages := t.excludedPackageSets[0]
-	containerPackages := t.packageSets[1]
-	commitPackageSpecs, checksums, err := t.depsolve(commitPackages, excludePackages)
-	if err != nil {
-		return nil, nil, err
+		specs, csums, err := t.depsolve(pkgSet, t.excludedPackageSets[name])
+		if err != nil {
+			return nil, nil, err
+		}
+		if name == "commit" {
+			checksums = csums
+		}
+		pkgSpecs[name] = specs
 	}
 
-	containerPackageSpecs, _, err := t.depsolve(containerPackages, nil)
-	if err != nil {
-		return nil, nil, err
-	}
 	buildPackages := append(t.arch.distro.buildPackages, t.arch.buildPackages...)
 	if t.rpmOstree {
 		buildPackages = append(buildPackages, "rpm-ostree")
+	}
+	if t.bootISO {
+		buildPackages = append(buildPackages, "lorax")
 	}
 	buildPackageSpecs, _, err := t.depsolve(buildPackages, nil)
 	if err != nil {
 		return nil, nil, err
 	}
+	pkgSpecs["build"] = buildPackageSpecs
 
-	return [][]rpmmd.PackageSpec{buildPackageSpecs, commitPackageSpecs, containerPackageSpecs}, checksums, nil
+	return pkgSpecs, checksums, nil
 }
 
 func (t *ImageTypeS2) Manifest(c *blueprint.Customizations,
@@ -178,7 +187,7 @@ func (t *ImageTypeS2) sources(packages []rpmmd.PackageSpec) osbuild.Sources {
 	}
 }
 
-func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetsSpecs [][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetsSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
 
 	if kernelOpts := c.GetKernel(); kernelOpts.Append != "" && t.rpmOstree {
 		return nil, fmt.Errorf("kernel boot parameter customizations are not supported for ostree types")
@@ -186,18 +195,11 @@ func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.Imag
 
 	pipelines := make([]osbuild.Pipeline, 0)
 
-	if len(packageSetsSpecs) < 1 {
-		return nil, fmt.Errorf("unexpected number of package sets: %d", len(packageSetsSpecs))
-	}
-
-	pipelines = append(pipelines, *t.buildPipeline(repos, packageSetsSpecs[0]))
+	pipelines = append(pipelines, *t.buildPipeline(repos, packageSetsSpecs["build"]))
 
 	if t.rpmOstree {
-		if len(packageSetsSpecs) < 2 {
-			return nil, fmt.Errorf("unexpected number of package sets: %d", len(packageSetsSpecs))
-		}
 		// NOTE(akoutsou) 1to2t: Currently all images of type imageTypeS2 are ostree
-		treePipeline, err := t.ostreeTreePipeline(repos, packageSetsSpecs[1], c)
+		treePipeline, err := t.ostreeTreePipeline(repos, packageSetsSpecs["commit"], c)
 		if err != nil {
 			return nil, err
 		}
@@ -206,17 +208,11 @@ func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.Imag
 	}
 
 	if t.bootISO {
-		if len(packageSetsSpecs) < 3 {
-			return nil, fmt.Errorf("unexpected number of package sets: %d", len(packageSetsSpecs))
-		}
-		pipelines = append(pipelines, *t.anacondaTreePipeline(repos, packageSetsSpecs[2], options, c))
+		pipelines = append(pipelines, *t.anacondaTreePipeline(repos, packageSetsSpecs["installer"], options, c))
 		pipelines = append(pipelines, *t.bootISOTreePipeline())
 		pipelines = append(pipelines, *t.bootISOPipeline())
 	} else {
-		if len(packageSetsSpecs) < 3 {
-			return nil, fmt.Errorf("unexpected number of package sets: %d", len(packageSetsSpecs))
-		}
-		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetsSpecs[2], options, c))
+		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetsSpecs["container"], options, c))
 		pipelines = append(pipelines, *t.containerPipeline())
 	}
 
