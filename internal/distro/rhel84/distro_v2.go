@@ -277,7 +277,9 @@ func (t *ImageTypeS2) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rp
 		p.AddStage(osbuild.NewFirewallStage(t.firewallStageOptions(firewall)))
 	}
 
-	p.AddStage(osbuild.NewSELinuxStage(t.selinuxStageOptions()))
+	if !t.bootISO {
+		p.AddStage(osbuild.NewSELinuxStage(t.selinuxStageOptions()))
+	}
 
 	// These are the current defaults for the sysconfig stage. This can be changed to be image type exclusive if different configs are needed.
 	p.AddStage(osbuild.NewSysconfigStage(&osbuild.SysconfigStageOptions{
