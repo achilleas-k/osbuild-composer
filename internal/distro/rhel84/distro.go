@@ -168,6 +168,7 @@ func (a *architecture) addS2ImageTypes(imageTypes ...ImageTypeS2) {
 			bootable:            it.bootable,
 			rpmOstree:           it.rpmOstree,
 			defaultSize:         it.defaultSize,
+			bootISO:             it.bootISO,
 		}
 	}
 }
@@ -1238,6 +1239,19 @@ func newDistro(isCentos bool) distro.Distro {
 		excludedPackageSets: [][]string{edgeImgTypeX86_64.excludedPackages},
 		enabledServices:     edgeImgTypeX86_64.enabledServices,
 		rpmOstree:           true,
+		bootISO:             false,
+	}
+
+	edgeInstallerPkgs := []string{}
+	edgeInstImgTypeX86_64 := ImageTypeS2{
+		name:                "rhel-edge-installer",
+		filename:            "rhel84-boot.iso",
+		mimeType:            "application/x-iso9660-image",
+		packageSets:         [][]string{edgeImgTypeX86_64.packages, edgeContainerPkgs, edgeInstallerPkgs},
+		excludedPackageSets: [][]string{edgeImgTypeX86_64.excludedPackages},
+		enabledServices:     edgeImgTypeX86_64.enabledServices,
+		rpmOstree:           true,
+		bootISO:             true,
 	}
 
 	edgeOCIImgTypeAarch64 := ImageTypeS2{
@@ -1248,6 +1262,7 @@ func newDistro(isCentos bool) distro.Distro {
 		excludedPackageSets: [][]string{edgeImgTypeAarch64.excludedPackages},
 		enabledServices:     edgeImgTypeAarch64.enabledServices,
 		rpmOstree:           true,
+		bootISO:             false,
 	}
 
 	x8664.addImageTypes(
@@ -1261,7 +1276,7 @@ func newDistro(isCentos bool) distro.Distro {
 
 	if !isCentos {
 		x8664.addImageTypes(edgeImgTypeX86_64)
-		x8664.addS2ImageTypes(edgeOCIImgTypeX86_64)
+		x8664.addS2ImageTypes(edgeOCIImgTypeX86_64, edgeInstImgTypeX86_64)
 	}
 
 	aarch64 := architecture{

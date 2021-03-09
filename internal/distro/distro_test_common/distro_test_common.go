@@ -85,7 +85,7 @@ func TestDistro_Manifest(t *testing.T, pipelinePath string, prefix string, distr
 				t.Errorf("unknown image type: %v", tt.ComposeRequest.ImageType)
 				return
 			}
-			if imageType.Name() == "rhel-edge-container" {
+			if imageType.Name() == "rhel-edge-container" || imageType.Name() == "rhel-edge-installer" {
 				// NOTE(akoutsou) 1to2t: not compatible with current tests
 				return
 				// its2, ok := imageType.(*rhel84.ImageTypeS2)
@@ -159,7 +159,7 @@ func TestDistro_KernelOption(t *testing.T, d distro.Distro) {
 		arch, err := d.GetArch(archName)
 		assert.NoError(t, err)
 		for _, typeName := range arch.ListImageTypes() {
-			if typeName == "rhel-edge-container" {
+			if typeName == "rhel-edge-container" || typeName == "rhel-edge-installer" {
 				// NOTE(akoutsou) 1to2t: image type returns no packages
 				continue
 			}
