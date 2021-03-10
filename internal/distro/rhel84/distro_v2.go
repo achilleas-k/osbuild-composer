@@ -121,7 +121,8 @@ func (t *ImageTypeS2) DepsolvePackageSets() (map[string][]rpmmd.PackageSpec, map
 		buildPackages = append(buildPackages, "rpm-ostree")
 	}
 	if t.bootISO {
-		buildPackages = append(buildPackages, "lorax")
+		buildPackages = append(buildPackages, "lorax", "shim-ia32", "shim-x64", "grub2-efi-ia32-cdboot")
+		buildPackages = append(buildPackages, t.packageSets["installer"]...)
 	}
 	buildPackageSpecs, _, err := t.depsolve(buildPackages, nil)
 	if err != nil {
