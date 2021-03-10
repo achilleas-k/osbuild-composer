@@ -6,9 +6,11 @@ type KickstartStageOptions struct {
 
 	OSTree OSTreeOptions `json:"ostree,omitempty"`
 
-	LiveIMG struct {
-		URL string `json:"url"`
-	} `json:"liveimg"`
+	LiveIMG LiveIMG `json:"liveimg,omitempty"`
+}
+
+type LiveIMG struct {
+	URL string `json:"url"`
 }
 
 type OSTreeOptions struct {
