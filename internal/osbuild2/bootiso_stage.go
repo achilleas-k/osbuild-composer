@@ -56,14 +56,14 @@ func (BootISOMonoStageInputs) isStageInputs() {}
 
 type BootISOMonoStageInput struct {
 	inputCommon
-	References BootISOStageReferences `json:"references"`
+	References BootISOMonoStageReferences `json:"references"`
 }
 
 func (BootISOMonoStageInput) isStageInput() {}
 
-type BootISOStageReferences []string
+type BootISOMonoStageReferences []string
 
-func (BootISOStageReferences) isReferences() {}
+func (BootISOMonoStageReferences) isReferences() {}
 
 // Assemble a file system tree for a bootable ISO
 func NewBootISOMonoStage(options *BootISOMonoStageOptions, inputs *BootISOMonoStageInputs) *Stage {
