@@ -510,6 +510,10 @@ func (t *ImageTypeS2) rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStag
 func (t *ImageTypeS2) selinuxStageOptions() *osbuild.SELinuxStageOptions {
 	return &osbuild.SELinuxStageOptions{
 		FileContexts: "etc/selinux/targeted/contexts/files/file_contexts",
+		Labels: map[string]string{
+			"/usr/bin/cp":  "system_u:object_r:install_exec_t:s0",
+			"/usr/bin/tar": "system_u:object_r:install_exec_t:s0",
+		},
 	}
 }
 
@@ -697,12 +701,16 @@ func (t *ImageTypeS2) bootISOMonoStageOptions(kernelVer string) *osbuild.BootISO
 		Kernel:   kernelVer,
 		EFI: osbuild.EFI{
 			Architectures: []string{
-				// TODO: based on image arch
 				"IA32",
 				"X64",
 			},
 			Vendor: "redhat",
 		},
+		ISOLinux: osbuild.ISOLinux{
+			Enabled: true,
+			Debug:   false,
+		},
+		Templates: "80-rhel",
 		RootFS: osbuild.RootFS{
 			Size: 4096,
 			Compression: osbuild.FSCompression{
