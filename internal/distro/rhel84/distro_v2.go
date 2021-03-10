@@ -121,8 +121,7 @@ func (t *ImageTypeS2) DepsolvePackageSets() (map[string][]rpmmd.PackageSpec, map
 		buildPackages = append(buildPackages, "rpm-ostree")
 	}
 	if t.bootISO {
-		buildPackages = append(buildPackages, "lorax", "shim-ia32", "shim-x64", "grub2-efi-ia32-cdboot")
-		buildPackages = append(buildPackages, t.packageSets["installer"]...)
+		buildPackages = append(buildPackages, t.packageSets["build"]...)
 	}
 	buildPackageSpecs, _, err := t.depsolve(buildPackages, nil)
 	if err != nil {
@@ -210,7 +209,16 @@ func (t *ImageTypeS2) pipelines(c *blueprint.Customizations, options distro.Imag
 
 	if t.bootISO {
 		pipelines = append(pipelines, *t.anacondaTreePipeline(repos, packageSetsSpecs["installer"], options, c))
-		pipelines = append(pipelines, *t.bootISOTreePipeline())
+		var kernelPkg rpmmd.PackageSpec
+		for _, pkg := range packageSetsSpecs["installer"] {
+			if pkg.Name == "kernel" {
+				kernelPkg = pkg
+				break
+			}
+		}
+		// TODO: panic if not found
+		kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
+		pipelines = append(pipelines, *t.bootISOTreePipeline(kernelVer))
 		pipelines = append(pipelines, *t.bootISOPipeline())
 	} else {
 		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetsSpecs["container"], options, c))
@@ -416,19 +424,28 @@ func (t *ImageTypeS2) anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []
 
 	p.AddStage(osbuild.NewLoraxScriptStage(t.loraxScriptStageOptions()))
 
-	p.AddStage(osbuild.NewDracutStage(t.dracutStageOptions()))
+	var kernelPkg rpmmd.PackageSpec
+	for _, pkg := range packages {
+		if pkg.Name == "kernel" {
+			kernelPkg = pkg
+			break
+		}
+	}
+	// TODO: panic if not found
+	kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
+	p.AddStage(osbuild.NewDracutStage(t.dracutStageOptions(kernelVer)))
 
 	p.AddStage(osbuild.NewKickstartStage(t.kickstartStageOptions(ostreePath)))
 
 	return p
 }
 
-func (t *ImageTypeS2) bootISOTreePipeline() *osbuild.Pipeline {
+func (t *ImageTypeS2) bootISOTreePipeline(kernelVer string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "bootiso-tree"
 	p.Build = "name:build"
 
-	p.AddStage(osbuild.NewBootISOMonoStage(t.bootISOMonoStageOptions(), t.bootISOMonoStageInputs()))
+	p.AddStage(osbuild.NewBootISOMonoStage(t.bootISOMonoStageOptions(kernelVer), t.bootISOMonoStageInputs()))
 	p.AddStage(osbuild.NewDiscinfoStage(t.discinfoStageOptions()))
 
 	return p
@@ -598,8 +615,8 @@ func (t *ImageTypeS2) loraxScriptStageOptions() *osbuild.LoraxScriptStageOptions
 	}
 }
 
-func (t *ImageTypeS2) dracutStageOptions() *osbuild.DracutStageOptions {
-	kernel := []string{"4.18.0-293.el8.x86_64"}
+func (t *ImageTypeS2) dracutStageOptions(kernelVer string) *osbuild.DracutStageOptions {
+	kernel := []string{kernelVer}
 	modules := []string{
 		"bash",
 		"systemd",
@@ -670,15 +687,14 @@ func (t *ImageTypeS2) kickstartStageOptions(ostreePath string) *osbuild.Kickstar
 	}
 }
 
-func (t *ImageTypeS2) bootISOMonoStageOptions() *osbuild.BootISOMonoStageOptions {
+func (t *ImageTypeS2) bootISOMonoStageOptions(kernelVer string) *osbuild.BootISOMonoStageOptions {
 	return &osbuild.BootISOMonoStageOptions{
 		Product: osbuild.Product{
 			Name:    "Red Hat Enterprise Linux",
 			Version: "8.4",
 		},
 		ISOLabel: "RHEL-8-4-X86_64",
-		// TODO: based on image arch
-		Kernel: "4.18.0-293.el8.x86_64",
+		Kernel:   kernelVer,
 		EFI: osbuild.EFI{
 			Architectures: []string{
 				// TODO: based on image arch
