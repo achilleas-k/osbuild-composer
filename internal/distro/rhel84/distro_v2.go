@@ -273,7 +273,7 @@ func (t *imageTypeS2) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rp
 			return nil, err
 		}
 		p.AddStage(osbuild.NewUsersStage(options))
-		p.AddStage(osbuild.NewFirstBootStage(t.usersFirstBootOptions(options)))
+		p.AddStage(osbuild.NewFirstBootStage(t.usersFirstBootOptions(options.Users)))
 	}
 
 	if services := c.GetServices(); services != nil || t.enabledServices != nil || t.disabledServices != nil || t.defaultTarget != "" {
@@ -534,11 +534,11 @@ func (t *imageTypeS2) userStageOptions(users []blueprint.UserCustomization) (*os
 	return &options, nil
 }
 
-func (t *imageTypeS2) usersFirstBootOptions(usersStageOptions *osbuild.UsersStageOptions) *osbuild.FirstBootStageOptions {
-	cmds := make([]string, 0, 3*len(usersStageOptions.Users)+1)
+func (t *imageTypeS2) usersFirstBootOptions(users map[string]osbuild.UsersStageOptionsUser) *osbuild.FirstBootStageOptions {
+	cmds := make([]string, 0, 3*len(users)+1)
 	// workaround for creating authorized_keys file for user
 	varhome := filepath.Join("/var", "home")
-	for name, user := range usersStageOptions.Users {
+	for name, user := range users {
 		if user.Key != nil {
 			sshdir := filepath.Join(varhome, name, ".ssh")
 			cmds = append(cmds, fmt.Sprintf("mkdir -p %s", sshdir))
