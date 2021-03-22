@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"path/filepath"
 	"sort"
 
 	"github.com/osbuild/osbuild-composer/internal/disk"
@@ -384,6 +385,9 @@ func (t *imageType) pipeline(c *blueprint.Customizations, options distro.ImageOp
 			return nil, err
 		}
 		p.AddStage(osbuild.NewUsersStage(options))
+		if t.rpmOstree {
+			p.AddStage(osbuild.NewFirstBootStage(t.usersFirstBootOptions(options.Users)))
+		}
 	}
 
 	if services := c.GetServices(); services != nil || t.enabledServices != nil || t.disabledServices != nil || t.defaultTarget != "" {
@@ -517,6 +521,27 @@ func (t *imageType) userStageOptions(users []blueprint.UserCustomization) (*osbu
 	}
 
 	return &options, nil
+}
+
+func (t *imageType) usersFirstBootOptions(users map[string]osbuild.UsersStageOptionsUser) *osbuild.FirstBootStageOptions {
+	cmds := make([]string, 0, 3*len(users)+1)
+	// workaround for creating authorized_keys file for user
+	varhome := filepath.Join("/var", "home")
+	for name, user := range users {
+		if user.Key != nil {
+			sshdir := filepath.Join(varhome, name, ".ssh")
+			cmds = append(cmds, fmt.Sprintf("mkdir -p %s", sshdir))
+			cmds = append(cmds, fmt.Sprintf("sh -c 'echo %q >> %q'", *user.Key, filepath.Join(sshdir, "authorized_keys")))
+			cmds = append(cmds, fmt.Sprintf("chown %s:%s -Rc %s", name, name, sshdir))
+		}
+	}
+	cmds = append(cmds, fmt.Sprintf("restorecon -rvF %s", varhome))
+	options := &osbuild.FirstBootStageOptions{
+		Commands:       cmds,
+		WaitForNetwork: false,
+	}
+
+	return options
 }
 
 func (t *imageType) groupStageOptions(groups []blueprint.GroupCustomization) *osbuild.GroupsStageOptions {
