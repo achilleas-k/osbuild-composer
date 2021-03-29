@@ -248,6 +248,26 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 	return nil
 }
 
+func (t *imageType) installerPipelines(options distro.ImageOptions, repos []rpmmd.RepoConfig, installerPackages []rpmmd.PackageSpec) ([]osbuild.Pipeline, error) {
+	kernelPkg := new(rpmmd.PackageSpec)
+	for _, pkg := range installerPackages {
+		if pkg.Name == "kernel" {
+			kernelPkg = &pkg
+			break
+		}
+	}
+	if kernelPkg == nil {
+		return nil, fmt.Errorf("kernel package not found in installer package set")
+	}
+	kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
+	pipelines := make([]osbuild.Pipeline, 0)
+	pipelines = append(pipelines, *t.anacondaTreePipeline(repos, installerPackages, options, kernelVer))
+	pipelines = append(pipelines, *t.bootISOTreePipeline(kernelVer))
+	pipelines = append(pipelines, *t.bootISOPipeline())
+	return pipelines, nil
+
+}
+
 func (t *imageType) pipelines(customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
 
 	if err := t.checkOptions(customizations, options); err != nil {
@@ -257,30 +277,21 @@ func (t *imageType) pipelines(customizations *blueprint.Customizations, options 
 	pipelines := make([]osbuild.Pipeline, 0)
 	pipelines = append(pipelines, *t.buildPipeline(repos, packageSetSpecs["build"]))
 	if t.bootISO {
-		kernelPkg := new(rpmmd.PackageSpec)
-		for _, pkg := range packageSetSpecs["installer"] {
-			if pkg.Name == "kernel" {
-				kernelPkg = &pkg
-				break
-			}
-		}
-		if kernelPkg == nil {
-			return nil, fmt.Errorf("kernel package not found in installer package set")
-		}
-		kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
-		pipelines = append(pipelines, *t.anacondaTreePipeline(repos, packageSetSpecs["installer"], options, kernelVer))
-		pipelines = append(pipelines, *t.bootISOTreePipeline(kernelVer))
-		pipelines = append(pipelines, *t.bootISOPipeline())
-	} else {
-		treePipeline, err := t.ostreeTreePipeline(repos, packageSetSpecs["packages"], customizations)
+		ips, err := t.installerPipelines(options, repos, packageSetSpecs["installer"])
 		if err != nil {
 			return nil, err
 		}
-		pipelines = append(pipelines, *treePipeline)
-		pipelines = append(pipelines, *t.ostreeCommitPipeline(options))
-		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
-		pipelines = append(pipelines, *t.containerPipeline())
+		return append(pipelines, ips...), nil
 	}
+
+	treePipeline, err := t.ostreeTreePipeline(repos, packageSetSpecs["packages"], customizations)
+	if err != nil {
+		return nil, err
+	}
+	pipelines = append(pipelines, *treePipeline)
+	pipelines = append(pipelines, *t.ostreeCommitPipeline(options))
+	pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
+	pipelines = append(pipelines, *t.containerPipeline())
 
 	return pipelines, nil
 }
