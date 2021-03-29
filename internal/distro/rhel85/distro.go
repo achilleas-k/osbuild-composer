@@ -257,14 +257,16 @@ func (t *imageType) pipelines(customizations *blueprint.Customizations, options 
 	pipelines := make([]osbuild.Pipeline, 0)
 	pipelines = append(pipelines, *t.buildPipeline(repos, packageSetSpecs["build"]))
 	if t.bootISO {
-		var kernelPkg rpmmd.PackageSpec
+		kernelPkg := new(rpmmd.PackageSpec)
 		for _, pkg := range packageSetSpecs["installer"] {
 			if pkg.Name == "kernel" {
-				kernelPkg = pkg
+				kernelPkg = &pkg
 				break
 			}
 		}
-		// TODO: panic if not found
+		if kernelPkg == nil {
+			return nil, fmt.Errorf("kernel package not found in installer package set")
+		}
 		kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
 		pipelines = append(pipelines, *t.anacondaTreePipeline(repos, packageSetSpecs["installer"], options, kernelVer))
 		pipelines = append(pipelines, *t.bootISOTreePipeline(kernelVer))
