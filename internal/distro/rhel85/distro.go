@@ -288,10 +288,14 @@ func (t *imageType) pipelines(customizations *blueprint.Customizations, options 
 	if err != nil {
 		return nil, err
 	}
+
 	pipelines = append(pipelines, *treePipeline)
 	pipelines = append(pipelines, *t.ostreeCommitPipeline(options))
-	pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
-	pipelines = append(pipelines, *t.containerPipeline())
+
+	if t.name == "edge-container" {
+		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
+		pipelines = append(pipelines, *t.containerPipeline())
+	}
 
 	return pipelines, nil
 }
