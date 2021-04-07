@@ -295,6 +295,8 @@ func (t *imageType) pipelines(customizations *blueprint.Customizations, options 
 	if t.name == "edge-container" {
 		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
 		pipelines = append(pipelines, *t.containerPipeline())
+	} else if t.name == "edge-commit" {
+		pipelines = append(pipelines, *t.commitTarPipeline())
 	}
 
 	return pipelines, nil
@@ -435,6 +437,20 @@ func (t *imageType) ostreeCommitPipeline(options distro.ImageOptions) *osbuild.P
 		},
 		&osbuild.OSTreeCommitStageInputs{Tree: commitStageInput}),
 	)
+	return p
+}
+
+func (t *imageType) commitTarPipeline() *osbuild.Pipeline {
+	options := osbuild.TarStageOptions{Filename: t.Filename()}
+	commitTree := new(osbuild.TarStageInput)
+	commitTree.Type = "org.osbuild.tree"
+	commitTree.Origin = "org.osbuild.pipeline"
+	commitTree.References = []string{"name:ostree-commit"}
+	tarStage := osbuild.NewTarStage(&options, &osbuild.TarStageInputs{Tree: commitTree})
+	p := new(osbuild.Pipeline)
+	p.Name = "commit-archive"
+	p.Build = "name:build"
+	p.AddStage(tarStage)
 	return p
 }
 
@@ -1014,7 +1030,7 @@ func New() distro.Distro {
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
-		exports:         []string{"ostree-commit"},
+		exports:         []string{"commit-archive"},
 	}
 	edgeOCIImgTypeX86_64 := imageType{
 		name:     "edge-container",
@@ -1061,7 +1077,7 @@ func New() distro.Distro {
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
-		exports:         []string{"ostree-commit"},
+		exports:         []string{"commit-archive"},
 	}
 	edgeOCIImgTypeAarch64 := imageType{
 		name:     "edge-container",
