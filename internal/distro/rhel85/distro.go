@@ -94,29 +94,19 @@ func (a *architecture) addImageTypes(imageTypes ...imageType) {
 	if a.imageTypes == nil {
 		a.imageTypes = map[string]distro.ImageType{}
 	}
-	for _, it := range imageTypes {
-		a.imageTypes[it.name] = &imageType{
-			arch:             a,
-			name:             it.name,
-			filename:         it.filename,
-			mimeType:         it.mimeType,
-			packageSets:      it.packageSets,
-			enabledServices:  it.enabledServices,
-			disabledServices: it.disabledServices,
-			defaultTarget:    it.defaultTarget,
-			kernelOptions:    it.kernelOptions,
-			bootable:         it.bootable,
-			bootISO:          it.bootISO,
-			rpmOstree:        it.rpmOstree,
-			defaultSize:      it.defaultSize,
-			exports:          it.exports,
-		}
+	for idx := range imageTypes {
+		it := imageTypes[idx]
+		it.arch = a
+		a.imageTypes[it.name] = &it
 	}
 }
 
 func (a *architecture) Distro() distro.Distro {
 	return a.distro
 }
+
+type pipelineFunc func(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) *osbuild.Pipeline
+type pipelinesFunc func(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error)
 
 type imageType struct {
 	arch             *architecture
@@ -131,6 +121,7 @@ type imageType struct {
 	rpmOstree        bool
 	defaultSize      uint64
 	exports          []string
+	pipelines        pipelinesFunc
 }
 
 func (t *imageType) Name() string {
@@ -204,9 +195,14 @@ func (t *imageType) Manifest(customizations *blueprint.Customizations,
 	packageSpecSets map[string][]rpmmd.PackageSpec,
 	seed int64) (distro.Manifest, error) {
 
+	if err := t.checkOptions(customizations, options); err != nil {
+		return distro.Manifest{}, err
+	}
+
 	source := rand.NewSource(seed)
 	rng := rand.New(source)
-	pipelines, err := t.pipelines(customizations, options, repos, packageSpecSets, rng)
+
+	pipelines, err := t.pipelines(t, customizations, options, repos, packageSpecSets, rng)
 	if err != nil {
 		return distro.Manifest{}, err
 	}
@@ -248,8 +244,11 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 	return nil
 }
 
-func (t *imageType) installerPipelines(options distro.ImageOptions, repos []rpmmd.RepoConfig, installerPackages []rpmmd.PackageSpec) ([]osbuild.Pipeline, error) {
+func edgeInstallerPipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+	pipelines := make([]osbuild.Pipeline, 0)
+	pipelines = append(pipelines, *buildPipeline(repos, packageSetSpecs["build"]))
 	kernelPkg := new(rpmmd.PackageSpec)
+	installerPackages := packageSetSpecs["installer"]
 	for _, pkg := range installerPackages {
 		if pkg.Name == "kernel" {
 			kernelPkg = &pkg
@@ -260,45 +259,43 @@ func (t *imageType) installerPipelines(options distro.ImageOptions, repos []rpmm
 		return nil, fmt.Errorf("kernel package not found in installer package set")
 	}
 	kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
-	pipelines := make([]osbuild.Pipeline, 0)
-	pipelines = append(pipelines, *t.anacondaTreePipeline(repos, installerPackages, options, kernelVer))
-	pipelines = append(pipelines, *t.bootISOTreePipeline(kernelVer))
-	pipelines = append(pipelines, *t.bootISOPipeline())
+	pipelines = append(pipelines, *anacondaTreePipeline(repos, installerPackages, options, kernelVer, t.Arch().Name()))
+	pipelines = append(pipelines, *bootISOTreePipeline(kernelVer, t.Arch().Name()))
+	pipelines = append(pipelines, *bootISOPipeline(t.Filename(), t.Arch().Name()))
 	return pipelines, nil
-
 }
 
-func (t *imageType) pipelines(customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
-
-	if err := t.checkOptions(customizations, options); err != nil {
-		return nil, err
-	}
-
+func edgeCorePipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec) ([]osbuild.Pipeline, error) {
 	pipelines := make([]osbuild.Pipeline, 0)
-	pipelines = append(pipelines, *t.buildPipeline(repos, packageSetSpecs["build"]))
-	if t.bootISO {
-		ips, err := t.installerPipelines(options, repos, packageSetSpecs["installer"])
-		if err != nil {
-			return nil, err
-		}
-		return append(pipelines, ips...), nil
-	}
+	pipelines = append(pipelines, *buildPipeline(repos, packageSetSpecs["build"]))
 
-	treePipeline, err := t.ostreeTreePipeline(repos, packageSetSpecs["packages"], customizations)
+	treePipeline, err := ostreeTreePipeline(t, repos, packageSetSpecs["packages"], customizations)
 	if err != nil {
 		return nil, err
 	}
 
 	pipelines = append(pipelines, *treePipeline)
-	pipelines = append(pipelines, *t.ostreeCommitPipeline(options))
+	pipelines = append(pipelines, *ostreeCommitPipeline(options))
 
-	if t.name == "edge-container" {
-		pipelines = append(pipelines, *t.containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
-		pipelines = append(pipelines, *t.containerPipeline())
-	} else if t.name == "edge-commit" {
-		pipelines = append(pipelines, *t.commitTarPipeline())
+	return pipelines, nil
+}
+
+func edgeCommitPipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+	pipelines, err := edgeCorePipelines(t, customizations, options, repos, packageSetSpecs)
+	if err != nil {
+		return nil, err
 	}
+	pipelines = append(pipelines, *commitTarPipeline(t.Filename()))
+	return pipelines, nil
+}
 
+func edgeContainerPipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+	pipelines, err := edgeCorePipelines(t, customizations, options, repos, packageSetSpecs)
+	if err != nil {
+		return nil, err
+	}
+	pipelines = append(pipelines, *containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
+	pipelines = append(pipelines, *containerPipeline(t))
 	return pipelines, nil
 }
 
@@ -335,20 +332,20 @@ func (t *imageType) sources(packages []rpmmd.PackageSpec, ostreeCommits []ostree
 	return sources
 }
 
-func (t *imageType) buildPipeline(repos []rpmmd.RepoConfig, buildPackageSpecs []rpmmd.PackageSpec) *osbuild.Pipeline {
+func buildPipeline(repos []rpmmd.RepoConfig, buildPackageSpecs []rpmmd.PackageSpec) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "build"
 	p.Runner = "org.osbuild.rhel85"
-	p.AddStage(osbuild.NewRPMStage(t.rpmStageOptions(repos), t.rpmStageInputs(buildPackageSpecs)))
-	p.AddStage(osbuild.NewSELinuxStage(t.selinuxStageOptions()))
+	p.AddStage(osbuild.NewRPMStage(rpmStageOptions(repos), rpmStageInputs(buildPackageSpecs)))
+	p.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	return p
 }
 
-func (t *imageType) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, c *blueprint.Customizations) (*osbuild.Pipeline, error) {
+func ostreeTreePipeline(t *imageType, repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, c *blueprint.Customizations) (*osbuild.Pipeline, error) {
 	p := new(osbuild.Pipeline)
 	p.Name = "ostree-tree"
 	p.Build = "name:build"
-	p.AddStage(osbuild.NewRPMStage(t.rpmStageOptions(repos), t.rpmStageInputs(packages)))
+	p.AddStage(osbuild.NewRPMStage(rpmStageOptions(repos), rpmStageInputs(packages)))
 	language, keyboard := c.GetPrimaryLocale()
 	if language != nil {
 		p.AddStage(osbuild.NewLocaleStage(&osbuild.LocaleStageOptions{Language: *language}))
@@ -374,28 +371,28 @@ func (t *imageType) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rpmm
 	}
 
 	if groups := c.GetGroups(); len(groups) > 0 {
-		p.AddStage(osbuild.NewGroupsStage(t.groupStageOptions(groups)))
+		p.AddStage(osbuild.NewGroupsStage(groupStageOptions(groups)))
 	}
 
 	if users := c.GetUsers(); len(users) > 0 {
-		options, err := t.userStageOptions(users)
+		options, err := userStageOptions(users)
 		if err != nil {
 			return nil, err
 		}
 		p.AddStage(osbuild.NewUsersStage(options))
-		p.AddStage(osbuild.NewFirstBootStage(t.usersFirstBootOptions(options)))
+		p.AddStage(osbuild.NewFirstBootStage(usersFirstBootOptions(options)))
 	}
 
 	if services := c.GetServices(); services != nil || t.enabledServices != nil || t.disabledServices != nil || t.defaultTarget != "" {
-		p.AddStage(osbuild.NewSystemdStage(t.systemdStageOptions(t.enabledServices, t.disabledServices, services, t.defaultTarget)))
+		p.AddStage(osbuild.NewSystemdStage(systemdStageOptions(t.enabledServices, t.disabledServices, services, t.defaultTarget)))
 	}
 
 	if firewall := c.GetFirewall(); firewall != nil {
-		p.AddStage(osbuild.NewFirewallStage(t.firewallStageOptions(firewall)))
+		p.AddStage(osbuild.NewFirewallStage(firewallStageOptions(firewall)))
 	}
 
 	if !t.bootISO {
-		p.AddStage(osbuild.NewSELinuxStage(t.selinuxStageOptions()))
+		p.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	}
 
 	// These are the current defaults for the sysconfig stage. This can be changed to be image type exclusive if different configs are needed.
@@ -418,7 +415,7 @@ func (t *imageType) ostreeTreePipeline(repos []rpmmd.RepoConfig, packages []rpmm
 	}))
 	return p, nil
 }
-func (t *imageType) ostreeCommitPipeline(options distro.ImageOptions) *osbuild.Pipeline {
+func ostreeCommitPipeline(options distro.ImageOptions) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "ostree-commit"
 	p.Build = "name:build"
@@ -440,8 +437,8 @@ func (t *imageType) ostreeCommitPipeline(options distro.ImageOptions) *osbuild.P
 	return p
 }
 
-func (t *imageType) commitTarPipeline() *osbuild.Pipeline {
-	options := osbuild.TarStageOptions{Filename: t.Filename()}
+func commitTarPipeline(filename string) *osbuild.Pipeline {
+	options := osbuild.TarStageOptions{Filename: filename}
 	commitTree := new(osbuild.TarStageInput)
 	commitTree.Type = "org.osbuild.tree"
 	commitTree.Origin = "org.osbuild.pipeline"
@@ -454,11 +451,11 @@ func (t *imageType) commitTarPipeline() *osbuild.Pipeline {
 	return p
 }
 
-func (t *imageType) containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, c *blueprint.Customizations) *osbuild.Pipeline {
+func containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, c *blueprint.Customizations) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "container-tree"
 	p.Build = "name:build"
-	p.AddStage(osbuild.NewRPMStage(t.rpmStageOptions(repos), t.rpmStageInputs(packages)))
+	p.AddStage(osbuild.NewRPMStage(rpmStageOptions(repos), rpmStageInputs(packages)))
 	language, _ := c.GetPrimaryLocale()
 	if language != nil {
 		p.AddStage(osbuild.NewLocaleStage(&osbuild.LocaleStageOptions{Language: *language}))
@@ -469,12 +466,12 @@ func (t *imageType) containerTreePipeline(repos []rpmmd.RepoConfig, packages []r
 
 	p.AddStage(osbuild.NewOSTreePullStage(
 		&osbuild.OSTreePullStageOptions{Repo: "/var/www/html/repo"},
-		t.ostreePullStageInputs("org.osbuild.pipeline", "name:ostree-commit", options.OSTree.Ref),
+		ostreePullStageInputs("org.osbuild.pipeline", "name:ostree-commit", options.OSTree.Ref),
 	))
 	return p
 }
 
-func (t *imageType) containerPipeline() *osbuild.Pipeline {
+func containerPipeline(t *imageType) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "container"
 	p.Build = "name:build"
@@ -495,18 +492,18 @@ func (t *imageType) containerPipeline() *osbuild.Pipeline {
 	return p
 }
 
-func (t *imageType) anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, kernelVer string) *osbuild.Pipeline {
+func anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, kernelVer string, arch string) *osbuild.Pipeline {
 	ostreeRepoPath := "/ostree/repo"
 	p := new(osbuild.Pipeline)
 	p.Name = "anaconda-tree"
 	p.Build = "name:build"
-	p.AddStage(osbuild.NewRPMStage(t.rpmStageOptions(repos), t.rpmStageInputs(packages)))
+	p.AddStage(osbuild.NewRPMStage(rpmStageOptions(repos), rpmStageInputs(packages)))
 	p.AddStage(osbuild.NewOSTreeInitStage(&osbuild.OSTreeInitStageOptions{Path: ostreeRepoPath}))
 	p.AddStage(osbuild.NewOSTreePullStage(
 		&osbuild.OSTreePullStageOptions{Repo: ostreeRepoPath},
-		t.ostreePullStageInputs("org.osbuild.source", options.OSTree.Parent, options.OSTree.Ref),
+		ostreePullStageInputs("org.osbuild.source", options.OSTree.Parent, options.OSTree.Ref),
 	))
-	p.AddStage(osbuild.NewBuildstampStage(t.buildStampStageOptions()))
+	p.AddStage(osbuild.NewBuildstampStage(buildStampStageOptions(arch)))
 	p.AddStage(osbuild.NewLocaleStage(&osbuild.LocaleStageOptions{Language: "en_US.UTF-8"}))
 
 	rootPassword := ""
@@ -534,36 +531,36 @@ func (t *imageType) anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []rp
 	}
 
 	p.AddStage(osbuild.NewUsersStage(usersStageOptions))
-	p.AddStage(osbuild.NewAnacondaStage(t.anacondaStageOptions()))
-	p.AddStage(osbuild.NewLoraxScriptStage(t.loraxScriptStageOptions()))
-	p.AddStage(osbuild.NewDracutStage(t.dracutStageOptions(kernelVer)))
-	p.AddStage(osbuild.NewKickstartStage(t.kickstartStageOptions(fmt.Sprintf("file://%s", ostreeRepoPath), options.OSTree.Ref)))
+	p.AddStage(osbuild.NewAnacondaStage(anacondaStageOptions()))
+	p.AddStage(osbuild.NewLoraxScriptStage(loraxScriptStageOptions(arch)))
+	p.AddStage(osbuild.NewDracutStage(dracutStageOptions(kernelVer)))
+	p.AddStage(osbuild.NewKickstartStage(kickstartStageOptions(fmt.Sprintf("file://%s", ostreeRepoPath), options.OSTree.Ref)))
 
 	return p
 }
 
-func (t *imageType) bootISOTreePipeline(kernelVer string) *osbuild.Pipeline {
+func bootISOTreePipeline(kernelVer string, arch string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "bootiso-tree"
 	p.Build = "name:build"
 
-	p.AddStage(osbuild.NewBootISOMonoStage(t.bootISOMonoStageOptions(kernelVer), t.bootISOMonoStageInputs()))
-	p.AddStage(osbuild.NewDiscinfoStage(t.discinfoStageOptions()))
+	p.AddStage(osbuild.NewBootISOMonoStage(bootISOMonoStageOptions(kernelVer, arch), bootISOMonoStageInputs()))
+	p.AddStage(osbuild.NewDiscinfoStage(discinfoStageOptions(arch)))
 
 	return p
 }
-func (t *imageType) bootISOPipeline() *osbuild.Pipeline {
+func bootISOPipeline(filename string, arch string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "bootiso"
 	p.Build = "name:build"
 
-	p.AddStage(osbuild.NewXorrisofsStage(t.xorrisofsStageOptions(), t.xorrisofsStageInputs()))
-	p.AddStage(osbuild.NewImplantisomd5Stage(&osbuild.Implantisomd5StageOptions{Filename: t.Filename()}))
+	p.AddStage(osbuild.NewXorrisofsStage(xorrisofsStageOptions(filename, arch), xorrisofsStageInputs()))
+	p.AddStage(osbuild.NewImplantisomd5Stage(&osbuild.Implantisomd5StageOptions{Filename: filename}))
 
 	return p
 }
 
-func (t *imageType) rpmStageInputs(specs []rpmmd.PackageSpec) *osbuild.RPMStageInputs {
+func rpmStageInputs(specs []rpmmd.PackageSpec) *osbuild.RPMStageInputs {
 	stageInput := new(osbuild.RPMStageInput)
 	stageInput.Type = "org.osbuild.files"
 	stageInput.Origin = "org.osbuild.source"
@@ -579,7 +576,7 @@ func pkgRefs(specs []rpmmd.PackageSpec) osbuild.RPMStageReferences {
 	return refs
 }
 
-func (t *imageType) ostreePullStageInputs(origin, source, commitRef string) *osbuild.OSTreePullStageInputs {
+func ostreePullStageInputs(origin, source, commitRef string) *osbuild.OSTreePullStageInputs {
 	pullStageInput := new(osbuild.OSTreePullStageInput)
 	pullStageInput.Type = "org.osbuild.ostree"
 	pullStageInput.Origin = origin
@@ -590,7 +587,7 @@ func (t *imageType) ostreePullStageInputs(origin, source, commitRef string) *osb
 	return &osbuild.OSTreePullStageInputs{Commits: pullStageInput}
 }
 
-func (t *imageType) rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStageOptions {
+func rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStageOptions {
 	var gpgKeys []string
 	for _, repo := range repos {
 		if repo.GPGKey == "" {
@@ -608,12 +605,12 @@ func (t *imageType) rpmStageOptions(repos []rpmmd.RepoConfig) *osbuild.RPMStageO
 	}
 }
 
-func (t *imageType) selinuxStageOptions() *osbuild.SELinuxStageOptions {
+func selinuxStageOptions(bootISO bool) *osbuild.SELinuxStageOptions {
 
 	options := &osbuild.SELinuxStageOptions{
 		FileContexts: "etc/selinux/targeted/contexts/files/file_contexts",
 	}
-	if t.bootISO {
+	if bootISO {
 		options.Labels = map[string]string{
 			"/usr/bin/cp":  "system_u:object_r:install_exec_t:s0",
 			"/usr/bin/tar": "system_u:object_r:install_exec_t:s0",
@@ -622,7 +619,7 @@ func (t *imageType) selinuxStageOptions() *osbuild.SELinuxStageOptions {
 	return options
 }
 
-func (t *imageType) userStageOptions(users []blueprint.UserCustomization) (*osbuild.UsersStageOptions, error) {
+func userStageOptions(users []blueprint.UserCustomization) (*osbuild.UsersStageOptions, error) {
 	options := osbuild.UsersStageOptions{
 		Users: make(map[string]osbuild.UsersStageOptionsUser),
 	}
@@ -655,7 +652,7 @@ func (t *imageType) userStageOptions(users []blueprint.UserCustomization) (*osbu
 	return &options, nil
 }
 
-func (t *imageType) usersFirstBootOptions(usersStageOptions *osbuild.UsersStageOptions) *osbuild.FirstBootStageOptions {
+func usersFirstBootOptions(usersStageOptions *osbuild.UsersStageOptions) *osbuild.FirstBootStageOptions {
 	cmds := make([]string, 0, 3*len(usersStageOptions.Users)+1)
 	// workaround for creating authorized_keys file for user
 	varhome := filepath.Join("/var", "home")
@@ -676,7 +673,7 @@ func (t *imageType) usersFirstBootOptions(usersStageOptions *osbuild.UsersStageO
 	return options
 }
 
-func (t *imageType) groupStageOptions(groups []blueprint.GroupCustomization) *osbuild.GroupsStageOptions {
+func groupStageOptions(groups []blueprint.GroupCustomization) *osbuild.GroupsStageOptions {
 	options := osbuild.GroupsStageOptions{
 		Groups: map[string]osbuild.GroupsStageOptionsGroup{},
 	}
@@ -693,7 +690,7 @@ func (t *imageType) groupStageOptions(groups []blueprint.GroupCustomization) *os
 	return &options
 }
 
-func (t *imageType) firewallStageOptions(firewall *blueprint.FirewallCustomization) *osbuild.FirewallStageOptions {
+func firewallStageOptions(firewall *blueprint.FirewallCustomization) *osbuild.FirewallStageOptions {
 	options := osbuild.FirewallStageOptions{
 		Ports: firewall.Ports,
 	}
@@ -706,7 +703,7 @@ func (t *imageType) firewallStageOptions(firewall *blueprint.FirewallCustomizati
 	return &options
 }
 
-func (t *imageType) systemdStageOptions(enabledServices, disabledServices []string, s *blueprint.ServicesCustomization, target string) *osbuild.SystemdStageOptions {
+func systemdStageOptions(enabledServices, disabledServices []string, s *blueprint.ServicesCustomization, target string) *osbuild.SystemdStageOptions {
 	if s != nil {
 		enabledServices = append(enabledServices, s.Enabled...)
 		disabledServices = append(disabledServices, s.Disabled...)
@@ -718,9 +715,9 @@ func (t *imageType) systemdStageOptions(enabledServices, disabledServices []stri
 	}
 }
 
-func (t *imageType) buildStampStageOptions() *osbuild.BuildstampStageOptions {
+func buildStampStageOptions(arch string) *osbuild.BuildstampStageOptions {
 	return &osbuild.BuildstampStageOptions{
-		Arch:    t.Arch().Name(),
+		Arch:    arch,
 		Product: "Red Hat Enterprise Linux",
 		Version: osVersion,
 		Variant: "edge",
@@ -728,7 +725,7 @@ func (t *imageType) buildStampStageOptions() *osbuild.BuildstampStageOptions {
 	}
 }
 
-func (t *imageType) anacondaStageOptions() *osbuild.AnacondaStageOptions {
+func anacondaStageOptions() *osbuild.AnacondaStageOptions {
 	return &osbuild.AnacondaStageOptions{
 		KickstartModules: []string{
 			"org.fedoraproject.Anaconda.Modules.Network",
@@ -738,14 +735,14 @@ func (t *imageType) anacondaStageOptions() *osbuild.AnacondaStageOptions {
 	}
 }
 
-func (t *imageType) loraxScriptStageOptions() *osbuild.LoraxScriptStageOptions {
+func loraxScriptStageOptions(arch string) *osbuild.LoraxScriptStageOptions {
 	return &osbuild.LoraxScriptStageOptions{
 		Path:     "99-generic/runtime-postinstall.tmpl",
-		BaseArch: t.Arch().Name(),
+		BaseArch: arch,
 	}
 }
 
-func (t *imageType) dracutStageOptions(kernelVer string) *osbuild.DracutStageOptions {
+func dracutStageOptions(kernelVer string) *osbuild.DracutStageOptions {
 	kernel := []string{kernelVer}
 	modules := []string{
 		"bash",
@@ -805,7 +802,7 @@ func (t *imageType) dracutStageOptions(kernelVer string) *osbuild.DracutStageOpt
 	}
 }
 
-func (t *imageType) kickstartStageOptions(ostreeURL, ostreeRef string) *osbuild.KickstartStageOptions {
+func kickstartStageOptions(ostreeURL, ostreeRef string) *osbuild.KickstartStageOptions {
 	return &osbuild.KickstartStageOptions{
 		Path: "/usr/share/anaconda/interactive-defaults.ks",
 		OSTree: osbuild.OSTreeOptions{
@@ -817,9 +814,9 @@ func (t *imageType) kickstartStageOptions(ostreeURL, ostreeRef string) *osbuild.
 	}
 }
 
-func (t *imageType) bootISOMonoStageOptions(kernelVer string) *osbuild.BootISOMonoStageOptions {
+func bootISOMonoStageOptions(kernelVer string, arch string) *osbuild.BootISOMonoStageOptions {
 	comprOptions := new(osbuild.FSCompressionOptions)
-	if bcj := osbuild.BCJOption(t.arch.Name()); bcj != "" {
+	if bcj := osbuild.BCJOption(arch); bcj != "" {
 		comprOptions.BCJ = bcj
 	}
 	return &osbuild.BootISOMonoStageOptions{
@@ -827,7 +824,7 @@ func (t *imageType) bootISOMonoStageOptions(kernelVer string) *osbuild.BootISOMo
 			Name:    "Red Hat Enterprise Linux",
 			Version: osVersion,
 		},
-		ISOLabel: fmt.Sprintf("RHEL-8-5-0-BaseOS-%s", t.Arch().Name()),
+		ISOLabel: fmt.Sprintf("RHEL-8-5-0-BaseOS-%s", arch),
 		Kernel:   kernelVer,
 		EFI: osbuild.EFI{
 			Architectures: []string{
@@ -851,7 +848,7 @@ func (t *imageType) bootISOMonoStageOptions(kernelVer string) *osbuild.BootISOMo
 	}
 }
 
-func (t *imageType) bootISOMonoStageInputs() *osbuild.BootISOMonoStageInputs {
+func bootISOMonoStageInputs() *osbuild.BootISOMonoStageInputs {
 	rootfsInput := new(osbuild.BootISOMonoStageInput)
 	rootfsInput.Type = "org.osbuild.tree"
 	rootfsInput.Origin = "org.osbuild.pipeline"
@@ -861,17 +858,17 @@ func (t *imageType) bootISOMonoStageInputs() *osbuild.BootISOMonoStageInputs {
 	}
 }
 
-func (t *imageType) discinfoStageOptions() *osbuild.DiscinfoStageOptions {
+func discinfoStageOptions(arch string) *osbuild.DiscinfoStageOptions {
 	return &osbuild.DiscinfoStageOptions{
-		BaseArch: t.Arch().Name(),
+		BaseArch: arch,
 		Release:  "202010217.n.0",
 	}
 }
 
-func (t *imageType) xorrisofsStageOptions() *osbuild.XorrisofsStageOptions {
+func xorrisofsStageOptions(filename string, arch string) *osbuild.XorrisofsStageOptions {
 	return &osbuild.XorrisofsStageOptions{
-		Filename: t.Filename(),
-		VolID:    fmt.Sprintf("RHEL-8-5-0-BaseOS-%s", t.Arch().Name()),
+		Filename: filename,
+		VolID:    fmt.Sprintf("RHEL-8-5-0-BaseOS-%s", arch),
 		SysID:    "LINUX",
 		Boot: osbuild.XorrisofsBoot{
 			Image:   "isolinux/isolinux.bin",
@@ -882,7 +879,7 @@ func (t *imageType) xorrisofsStageOptions() *osbuild.XorrisofsStageOptions {
 	}
 }
 
-func (t *imageType) xorrisofsStageInputs() *osbuild.XorrisofsStageInputs {
+func xorrisofsStageInputs() *osbuild.XorrisofsStageInputs {
 	input := new(osbuild.XorrisofsStageInput)
 	input.Type = "org.osbuild.tree"
 	input.Origin = "org.osbuild.pipeline"
@@ -1030,8 +1027,10 @@ func New() distro.Distro {
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
+		pipelines:       edgeCommitPipelines,
 		exports:         []string{"commit-archive"},
 	}
+
 	edgeOCIImgTypeX86_64 := imageType{
 		name:     "edge-container",
 		filename: "container.tar",
@@ -1044,6 +1043,7 @@ func New() distro.Distro {
 		enabledServices: edgeServices,
 		rpmOstree:       true,
 		bootISO:         false,
+		pipelines:       edgeContainerPipelines,
 		exports:         []string{"container"},
 	}
 	edgeInstallerImgTypeX86_64 := imageType{
@@ -1058,6 +1058,7 @@ func New() distro.Distro {
 		enabledServices: edgeServices,
 		rpmOstree:       true,
 		bootISO:         true,
+		pipelines:       edgeInstallerPipelines,
 		exports:         []string{"bootiso"},
 	}
 
@@ -1077,6 +1078,7 @@ func New() distro.Distro {
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
+		pipelines:       edgeCommitPipelines,
 		exports:         []string{"commit-archive"},
 	}
 	edgeOCIImgTypeAarch64 := imageType{
@@ -1090,6 +1092,7 @@ func New() distro.Distro {
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
+		pipelines:       edgeContainerPipelines,
 		exports:         []string{"container"},
 	}
 	edgeInstallerImgTypeAarch64 := imageType{
@@ -1104,6 +1107,7 @@ func New() distro.Distro {
 		enabledServices: edgeServices,
 		rpmOstree:       true,
 		bootISO:         true,
+		pipelines:       edgeInstallerPipelines,
 		exports:         []string{"bootiso"},
 	}
 	aarch64 := architecture{
