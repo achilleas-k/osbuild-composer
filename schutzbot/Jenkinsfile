@@ -170,6 +170,20 @@ pipeline {
                         }
                     }
                 }
+                stage('EL8.5') {
+                    agent { label "rhel85cloudbase && x86_64 && psi" }
+                    environment {
+                        AWS_CREDS = credentials('aws-credentials-osbuildci')
+                        AWS_IMAGE_TEST_CREDS = credentials('aws-credentials-osbuild-image-test')
+                        RHEL85_NIGHTLY_REPO = credentials('rhel85-nightly-repo')
+                    }
+                    steps {
+                        sh "schutzbot/ci_details.sh"
+                        retry(3) {
+                            sh "schutzbot/mockbuild.sh"
+                        }
+                    }
+                }
                 stage('CS8') {
                     agent { label "cs8cloudbase && x86_64 && aws" }
                     environment {
@@ -590,6 +604,28 @@ pipeline {
                     post {
                         always {
                             preserve_logs('rhel84-ostree-ng')
+                        }
+                    }
+                }
+                stage('EL8.5 OSTree') {
+                    agent { label "rhel85cloudbase && psi && x86_64" }
+                    steps {
+                        run_tests('ostree')
+                    }
+                    post {
+                        always {
+                            preserve_logs('rhel85-ostree')
+                        }
+                    }
+                }
+                stage('EL8.5 New OSTree') {
+                    agent { label "rhel85cloudbase && psi && x86_64" }
+                    steps {
+                        run_tests('ostree-ng')
+                    }
+                    post {
+                        always {
+                            preserve_logs('rhel85-ostree-ng')
                         }
                     }
                 }
