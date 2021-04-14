@@ -314,18 +314,31 @@ func New() distro.Distro {
 		},
 		Exclude: []string{"rng-tools"},
 	}
-	edgeBuildPkgSet := rpmmd.PackageSet{
+	baseBuildPkgSet := rpmmd.PackageSet{
 		Include: []string{
-			"dnf", "dosfstools", "e2fsprogs", "efibootmgr", "genisoimage",
-			"grub2-efi-ia32-cdboot", "grub2-efi-x64", "grub2-efi-x64-cdboot",
-			"grub2-pc", "grub2-pc-modules", "grub2-tools", "grub2-tools-efi",
-			"grub2-tools-extra", "grub2-tools-minimal", "isomd5sum",
-			"lorax-templates-generic", "lorax-templates-rhel",
-			"policycoreutils", "python36", "python3-iniparse", "qemu-img",
-			"rpm-ostree", "selinux-policy-targeted", "shim-ia32", "shim-x64",
-			"squashfs-tools", "syslinux", "syslinux-nonlinux", "systemd",
-			"tar", "xfsprogs", "xorriso", "xz",
+			"dnf", "dosfstools", "e2fsprogs", "glibc", "policycoreutils",
+			"python36", "python3-iniparse", "qemu-img",
+			"selinux-policy-targeted", "systemd", "tar", "xfsprogs", "xz",
 		},
+	}
+	x86bootPkgSet := rpmmd.PackageSet{
+		Include: []string{
+			"dracut-config-generic",
+			"grub2-pc",
+			"grub2-efi-x64",
+			"shim-x64",
+		},
+		Exclude: nil,
+	}
+	edgeBuildPkgSet := rpmmd.PackageSet{
+		Include: append(baseBuildPkgSet.Include,
+			"efibootmgr", "genisoimage", "grub2-efi-ia32-cdboot",
+			"grub2-efi-x64", "grub2-efi-x64-cdboot", "grub2-pc",
+			"grub2-pc-modules", "grub2-tools", "grub2-tools-efi",
+			"grub2-tools-extra", "grub2-tools-minimal", "isomd5sum",
+			"lorax-templates-generic", "lorax-templates-rhel", "rpm-ostree",
+			"shim-ia32", "shim-x64", "squashfs-tools", "syslinux",
+			"syslinux-nonlinux", "xorriso"),
 		Exclude: nil,
 	}
 	installerPkgSet := rpmmd.PackageSet{
@@ -454,15 +467,17 @@ func New() distro.Distro {
 		filename: "installer.iso",
 		mimeType: "application/x-iso9660-image",
 		packageSets: map[string]rpmmd.PackageSet{
-			"build":     {},
-			"packages":  {},
+			"build": edgeBuildPkgSet,
+			"packages": {
+				Include: append(x86bootPkgSet.Include, "lvm2", "policycoreutils", "selinux-policy-targeted"),
+				Exclude: []string{"rng-tools"},
+			},
 			"installer": installerPkgSet,
 		},
-		enabledServices: edgeServices,
-		rpmOstree:       false,
-		bootISO:         true,
-		pipelines:       tarInstallerPipelines,
-		exports:         []string{"bootiso"},
+		rpmOstree: false,
+		bootISO:   true,
+		pipelines: tarInstallerPipelines,
+		exports:   []string{"bootiso"},
 	}
 
 	x86_64 := architecture{
