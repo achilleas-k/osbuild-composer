@@ -258,7 +258,7 @@ func (t *imageType) sources(packages []rpmmd.PackageSpec, ostreeCommits []ostree
 
 // checkOptions checks the validity and compatibility of options and customizations for the image type.
 func (t *imageType) checkOptions(customizations *blueprint.Customizations, options distro.ImageOptions) error {
-	if t.bootISO {
+	if t.bootISO && t.rpmOstree {
 		if options.OSTree.Parent == "" {
 			return fmt.Errorf("boot ISO image type %q requires specifying a URL from which to retrieve the OSTree commit", t.name)
 		}
@@ -328,7 +328,7 @@ func New() distro.Distro {
 		},
 		Exclude: nil,
 	}
-	edgeInstallerPkgSet := rpmmd.PackageSet{
+	installerPkgSet := rpmmd.PackageSet{
 		Include: []string{
 			"aajohan-comfortaa-fonts", "abattis-cantarell-fonts",
 			"alsa-firmware", "alsa-tools-firmware", "anaconda",
@@ -440,7 +440,7 @@ func New() distro.Distro {
 		packageSets: map[string]rpmmd.PackageSet{
 			"build":     edgeBuildPkgSet,
 			"packages":  edgeCommitX86PkgSet,
-			"installer": edgeInstallerPkgSet,
+			"installer": installerPkgSet,
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
@@ -449,11 +449,27 @@ func New() distro.Distro {
 		exports:         []string{"bootiso"},
 	}
 
+	tarInstallerImgTypeX86_64 := imageType{
+		name:     "tar-installer",
+		filename: "installer.iso",
+		mimeType: "application/x-iso9660-image",
+		packageSets: map[string]rpmmd.PackageSet{
+			"build":     {},
+			"packages":  {},
+			"installer": installerPkgSet,
+		},
+		enabledServices: edgeServices,
+		rpmOstree:       false,
+		bootISO:         true,
+		pipelines:       tarInstallerPipelines,
+		exports:         []string{"bootiso"},
+	}
+
 	x86_64 := architecture{
 		name:   "x86_64",
 		distro: rd,
 	}
-	x86_64.addImageTypes(edgeCommitImgTypeX86_64, edgeInstallerImgTypeX86_64, edgeOCIImgTypeX86_64)
+	x86_64.addImageTypes(edgeCommitImgTypeX86_64, edgeInstallerImgTypeX86_64, edgeOCIImgTypeX86_64, tarInstallerImgTypeX86_64)
 
 	edgeCommitImgTypeAarch64 := imageType{
 		name:     "edge-commit",
@@ -489,7 +505,7 @@ func New() distro.Distro {
 		packageSets: map[string]rpmmd.PackageSet{
 			"build":     edgeBuildPkgSet,
 			"packages":  edgeCommitX86PkgSet,
-			"installer": edgeInstallerPkgSet,
+			"installer": installerPkgSet,
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,
