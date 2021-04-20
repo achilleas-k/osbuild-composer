@@ -34,6 +34,11 @@ case "${ID}-${VERSION_ID}" in
         OSTREE_REF="rhel/8/${ARCH}/edge"
         OS_VARIANT="rhel8-unknown"
         BOOT_LOCATION="http://download.devel.redhat.com/nightly/rhel-8/RHEL-8/latest-RHEL-8.4/compose/BaseOS/x86_64/os/";;
+    "rhel-8.5")
+        IMAGE_TYPE=edge-commit
+        OSTREE_REF="rhel/8/${ARCH}/edge"
+        OS_VARIANT="rhel8-unknown"
+        BOOT_LOCATION="http://download.devel.redhat.com/nightly/rhel-8/RHEL-8/latest-RHEL-8.5/compose/BaseOS/x86_64/os/";;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
         exit 1;;
