@@ -78,6 +78,25 @@ COMPOSE_INFO=${TEMPDIR}/compose-info-${IMAGE_KEY}.json
 SSH_OPTIONS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=5)
 SSH_KEY=${OSBUILD_COMPOSER_TEST_DATA}keyring/id_rsa
 
+case "${ID}-${VERSION_ID}" in
+    "rhel-8.4")
+        CONTAINER_TYPE=rhel-edge-container
+        CONTAINER_FILENAME=rhel84-container.tar
+        INSTALLER_TYPE=rhel-edge-installer
+        INSTALLER_FILENAME=rhel84-boot.iso
+        ;;
+    "rhel-8.5")
+        CONTAINER_TYPE=edge-container
+        CONTAINER_FILENAME=container.tar
+        INSTALLER_TYPE=edge-installer
+        INSTALLER_FILENAME=installer.iso
+        ;;
+    *)
+        echo "unsupported distro: ${ID}-${VERSION_ID}"
+        exit 1;;
+esac
+
+
 # Get the compose log.
 get_compose_log () {
     COMPOSE_ID=$1
@@ -261,7 +280,7 @@ sudo composer-cli blueprints push "$BLUEPRINT_FILE"
 sudo composer-cli blueprints depsolve container
 
 # Build container image.
-build_image container rhel-edge-container
+build_image container "${CONTAINER_TYPE}"
 
 # Download the image
 greenprint "📥 Downloading the container image"
@@ -276,7 +295,7 @@ sudo podman rmi -f -a
 
 # Deal with stage repo image
 greenprint "🗜 Extracting image"
-IMAGE_FILENAME="${COMPOSE_ID}-rhel84-container.tar"
+IMAGE_FILENAME="${COMPOSE_ID}-${CONTAINER_FILENAME}"
 sudo podman pull "oci-archive:${IMAGE_FILENAME}"
 sudo podman images
 # Clear image file
@@ -326,12 +345,12 @@ sudo composer-cli blueprints depsolve installer
 
 # Build installer image.
 # Test --url arg following by URL with tailling slash for bz#1942029
-build_image installer rhel-edge-installer "${PROD_REPO_URL}/"
+build_image installer "${INSTALLER_TYPE}" "${PROD_REPO_URL}/"
 
 # Download the image
 greenprint "📥 Downloading the installer image"
 sudo composer-cli compose image "${COMPOSE_ID}" > /dev/null
-ISO_FILENAME="${COMPOSE_ID}-rhel84-boot.iso"
+ISO_FILENAME="${COMPOSE_ID}-${INSTALLER_FILENAME}"
 sudo mv "${ISO_FILENAME}" /var/lib/libvirt/images
 
 # Clean compose and blueprints.
@@ -477,7 +496,7 @@ sudo composer-cli blueprints push "$BLUEPRINT_FILE"
 sudo composer-cli blueprints depsolve upgrade
 
 # Build upgrade image.
-build_image upgrade rhel-edge-container "$PROD_REPO_URL"
+build_image upgrade  "${CONTAINER_TYPE}" "$PROD_REPO_URL"
 
 # Download the image
 greenprint "📥 Downloading the upgrade image"
@@ -492,7 +511,7 @@ sudo podman rmi -f -a
 
 # Deal with stage repo container
 greenprint "🗜 Extracting image"
-IMAGE_FILENAME="${COMPOSE_ID}-rhel84-container.tar"
+IMAGE_FILENAME="${COMPOSE_ID}-${CONTAINER_FILENAME}"
 sudo podman pull "oci-archive:${IMAGE_FILENAME}"
 sudo podman images
 # Clear image file
