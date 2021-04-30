@@ -438,7 +438,7 @@ func New() distro.Distro {
 		packageSets: map[string]rpmmd.PackageSet{
 			"build":     edgeBuildPkgSet,
 			"packages":  edgeCommitX86PkgSet,
-			"container": {Include: []string{"httpd"}},
+			"container": {Include: []string{"nginx"}},
 		},
 		enabledServices: edgeServices,
 		rpmOstree:       true,

@@ -91,8 +91,9 @@ func edgeContainerPipelines(t *imageType, customizations *blueprint.Customizatio
 	if err != nil {
 		return nil, err
 	}
-	pipelines = append(pipelines, *containerTreePipeline(repos, packageSetSpecs["container"], options, customizations))
-	pipelines = append(pipelines, *containerPipeline(t))
+	nginxConfigPath := "/nginx.conf"
+	pipelines = append(pipelines, *containerTreePipeline(repos, packageSetSpecs["container"], options, customizations, nginxConfigPath))
+	pipelines = append(pipelines, *containerPipeline(t, nginxConfigPath))
 	return pipelines, nil
 }
 
@@ -251,7 +252,7 @@ func commitTarPipeline(filename string) *osbuild.Pipeline {
 	return p
 }
 
-func containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, c *blueprint.Customizations) *osbuild.Pipeline {
+func containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec, options distro.ImageOptions, c *blueprint.Customizations, nginxConfigPath string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "container-tree"
 	p.Build = "name:build"
@@ -265,13 +266,31 @@ func containerTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpe
 	p.AddStage(osbuild.NewOSTreeInitStage(&osbuild.OSTreeInitStageOptions{Path: "/var/www/html/repo"}))
 
 	p.AddStage(osbuild.NewOSTreePullStage(
-		&osbuild.OSTreePullStageOptions{Repo: "/var/www/html/repo"},
+		&osbuild.OSTreePullStageOptions{Repo: "/usr/share/nginx/html/repo"},
 		ostreePullStageInputs("org.osbuild.pipeline", "name:ostree-commit", options.OSTree.Ref),
 	))
+
+	p.AddStage(osbuild.NewChmodStage(
+		&osbuild.ChmodStageOptions{"/var/log/nginx": {Mode: "o+w", Recursive: true}},
+	))
+
+	daemon := new(bool)
+	*daemon = false
+	cfg := &osbuild.NginxConfig{
+		Listen: "80",
+		Root:   "/usr/share/nginx/html",
+		PID:    "/tmp/nginx.pid",
+		Daemon: daemon,
+	}
+	nginxCfg := &osbuild.NginxConfigStageOptions{
+		Path:   nginxConfigPath,
+		Config: cfg,
+	}
+	p.AddStage(osbuild.NewNginxConfigStage(nginxCfg))
 	return p
 }
 
-func containerPipeline(t *imageType) *osbuild.Pipeline {
+func containerPipeline(t *imageType, nginxConfigPath string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "container"
 	p.Build = "name:build"
@@ -279,7 +298,7 @@ func containerPipeline(t *imageType) *osbuild.Pipeline {
 		Architecture: t.arch.Name(),
 		Filename:     t.Filename(),
 		Config: &osbuild.OCIArchiveConfig{
-			Cmd:          []string{"httpd", "-D", "FOREGROUND"},
+			Cmd:          []string{"nginx", "-c", nginxConfigPath},
 			ExposedPorts: []string{"80"},
 		},
 	}
