@@ -350,3 +350,139 @@ func grub2StageOptions(pt *disk.PartitionTable, kernelOptions string, kernel *bl
 
 	return &stageOptions
 }
+
+// sfdiskStageOptions creates the options and devices properties for an
+// org.osbuild.sfdisk stage based on a partition table description
+func sfdiskStageOptions(pt *disk.PartitionTable, device *osbuild.Device) (*osbuild.SfdiskStageOptions, *osbuild.SfdiskStageDevices) {
+	stageDevices := &osbuild.SfdiskStageDevices{
+		Device: *device,
+	}
+
+	partitions := make([]osbuild.Partition, len(pt.Partitions))
+	for idx, p := range pt.Partitions {
+		partitions[idx] = osbuild.Partition{
+			Bootable: p.Bootable,
+			Size:     p.Size,
+			Start:    p.Start,
+			Type:     p.Type,
+			UUID:     p.UUID,
+		}
+	}
+	stageOptions := &osbuild.SfdiskStageOptions{
+		Label:      pt.Type,
+		UUID:       pt.UUID,
+		Partitions: partitions,
+	}
+
+	return stageOptions, stageDevices
+}
+
+// copyFSTreeOptions creates the options, inputs, devices, and mounts properties
+// for an org.osbuild.copy stage for a given source tree using a partition
+// table description to define the mounts
+func copyFSTreeOptions(inputName, inputPipeline string, pt *disk.PartitionTable, device *osbuild.Device) (
+	*osbuild.CopyStageOptions,
+	*osbuild.CopyStageDevices,
+	*osbuild.CopyStageMounts,
+) {
+	// assume loopback device for simplicity since it's the only one currently supported
+	// panic if the conversion fails
+	devOptions, ok := device.Options.(osbuild.LoopbackDeviceOptions)
+	if !ok {
+		panic("copyStageOptions: failed to convert device options to loopback options")
+	}
+
+	devices := make(map[string]osbuild.Device, len(pt.Partitions))
+	mounts := make(map[string]osbuild.Mount, len(pt.Partitions))
+	for _, p := range pt.Partitions {
+		if p.Filesystem == nil {
+			// no filesystem for partition (e.g., BIOS boot)
+			continue
+		}
+		name := filepath.Base(p.Filesystem.Mountpoint)
+		if name == "/" {
+			name = "root"
+		}
+		devices[name] = osbuild.Device{
+			Type: "org.osbuild.loopback",
+			Options: osbuild.LoopbackDeviceOptions{
+				Filename: devOptions.Filename,
+				Start:    p.Start,
+				Size:     p.Size,
+			},
+		}
+		mount := osbuild.Mount{
+			Type:   "",
+			Source: name,
+			Target: p.Filesystem.Mountpoint,
+		}
+		switch p.Filesystem.Type {
+		case "xfs":
+			mount.Type = "org.osbuild.xfs"
+		case "vfat":
+			mount.Type = "org.osbuild.fat"
+		case "ext4":
+			mount.Type = "org.osbuild.ext4"
+		case "btrfs":
+			mount.Type = "org.osbuild.btrfs"
+		default:
+			panic("unknown fs type " + p.Type)
+		}
+		mounts[name] = mount
+	}
+
+	stageMounts := osbuild.CopyStageMounts(mounts)
+	stageDevices := osbuild.CopyStageDevices(devices)
+
+	options := osbuild.CopyStageOptions{
+		Paths: []osbuild.CopyStagePath{
+			{
+				From: fmt.Sprintf("input://%s/", inputName),
+				To:   "mount://root/",
+			},
+		},
+	}
+
+	return &options, &stageDevices, &stageMounts
+}
+
+func newLoopbackDevice(filename string) *osbuild.Device {
+	loopbackOptions := osbuild.LoopbackDeviceOptions{Filename: filename}
+	return &osbuild.Device{
+		Type:    "org.osbuild.loopback",
+		Options: loopbackOptions,
+	}
+}
+
+func grub2InstStageOptions(filename string, pt *disk.PartitionTable, bootPartIndex uint, platform string) *osbuild.Grub2InstStageOptions {
+	core := osbuild.CoreMkImage{
+		Type:       "mkimage",
+		PartLabel:  pt.Type,
+		Filesystem: pt.Partitions[bootPartIndex].Filesystem.Type,
+	}
+
+	prefix := osbuild.PrefixPartition{
+		Type:      "partition",
+		PartLabel: pt.Type,
+		Number:    bootPartIndex,
+		Path:      "/boot/grub2",
+	}
+
+	return &osbuild.Grub2InstStageOptions{
+		Filename: filename,
+		Platform: platform,
+		Location: pt.Partitions[0].Start,
+		Core:     core,
+		Prefix:   prefix,
+	}
+}
+
+func qemuStageOptions(filename string) *osbuild.QEMUStageOptions {
+	return &osbuild.QEMUStageOptions{
+		Filename: filename,
+		Format: osbuild.Qcow2Options{
+			Type:   "qcow2",
+			Compat: "0.10",
+		},
+	}
+}
