@@ -175,7 +175,7 @@ func loraxScriptStageOptions(arch string) *osbuild.LoraxScriptStageOptions {
 	}
 }
 
-func dracutStageOptions(kernelVer string) *osbuild.DracutStageOptions {
+func dracutStageOptions(kernelVer string, additionalModules []string) *osbuild.DracutStageOptions {
 	kernel := []string{kernelVer}
 	modules := []string{
 		"bash",
@@ -228,6 +228,7 @@ func dracutStageOptions(kernelVer string) *osbuild.DracutStageOptions {
 		"shutdown",
 		"uefi-lib",
 	}
+	modules = append(modules, additionalModules...)
 	return &osbuild.DracutStageOptions{
 		Kernel:  kernel,
 		Modules: modules,
@@ -332,7 +333,7 @@ func grub2StageOptions(rootPartition *disk.Partition, bootPartition *disk.Partit
 
 	if uefi {
 		stageOptions.UEFI = &osbuild.GRUB2UEFI{
-			Vendor: "redhat",
+			Vendor:  "redhat",
 		}
 	}
 
