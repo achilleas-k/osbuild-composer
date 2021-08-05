@@ -857,10 +857,10 @@ func liveImagePipeline(inputPipelineName string, outputFilename string, pt *disk
 	p.Name = "image"
 	p.Build = "name:build"
 
-	loopback := osbuild.NewLoopbackDevice(&osbuild.LoopbackDeviceOptions{Filename: outputFilename})
 	p.AddStage(osbuild.NewTruncateStage(&osbuild.TruncateStageOptions{Filename: outputFilename, Size: fmt.Sprintf("%d", pt.Size)}))
-	sfOptions, sfDevices := sfdiskStageOptions(pt, loopback)
-	p.AddStage(osbuild.NewSfdiskStage(sfOptions, sfDevices))
+	sfOptions := sfdiskStageOptions(pt)
+	loopback := osbuild.NewLoopbackDevice(&osbuild.LoopbackDeviceOptions{Filename: outputFilename})
+	p.AddStage(osbuild.NewSfdiskStage(sfOptions, loopback))
 
 	for _, stage := range mkfsStages(pt, loopback) {
 		p.AddStage(stage)
@@ -922,28 +922,24 @@ func mkfsStages(pt *disk.PartitionTable, device *osbuild.Device) []*osbuild2.Sta
 				UUID:  p.Filesystem.UUID,
 				Label: p.Filesystem.Label,
 			}
-			devices := &osbuild.MkfsXfsStageDevices{Device: *stageDevice}
-			stage = osbuild.NewMkfsXfsStage(options, devices)
+			stage = osbuild.NewMkfsXfsStage(options, stageDevice)
 		case "vfat":
 			options := &osbuild.MkfsFATStageOptions{
 				VolID: strings.Replace(p.Filesystem.UUID, "-", "", -1),
 			}
-			devices := &osbuild.MkfsFATStageDevices{Device: *stageDevice}
-			stage = osbuild.NewMkfsFATStage(options, devices)
+			stage = osbuild.NewMkfsFATStage(options, stageDevice)
 		case "btrfs":
 			options := &osbuild.MkfsBtrfsStageOptions{
 				UUID:  p.Filesystem.UUID,
 				Label: p.Filesystem.Label,
 			}
-			devices := &osbuild.MkfsBtrfsStageDevices{Device: *stageDevice}
-			stage = osbuild.NewMkfsBtrfsStage(options, devices)
+			stage = osbuild.NewMkfsBtrfsStage(options, device)
 		case "ext4":
 			options := &osbuild.MkfsExt4StageOptions{
 				UUID:  p.Filesystem.UUID,
 				Label: p.Filesystem.Label,
 			}
-			devices := &osbuild.MkfsExt4StageDevices{Device: *stageDevice}
-			stage = osbuild.NewMkfsExt4Stage(options, devices)
+			stage = osbuild.NewMkfsExt4Stage(options, device)
 		default:
 			panic("unknown fs type " + p.Type)
 		}
