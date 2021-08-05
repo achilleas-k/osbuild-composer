@@ -1,32 +1,36 @@
 package osbuild2
 
 // Collection of Inputs for a Stage
-type Inputs interface {
-	isStageInputs()
-}
+type Inputs map[string]Input
 
 // Single Input for a Stage
-type Input interface {
-	isInput()
+type Input struct {
+	// Input type
+	Type string `json:"type"`
+
+	// Origin should be either 'org.osbuild.source' or 'org.osbuild.pipeline'
+	Origin InputOriginType `json:"origin"`
+
+	References References `json:"references"`
 }
 
 // TODO: define these using type aliases
+type InputOriginType string
+
 const (
-	InputOriginSource   string = "org.osbuild.source"
-	InputOriginPipeline string = "org.osbuild.pipeline"
+	InputOriginSource   InputOriginType = "org.osbuild.source"
+	InputOriginPipeline                 = "org.osbuild.pipeline"
 )
 
-// Fields shared between all Input types (should be embedded in each instance)
 type inputCommon struct {
 	Type string `json:"type"`
 	// Origin should be either 'org.osbuild.source' or 'org.osbuild.pipeline'
 	Origin string `json:"origin"`
 }
-
-type StageInput interface {
-	isStageInput()
-}
-
 type References interface {
 	isReferences()
 }
+
+type ReferenceList []string
+
+func (ReferenceList) isReferences() {}

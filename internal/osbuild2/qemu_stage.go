@@ -73,11 +73,14 @@ type QEMUFile struct {
 type FileMetadata map[string]interface{}
 
 // NewQEMUStage creates a new QEMU Stage object.
-func NewQEMUStage(options *QEMUStageOptions, inputs *QEMUStageInputs) *Stage {
+func NewQEMUStage(options *QEMUStageOptions, inputPipeline, inputFile string) *Stage {
+	input := NewFilesInputReferencesPipeline(inputPipeline, inputFile)
 	return &Stage{
 		Type:    "org.osbuild.qemu",
 		Options: options,
-		Inputs:  inputs,
+		Inputs: Inputs{
+			"image": input,
+		},
 	}
 }
 

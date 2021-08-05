@@ -61,26 +61,13 @@ func BCJOption(arch string) string {
 
 func (BootISOMonoStageOptions) isStageOptions() {}
 
-type BootISOMonoStageInputs struct {
-	RootFS *BootISOMonoStageInput `json:"rootfs"`
-	Kernel *BootISOMonoStageInput `json:"kernel,omitempty"`
-}
-
-func (BootISOMonoStageInputs) isStageInputs() {}
-
-type BootISOMonoStageInput struct {
-	inputCommon
-	References BootISOMonoStageReferences `json:"references"`
-}
-
-func (BootISOMonoStageInput) isStageInput() {}
-
-type BootISOMonoStageReferences []string
-
-func (BootISOMonoStageReferences) isReferences() {}
-
 // Assemble a file system tree for a bootable ISO
-func NewBootISOMonoStage(options *BootISOMonoStageOptions, inputs *BootISOMonoStageInputs) *Stage {
+func NewBootISOMonoStage(options *BootISOMonoStageOptions, rootPipeline string) *Stage {
+	// NOTE: The bootiso.mono stage is deprecated and we never used the
+	// 'kernel' property, so keeping support for it is not necessary
+	inputs := Inputs{
+		"rootfs": *NewTreeInput(rootPipeline),
+	}
 	return &Stage{
 		Type:    "org.osbuild.bootiso.mono",
 		Options: options,

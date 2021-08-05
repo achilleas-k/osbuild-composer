@@ -93,16 +93,12 @@ func (stage *Stage) UnmarshalJSON(data []byte) error {
 		options = new(KernelCmdlineStageOptions)
 	case "org.osbuild.rpm":
 		options = new(RPMStageOptions)
-		inputs = new(RPMStageInputs)
 	case "org.osbuild.oci-archive":
 		options = new(OCIArchiveStageOptions)
-		inputs = new(OCIArchiveStageInputs)
 	case "org.osbuild.ostree.commit":
 		options = new(OSTreeCommitStageOptions)
-		inputs = new(OSTreeCommitStageInputs)
 	case "org.osbuild.ostree.pull":
 		options = new(OSTreePullStageOptions)
-		inputs = new(OSTreePullStageInputs)
 	case "org.osbuild.ostree.init":
 		options = new(OSTreeInitStageOptions)
 	case "org.osbuild.ostree.preptree":
@@ -113,7 +109,6 @@ func (stage *Stage) UnmarshalJSON(data []byte) error {
 		options = new(SfdiskStageOptions)
 	case "org.osbuild.copy":
 		options = new(CopyStageOptions)
-		inputs = new(CopyStageInputs)
 	case "org.osbuild.mkfs.btrfs":
 		options = new(MkfsBtrfsStageOptions)
 	case "org.osbuild.mkfs.ext4":
@@ -124,24 +119,16 @@ func (stage *Stage) UnmarshalJSON(data []byte) error {
 		options = new(MkfsXfsStageOptions)
 	case "org.osbuild.qemu":
 		options = new(QEMUStageOptions)
-		inputs = new(QEMUStageInputs)
 	case "org.osbuild.xz":
 		options = new(XzStageOptions)
-		// TODO: Unmarshalling inputs should be moved to a separate method and struct should be determined by its Type
-		// The stage accepts also source input, but we need to rework all inputs first to handle this nicely here.
-		// Only files input is used by the XZ stage at this moment.
-		inputs = new(FilesInputs)
 	default:
 		return fmt.Errorf("unexpected stage type: %s", rawStage.Type)
 	}
 	if err := json.Unmarshal(rawStage.Options, options); err != nil {
 		return err
 	}
-	if inputs != nil && rawStage.Inputs != nil {
-		if err := json.Unmarshal(rawStage.Inputs, inputs); err != nil {
-			return err
-		}
-	}
+
+	// TODO: do the same selection based on type for inputs, devices, and mounts
 
 	stage.Type = rawStage.Type
 	stage.Options = options
