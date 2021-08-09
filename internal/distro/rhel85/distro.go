@@ -16,6 +16,7 @@ import (
 const defaultName = "rhel-85"
 const rhel86Name = "rhel-86"
 const osVersion = "8.5"
+const defaultCentosName = "centos-8"
 const releaseVersion = "8"
 const modulePlatformID = "platform:el8"
 const ostreeRef = "rhel/8/%s/edge"
@@ -457,18 +458,26 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 
 // New creates a new distro object, defining the supported architectures and image types
 func New() distro.Distro {
-	return newDistro(defaultName, modulePlatformID, ostreeRef)
+	return newDistro(defaultName, modulePlatformID, ostreeRef, false)
 }
 
 func NewRHEL86() distro.Distro {
-	return newDistro(rhel86Name, modulePlatformID, ostreeRef)
+	return newDistro(rhel86Name, modulePlatformID, ostreeRef, false)
 }
 
 func NewHostDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
-	return newDistro(name, modulePlatformID, ostreeRef)
+	return newDistro(name, modulePlatformID, ostreeRef, false)
 }
 
-func newDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
+func NewCentos() distro.Distro {
+	return newDistro(defaultCentosName, modulePlatformID, ostreeRef, true)
+}
+
+func NewCentosHostDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
+	return newDistro(name, modulePlatformID, ostreeRef, true)
+}
+
+func newDistro(name, modulePlatformID, ostreeRef string, isCentos bool) distro.Distro {
 	const GigaByte = 1024 * 1024 * 1024
 
 	rd := &distribution{
@@ -514,74 +523,6 @@ func newDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
 		},
 		legacy:   "powerpc-ieee1275",
 		bootType: LegacyBootType,
-	}
-	s390x := architecture{
-		distro: rd,
-		name:   s390xArchName,
-		packageSets: map[string]rpmmd.PackageSet{
-			bootLegacyPkgsKey: s390xLegacyBootPackageSet(),
-		},
-		bootType: LegacyBootType,
-	}
-
-	// Shared Services
-	edgeServices := []string{
-		"NetworkManager.service", "firewalld.service", "sshd.service",
-	}
-
-	// Image Definitions
-	edgeCommitImgType := imageType{
-		name:        "edge-commit",
-		nameAliases: []string{"rhel-edge-commit"},
-		filename:    "commit.tar",
-		mimeType:    "application/x-tar",
-		packageSets: map[string]rpmmd.PackageSet{
-			buildPkgsKey: edgeBuildPackageSet(),
-			osPkgsKey:    edgeCommitPackageSet(),
-		},
-		enabledServices: edgeServices,
-		rpmOstree:       true,
-		pipelines:       edgeCommitPipelines,
-		exports:         []string{"commit-archive"},
-	}
-	edgeOCIImgType := imageType{
-		name:        "edge-container",
-		nameAliases: []string{"rhel-edge-container"},
-		filename:    "container.tar",
-		mimeType:    "application/x-tar",
-		packageSets: map[string]rpmmd.PackageSet{
-			buildPkgsKey:     edgeBuildPackageSet(),
-			osPkgsKey:        edgeCommitPackageSet(),
-			containerPkgsKey: {Include: []string{"httpd"}},
-		},
-		enabledServices: edgeServices,
-		rpmOstree:       true,
-		bootISO:         false,
-		pipelines:       edgeContainerPipelines,
-		exports:         []string{containerPkgsKey},
-	}
-	edgeInstallerImgType := imageType{
-		name:        "edge-installer",
-		nameAliases: []string{"rhel-edge-installer"},
-		filename:    "installer.iso",
-		mimeType:    "application/x-iso9660-image",
-		packageSets: map[string]rpmmd.PackageSet{
-			// TODO: non-arch-specific package set handling for installers
-			// This image type requires build packages for installers and
-			// ostree/edge.  For now we only have x86-64 installer build
-			// package sets defined.  When we add installer build package sets
-			// for other architectures, this will need to be moved to the
-			// architecture and the merging will happen in the PackageSets()
-			// method like the other sets.
-			buildPkgsKey:     x8664InstallerBuildPackageSet().Append(edgeBuildPackageSet()),
-			osPkgsKey:        edgeCommitPackageSet(),
-			installerPkgsKey: edgeInstallerPackageSet(),
-		},
-		enabledServices: edgeServices,
-		rpmOstree:       true,
-		bootISO:         true,
-		pipelines:       edgeInstallerPipelines,
-		exports:         []string{"bootiso"},
 	}
 
 	qcow2ImgType := imageType{
@@ -779,11 +720,87 @@ func newDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
 		exports:   []string{"bootiso"},
 	}
 
-	x86_64.addImageTypes(qcow2ImgType, vhdImgType, vmdkImgType, openstackImgType, amiImgTypeX86_64, ec2ImgTypeX86_64, ec2HaImgTypeX86_64, tarImgType, tarInstallerImgTypeX86_64, edgeCommitImgType, edgeInstallerImgType, edgeOCIImgType)
-	aarch64.addImageTypes(qcow2ImgType, openstackImgType, amiImgTypeAarch64, ec2ImgTypeAarch64, tarImgType, edgeCommitImgType, edgeOCIImgType)
+	x86_64.addImageTypes(qcow2ImgType, vhdImgType, vmdkImgType, openstackImgType, amiImgTypeX86_64, ec2ImgTypeX86_64, ec2HaImgTypeX86_64, tarImgType, tarInstallerImgTypeX86_64)
+	aarch64.addImageTypes(qcow2ImgType, openstackImgType, amiImgTypeAarch64, ec2ImgTypeAarch64, tarImgType)
 	ppc64le.addImageTypes(qcow2ImgType, tarImgType)
-	s390x.addImageTypes(qcow2ImgType, tarImgType)
 
-	rd.addArches(x86_64, aarch64, ppc64le, s390x)
+	if !isCentos {
+		// add s390x architecture and edge image types
+
+		s390x := architecture{
+			distro: rd,
+			name:   s390xArchName,
+			packageSets: map[string]rpmmd.PackageSet{
+				bootLegacyPkgsKey: s390xLegacyBootPackageSet(),
+			},
+			bootType: LegacyBootType,
+		}
+
+		// Shared Services
+		edgeServices := []string{
+			"NetworkManager.service", "firewalld.service", "sshd.service",
+		}
+
+		// Image Definitions
+		edgeCommitImgType := imageType{
+			name:        "edge-commit",
+			nameAliases: []string{"rhel-edge-commit"},
+			filename:    "commit.tar",
+			mimeType:    "application/x-tar",
+			packageSets: map[string]rpmmd.PackageSet{
+				buildPkgsKey: edgeBuildPackageSet(),
+				osPkgsKey:    edgeCommitPackageSet(),
+			},
+			enabledServices: edgeServices,
+			rpmOstree:       true,
+			pipelines:       edgeCommitPipelines,
+			exports:         []string{"commit-archive"},
+		}
+		edgeOCIImgType := imageType{
+			name:        "edge-container",
+			nameAliases: []string{"rhel-edge-container"},
+			filename:    "container.tar",
+			mimeType:    "application/x-tar",
+			packageSets: map[string]rpmmd.PackageSet{
+				buildPkgsKey:     edgeBuildPackageSet(),
+				osPkgsKey:        edgeCommitPackageSet(),
+				containerPkgsKey: {Include: []string{"httpd"}},
+			},
+			enabledServices: edgeServices,
+			rpmOstree:       true,
+			bootISO:         false,
+			pipelines:       edgeContainerPipelines,
+			exports:         []string{containerPkgsKey},
+		}
+		edgeInstallerImgType := imageType{
+			name:        "edge-installer",
+			nameAliases: []string{"rhel-edge-installer"},
+			filename:    "installer.iso",
+			mimeType:    "application/x-iso9660-image",
+			packageSets: map[string]rpmmd.PackageSet{
+				// TODO: non-arch-specific package set handling for installers
+				// This image type requires build packages for installers and
+				// ostree/edge.  For now we only have x86-64 installer build
+				// package sets defined.  When we add installer build package sets
+				// for other architectures, this will need to be moved to the
+				// architecture and the merging will happen in the PackageSets()
+				// method like the other sets.
+				buildPkgsKey:     x8664InstallerBuildPackageSet().Append(edgeBuildPackageSet()),
+				osPkgsKey:        edgeCommitPackageSet(),
+				installerPkgsKey: edgeInstallerPackageSet(),
+			},
+			enabledServices: edgeServices,
+			rpmOstree:       true,
+			bootISO:         true,
+			pipelines:       edgeInstallerPipelines,
+			exports:         []string{"bootiso"},
+		}
+
+		x86_64.addImageTypes(edgeCommitImgType, edgeInstallerImgType, edgeOCIImgType)
+		aarch64.addImageTypes(edgeCommitImgType, edgeOCIImgType)
+		s390x.addImageTypes(qcow2ImgType, tarImgType)
+		rd.addArches(s390x)
+	}
+	rd.addArches(x86_64, aarch64, ppc64le)
 	return rd
 }

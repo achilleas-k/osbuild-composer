@@ -20,7 +20,6 @@ import (
 )
 
 const defaultName = "rhel-84"
-const defaultCentosName = "centos-8"
 const releaseVersion = "8"
 const modulePlatformID = "platform:el8"
 const ostreeRef = "rhel/8/%s/edge"
@@ -851,16 +850,8 @@ func New() distro.Distro {
 	return newDistro(defaultName, modulePlatformID, ostreeRef, false)
 }
 
-func NewCentos() distro.Distro {
-	return newDistro(defaultCentosName, modulePlatformID, ostreeRef, true)
-}
-
 func NewHostDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
 	return newDistro(name, modulePlatformID, ostreeRef, false)
-}
-
-func NewCentosHostDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
-	return newDistro(name, modulePlatformID, ostreeRef, true)
 }
 
 func newDistro(name, modulePlatformID, ostreeRef string, isCentos bool) distro.Distro {

@@ -23,6 +23,10 @@ var rhelFamilyDistros = []rhelFamilyDistro{
 		name:   "rhel",
 		distro: rhel85.New(),
 	},
+	{
+		name:   "centos",
+		distro: rhel85.NewCentos(),
+	},
 }
 
 func TestFilenameFromType(t *testing.T) {
@@ -549,6 +553,9 @@ func TestRhel85_Name(t *testing.T) {
 func TestRhel85_ModulePlatformID(t *testing.T) {
 	distro := rhel85.New()
 	assert.Equal(t, "platform:el8", distro.ModulePlatformID())
+
+	centos := rhel85.NewCentos()
+	assert.Equal(t, "platform:el8", centos.ModulePlatformID())
 }
 
 func TestRhel85_KernelOption(t *testing.T) {
@@ -609,4 +616,14 @@ func TestDistro_TestRootMountPoint(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestCentos_ListArches(t *testing.T) {
+	arches := rhel85.NewCentos().ListArches()
+	assert.Equal(t, []string{"aarch64", "ppc64le", "x86_64"}, arches)
+}
+
+func TestCentos_Name(t *testing.T) {
+	distro := rhel85.NewCentos()
+	assert.Equal(t, "centos-8", distro.Name())
 }
