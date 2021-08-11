@@ -1096,12 +1096,12 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 			},
 		},
 	))
-	
+
 	fstabOptions := pt.FSTabStageOptionsV2()
 	fstabOptions.Deployment = &osbuild.Deployment{
-				OsName: osname,
-				Ref:    options.OSTree.Ref,
-			}
+		OsName: osname,
+		Ref:    options.OSTree.Ref,
+	}
 	p.AddStage(osbuild2.NewFSTabStage(fstabOptions))
 
 	p.AddStage(osbuild.NewOSTreeSelinuxStage(
@@ -1112,14 +1112,7 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 			},
 		},
 	))
-	grub2Options := grub2StageOptions(
-		pt,
-		kernelOptions,
-		nil,
-		nil,
-		true,
-		arch.legacy,
-	)
+	grub2Options := grub2StageOptions(pt.RootPartition(), kernelOptions, kernel, kernelVer, uefi, arch.legacy)
 	grub2Options.UEFI.Install = common.BoolToPtr(true)
 	p.AddStage(osbuild.NewGRUB2Stage(grub2Options))
 	return p
