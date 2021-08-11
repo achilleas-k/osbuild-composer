@@ -10,14 +10,29 @@ import (
 
 // A Blueprint is a high-level description of an image.
 type Blueprint struct {
-	Name           string          `json:"name" toml:"name"`
-	Description    string          `json:"description" toml:"description"`
-	Version        string          `json:"version,omitempty" toml:"version,omitempty"`
-	Packages       []Package       `json:"packages" toml:"packages"`
-	Modules        []Package       `json:"modules" toml:"modules"`
-	Groups         []Group         `json:"groups" toml:"groups"`
+	Name           string            `json:"name" toml:"name"`
+	Description    string            `json:"description" toml:"description"`
+	Version        string            `json:"version,omitempty" toml:"version,omitempty"`
+	Packages       []Package         `json:"packages" toml:"packages"`
+	Modules        []Package         `json:"modules" toml:"modules"`
+	Groups         []Group           `json:"groups" toml:"groups"`
+	Customizations *Customizations   `json:"customizations,omitempty" toml:"customizations,omitempty"`
+	Distro         string            `json:"distro" toml:"distro"`
+	OSTree         *OSTree           `json:"ostree,omitempty" toml:"ostree,omitempty"`
+	Payload        *PayloadBlueprint `json:"payload,omitempty" toml:"payload,omitempty"`
+}
+
+// PayloadBlueprint describes the image embedded in an installer ISO.
+type PayloadBlueprint struct {
+	// Packages are only available for installer builds that also build the
+	// payload.
+	Packages []Package `json:"packages" toml:"packages"`
+
+	// OSTree options for the payload.
+	OSTree OSTree `json:"ostree" toml:"ostree"`
+
+	// Customizations for the payload.
 	Customizations *Customizations `json:"customizations,omitempty" toml:"customizations,omitempty"`
-	Distro         string          `json:"distro" toml:"distro"`
 }
 
 type Change struct {
@@ -37,6 +52,13 @@ type Package struct {
 // A group specifies an package group.
 type Group struct {
 	Name string `json:"name" toml:"name"`
+}
+
+// OSTree commit source description (URL and commit ref) and parent commit.
+type OSTree struct {
+	URL    string `json:"url" toml:"url"`
+	Ref    string `json:"ref" toml:"ref"`
+	Parent string `json:"parent" toml:"parent"`
 }
 
 // DeepCopy returns a deep copy of the blueprint
