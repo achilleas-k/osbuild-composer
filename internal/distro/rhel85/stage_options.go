@@ -2,12 +2,14 @@ package rhel85
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
 
 	"github.com/google/uuid"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
+	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/crypt"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild2"
@@ -333,7 +335,7 @@ func grub2StageOptions(rootPartition *disk.Partition, bootPartition *disk.Partit
 
 	if uefi {
 		stageOptions.UEFI = &osbuild.GRUB2UEFI{
-			Vendor:  "redhat",
+			Vendor: "redhat",
 		}
 	}
 
@@ -514,5 +516,27 @@ func kernelCmdlineStageOptions(rootUUID string, kernelOptions string) *osbuild.K
 	return &osbuild.KernelCmdlineStageOptions{
 		RootFsUUID: rootUUID,
 		KernelOpts: kernelOptions,
+	}
+}
+
+func ostreeConfigStageOptions(repo string, readOnly bool) *osbuild.OSTreeConfigStageOptions {
+	return &osbuild.OSTreeConfigStageOptions{
+		Repo: repo,
+		Config: &osbuild.OSTreeConfig{
+			Sysroot: &osbuild.SysrootOptions{
+				ReadOnly: common.BoolToPtr(readOnly),
+			},
+		},
+	}
+}
+
+func efiMkdirStageOptions() *osbuild.MkdirStageOptions {
+	return &osbuild.MkdirStageOptions{
+		Paths: []osbuild.Path{
+			{
+				Path: "/boot/efi",
+				Mode: os.FileMode(0700),
+			},
+		},
 	}
 }

@@ -3,7 +3,6 @@ package rhel85
 import (
 	"fmt"
 	"math/rand"
-	"os"
 	"strings"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
@@ -966,16 +965,22 @@ func simplifiedInstallerEFIBootTreePipeline(installDevice, kernelVer, arch strin
 				Name:    "Red Hat Enterprise Linux",
 				Version: osVersion,
 			},
-			ISOLabel:   isolabel,
-			Kernel:     kernelVer,
-			KernelOpts: fmt.Sprintf("rd.neednet=1 console=tty0 console=ttyS0 edge.liveiso=%s coreos.inst.install_dev=%s coreos.inst.image_file=/run/media/iso/disk.img.xz coreos.inst.insecure", isolabel, installDevice),
-			EFI: osbuild.EFI{
-				Architectures: []string{
-					"IA32",
-					"X64",
-				},
-				Vendor: "redhat",
+			ISOLabel: isolabel,
+			Kernel: osbuild.ISOKernel{
+				Dir: "/images/pxeboot",
+				Opts: []string{"rd.neednet=1",
+					"console=tty0",
+					"console=ttyS0",
+					"edge.liveiso=" + isolabel,
+					"coreos.inst.install_dev=" + installDevice,
+					"coreos.inst.image_file=/run/media/iso/disk.img.xz",
+					"coreos.inst.insecure"},
 			},
+			Architectures: []string{
+				"IA32",
+				"X64",
+			},
+			Vendor: "redhat",
 		},
 	))
 
@@ -1049,29 +1054,11 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 	))
 	p.AddStage(osbuild.NewOSTreeOsInitStage(
 		&osbuild.OSTreeOsInitStageOptions{
-			OsName: osname,
+			OSName: osname,
 		},
 	))
-	p.AddStage(osbuild.NewOSTreeConfigStage(
-		&osbuild.OSTreeConfigStageOptions{
-			Repo: repo,
-			Config: osbuild.OstreeConfigOptions{
-				Sysroot: osbuild.SysrootOptions{
-					ReadOnly: true,
-				},
-			},
-		},
-	))
-	p.AddStage(osbuild.NewMkdirStage(
-		&osbuild.MkdirStageOptions{
-			Paths: []osbuild.Path{
-				{
-					Path: "/boot/efi",
-					Mode: os.FileMode(448),
-				},
-			},
-		},
-	))
+	p.AddStage(osbuild.NewOSTreeConfigStage(ostreeConfigStageOptions(repo, true)))
+	p.AddStage(osbuild.NewMkdirStage(efiMkdirStageOptions()))
 	p.AddStage(osbuild.NewOSTreeDeployStage(
 		&osbuild.OSTreeDeployStageOptions{
 			OsName: osname,
@@ -1090,24 +1077,26 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 	))
 	p.AddStage(osbuild.NewOSTreeFillvarStage(
 		&osbuild.OSTreeFillvarStageOptions{
-			Deployment: osbuild.Deployment{
-				OsName: osname,
+			Deployment: osbuild.OSTreeDeployment{
+				OSName: osname,
 				Ref:    options.OSTree.Ref,
 			},
 		},
 	))
 
 	fstabOptions := pt.FSTabStageOptionsV2()
-	fstabOptions.Deployment = &osbuild.Deployment{
-		OsName: osname,
-		Ref:    options.OSTree.Ref,
+	fstabOptions.OSTree = &osbuild.OSTreeFstab{
+		Deployment: osbuild.OSTreeDeployment{
+			OSName: osname,
+			Ref:    options.OSTree.Ref,
+		},
 	}
 	p.AddStage(osbuild2.NewFSTabStage(fstabOptions))
 
 	p.AddStage(osbuild.NewOSTreeSelinuxStage(
 		&osbuild.OSTreeSelinuxStageOptions{
-			Deployment: osbuild.Deployment{
-				OsName: osname,
+			Deployment: osbuild.OSTreeDeployment{
+				OSName: osname,
 				Ref:    options.OSTree.Ref,
 			},
 		},
