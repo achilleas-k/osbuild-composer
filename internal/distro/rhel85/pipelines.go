@@ -807,17 +807,7 @@ func ostreePayloadStages(options distro.ImageOptions, ostreeRepoPath string) []*
 func edgeSimplifiedInstallerPipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
 	pipelines := make([]osbuild.Pipeline, 0)
 	pipelines = append(pipelines, *buildPipeline(repos, packageSetSpecs[buildPkgsKey]))
-	kernelPkg := new(rpmmd.PackageSpec)
 	installerPackages := packageSetSpecs[installerPkgsKey]
-	for _, pkg := range installerPackages {
-		if pkg.Name == "kernel" {
-			kernelPkg = &pkg
-			break
-		}
-	}
-	if kernelPkg == nil {
-		return nil, fmt.Errorf("kernel package not found in installer package set")
-	}
 	imgName := "disk.img"
 	imgNameCompressed := "disk.img.xz"
 	ostreeRepoPath := "/ostree/repo"
@@ -826,7 +816,7 @@ func edgeSimplifiedInstallerPipelines(t *imageType, customizations *blueprint.Cu
 		options.Size = 10737418240
 	}
 	partitionTable := edgePartitionTable(options, t.arch, rng)
-	kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
+	kernelVer := kernelVerStr(installerPackages, "kernel", t.Arch().Name())
 
 	imageTreePipeline := *simplifiedInstallerImageTreePipeline(&partitionTable, kernelVer, customizations.GetKernel(), t.arch, t.supportsUEFI(), t.kernelOptions, rng, options, ostreePayloadStages(options, ostreeRepoPath))
 	pipelines = append(pipelines, imageTreePipeline)
