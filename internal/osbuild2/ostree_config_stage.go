@@ -1,22 +1,23 @@
 package osbuild2
 
-type OstreeConfigOptions struct {
-	Sysroot SysrootOptions `json:"sysroot"`
-}
-
-type SysrootOptions struct {
-	ReadOnly bool `json:"readonly"`
-}
-
 // Options for the org.osbuild.ostree.config stage.
 type OSTreeConfigStageOptions struct {
 	// Location of the ostree repo
 	Repo string `json:"repo"`
 
-	Config OstreeConfigOptions `json:"config"`
+	Config *OSTreeConfig `json:"config,omitempty"`
 }
 
 func (OSTreeConfigStageOptions) isStageOptions() {}
+
+type OSTreeConfig struct {
+	// Options concerning the sysroot
+	Sysroot *SysrootOptions `json:"sysroot,omitempty"`
+}
+
+type SysrootOptions struct {
+	ReadOnly *bool `json:"readonly,omitempty"`
+}
 
 // A new org.osbuild.ostree.init stage to create an OSTree repository
 func NewOSTreeConfigStage(options *OSTreeConfigStageOptions) *Stage {

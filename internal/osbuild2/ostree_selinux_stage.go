@@ -3,7 +3,7 @@ package osbuild2
 // Options for the org.osbuild.ostree.selinux stage.
 type OSTreeSelinuxStageOptions struct {
 	// shared with ostree.fillvar
-	Deployment Deployment `json:"deployment"`
+	Deployment OSTreeDeployment `json:"deployment"`
 }
 
 func (OSTreeSelinuxStageOptions) isStageOptions() {}

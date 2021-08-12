@@ -3,7 +3,7 @@ package osbuild2
 // Options for the org.osbuild.ostree.os-init stage.
 type OSTreeOsInitStageOptions struct {
 	// Name of the OS
-	OsName string `json:"osname,omitempty"`
+	OSName string `json:"osname"`
 }
 
 func (OSTreeOsInitStageOptions) isStageOptions() {}
