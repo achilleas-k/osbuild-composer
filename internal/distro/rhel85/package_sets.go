@@ -408,6 +408,11 @@ func edgeSimplifiedInstallerPackageSet() rpmmd.PackageSet {
 			"iwl6000-firmware",
 			"iwl6050-firmware",
 			"iwl7260-firmware",
+
+			// missing dracut modules
+			"keyutils", "rng-tools", "lvm2", "device-mapper-multipath",
+			"lldpad", "fcoe-utils", "iscsi-initiator-utils", "rpcbind",
+			"biosdevname", "nfs-utils", "plymouth", "prefixdevname", "anaconda-dracut",
 		},
 		Exclude: nil,
 	}
