@@ -825,7 +825,7 @@ func edgeSimplifiedInstallerPipelines(t *imageType, customizations *blueprint.Cu
 	if options.Size == 0 {
 		options.Size = 10737418240
 	}
-	partitionTable := defaultPartitionTableEdge(options, t.arch, rng)
+	partitionTable := edgePartitionTable(options, t.arch, rng)
 	kernelVer := fmt.Sprintf("%s-%s.%s", kernelPkg.Version, kernelPkg.Release, kernelPkg.Arch)
 
 	imageTreePipeline := *simplifiedInstallerImageTreePipeline(&partitionTable, kernelVer, customizations.GetKernel(), t.arch, t.supportsUEFI(), t.kernelOptions, rng, options, ostreePayloadStages(options, ostreeRepoPath))
