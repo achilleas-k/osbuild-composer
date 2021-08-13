@@ -903,8 +903,8 @@ func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver string) *o
 	p.AddStage(stage)
 
 	inputName := "root-tree"
-	copyOptions, copyDevices, copyMounts := copyFSTreeOptions(inputName, "efiboot-tree", &pt, loopback)
 	copyInputs := copyPipelineTreeInputs(inputName, "efiboot-tree")
+	copyOptions, copyDevices, copyMounts := copyFSTreeOptions(inputName, "efiboot-tree", &pt, loopback)
 	p.AddStage(osbuild.NewCopyStage(copyOptions, copyInputs, copyDevices, copyMounts))
 
 	inputName = "coi"
@@ -927,12 +927,13 @@ func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver string) *o
 		nil,
 	))
 
+	inputName = "efi-tree"
 	copyInputs = copyPipelineTreeInputs(inputName, "efiboot-tree")
 	p.AddStage(osbuild.NewCopyStage(
 		&osbuild.CopyStageOptions{
 			Paths: []osbuild.CopyStagePath{
 				{
-					From: "input://root-tree/EFI",
+					From: fmt.Sprintf("input://%s/EFI", inputName),
 					To:   "tree:///",
 				},
 			},
@@ -1158,7 +1159,8 @@ func bootISOPipeline(filename string, arch string) *osbuild.Pipeline {
 	p.Name = "bootiso"
 	p.Build = "name:build"
 
-	p.AddStage(osbuild.NewXorrisofsStage(xorrisofsStageOptions(filename, arch), xorrisofsStageInputs()))
+	// TODO: make xorrisofs stage input pipeline name configurable
+	p.AddStage(osbuild.NewXorrisofsStage(xorrisofsStageOptions(filename, arch), xorrisofsStageInputs("bootiso-tree")))
 	p.AddStage(osbuild.NewImplantisomd5Stage(&osbuild.Implantisomd5StageOptions{Filename: filename}))
 
 	return p
