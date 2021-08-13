@@ -827,16 +827,17 @@ func edgeSimplifiedInstallerPipelines(t *imageType, customizations *blueprint.Cu
 	installerTreePipeline := *simplifiedInstallerTreePipeline(repos, installerPackages, kernelVer, t.Arch().Name())
 	pipelines = append(pipelines, installerTreePipeline)
 	//	efibootTreePipeline := *simplifiedInstallerEFIBootTreePipeline(options.InstallationDevice, kernelVer, t.arch.name)
+	// TODO: Installation device /dev/vda from blueprint
 	efibootTreePipeline := *simplifiedInstallerEFIBootTreePipeline("/dev/vda", kernelVer, t.Arch().Name())
 	pipelines = append(pipelines, efibootTreePipeline)
-	bootISOTreePipeline := simplifiedInstallerBootISOTreePipeline(xzArchivePipeline.Name, kernelVer, t.Arch().Name())
+	bootISOTreePipeline := simplifiedInstallerBootISOTreePipeline(xzArchivePipeline.Name, kernelVer)
 	pipelines = append(pipelines, *bootISOTreePipeline)
 	pipelines = append(pipelines, *bootISOPipeline(t.Filename(), t.Arch().Name()))
 
 	return pipelines, nil
 }
 
-func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver, arch string) *osbuild.Pipeline {
+func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
 	p.Name = "bootiso-tree"
 	p.Build = "name:build"
@@ -906,16 +907,17 @@ func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver, arch stri
 	copyInputs := copyPipelineTreeInputs(inputName, "efiboot-tree")
 	p.AddStage(osbuild.NewCopyStage(copyOptions, copyInputs, copyDevices, copyMounts))
 
+	inputName = "coi"
 	copyInputs = copyPipelineTreeInputs(inputName, "coi-tree")
 	p.AddStage(osbuild.NewCopyStage(
 		&osbuild.CopyStageOptions{
 			Paths: []osbuild.CopyStagePath{
 				{
-					From: fmt.Sprintf("input://root-tree/boot/vmlinuz-%s.el8.%s", kver, arch),
+					From: fmt.Sprintf("input://%s/boot/vmlinuz-%s", inputName, kver),
 					To:   "tree:///images/pxeboot/vmlinuz",
 				},
 				{
-					From: fmt.Sprintf("input://root-tree/boot/initramfs-%s.el8.%s.img", kver, arch),
+					From: fmt.Sprintf("input://%s/boot/initramfs-%s.img", inputName, kver),
 					To:   "tree:///images/pxeboot/initrd.img",
 				},
 			},
