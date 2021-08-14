@@ -804,38 +804,86 @@ func ostreePayloadStages(options distro.ImageOptions, ostreeRepoPath string) []*
 	return stages
 }
 
-func edgeSimplifiedInstallerPipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+func edgeSimplifiedInstallerPipelinesTake2(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
 	pipelines := make([]osbuild.Pipeline, 0)
 	pipelines = append(pipelines, *buildPipeline(repos, packageSetSpecs[buildPkgsKey]))
 	installerPackages := packageSetSpecs[installerPkgsKey]
+	kernelVer := kernelVerStr(installerPackages, "kernel", t.Arch().Name())
 	imgName := "disk.img"
-	imgNameCompressed := "disk.img.xz"
+	imgNameXz := imgName + ".xz"
 	ostreeRepoPath := "/ostree/repo"
 
-	if options.Size == 0 {
-		options.Size = 10737418240
+	partitionTable := defaultPartitionTable(options, t.arch, rng)
+
+	// prepare ostree deployment tree
+	treePipeline := ostreeDeployPipeline(t, &partitionTable, ostreeRepoPath, customizations.GetKernel(), kernelVer, rng, options)
+	pipelines = append(pipelines, *treePipeline)
+
+	// make raw image from tree
+	imagePipeline := liveImagePipeline(treePipeline.Name, imgName, &partitionTable, t.arch, kernelVer)
+	pipelines = append(pipelines, *imagePipeline)
+
+	// compress image
+	xzPipeline := xzImagePipeline(imagePipeline.Name, imgName, imgNameXz)
+	pipelines = append(pipelines, *xzPipeline)
+
+	// payload stages that copy raw image
+	imagePayloadStages := func() []*osbuild.Stage {
+		stages := make([]*osbuild.Stage, 0)
+		// single copy stage: disk.img.xz -> iso rootfs
+		stages = append(stages, osbuild.NewCopyStageFiles(
+			&osbuild.CopyStageOptions{
+				Paths: []osbuild.CopyStagePath{
+					{
+						From: "input://file/" + imgNameXz,
+						To:   "tree:///" + imgNameXz,
+					},
+				},
+			},
+			osbuild.NewFilesInputs(osbuild.NewFilesInputReferencesPipeline(xzPipeline.Name, imgNameXz)),
+		))
+		return stages
 	}
-	partitionTable := edgePartitionTable(options, t.arch, rng)
-	kernelVer := kernelVerStr(installerPackages, "kernel", t.Arch().Name())
 
-	imageTreePipeline := *simplifiedInstallerImageTreePipeline(&partitionTable, kernelVer, customizations.GetKernel(), t.arch, t.supportsUEFI(), t.kernelOptions, rng, options, ostreePayloadStages(options, ostreeRepoPath))
-	pipelines = append(pipelines, imageTreePipeline)
-	imagePipeline := *simplifiedInstallerImagePipeline(imgName, imageTreePipeline.Name, &partitionTable, t.arch)
-	pipelines = append(pipelines, imagePipeline)
-	xzArchivePipeline := *xzArchivePipeline(imagePipeline.Name, imgName, imgNameCompressed)
-	pipelines = append(pipelines, xzArchivePipeline)
-	installerTreePipeline := *simplifiedInstallerTreePipeline(repos, installerPackages, kernelVer, t.Arch().Name())
-	pipelines = append(pipelines, installerTreePipeline)
-	//	efibootTreePipeline := *simplifiedInstallerEFIBootTreePipeline(options.InstallationDevice, kernelVer, t.arch.name)
-	// TODO: Installation device /dev/vda from blueprint
-	efibootTreePipeline := *simplifiedInstallerEFIBootTreePipeline("/dev/vda", kernelVer, t.Arch().Name())
-	pipelines = append(pipelines, efibootTreePipeline)
-	bootISOTreePipeline := simplifiedInstallerBootISOTreePipeline(xzArchivePipeline.Name, kernelVer)
-	pipelines = append(pipelines, *bootISOTreePipeline)
+	// create boot ISO with raw image
+	pipelines = append(pipelines, *anacondaTreePipeline(repos, installerPackages, kernelVer, t.Arch().Name(), imagePayloadStages()))
+	pipelines = append(pipelines, *bootISOTreePipeline(kernelVer, t.Arch().Name(), ostreeKickstartStageOptions("file://"+ostreeRepoPath, options.OSTree.Ref)))
 	pipelines = append(pipelines, *bootISOPipeline(t.Filename(), t.Arch().Name()))
-
 	return pipelines, nil
 }
+
+//func edgeSimplifiedInstallerPipelines(t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, repos []rpmmd.RepoConfig, packageSetSpecs map[string][]rpmmd.PackageSpec, rng *rand.Rand) ([]osbuild.Pipeline, error) {
+//	pipelines := make([]osbuild.Pipeline, 0)
+//	pipelines = append(pipelines, *buildPipeline(repos, packageSetSpecs[buildPkgsKey]))
+//	installerPackages := packageSetSpecs[installerPkgsKey]
+//	imgName := "disk.img"
+//	imgNameCompressed := "disk.img.xz"
+//	ostreeRepoPath := "/ostree/repo"
+
+//	if options.Size == 0 {
+//		options.Size = 10737418240
+//	}
+//	partitionTable := edgePartitionTable(options, t.arch, rng)
+//	kernelVer := kernelVerStr(installerPackages, "kernel", t.Arch().Name())
+
+//	imageTreePipeline := *ostreeDeployPipeline(&partitionTable, kernelVer, customizations.GetKernel(), t.arch, t.supportsUEFI(), t.kernelOptions, rng, options, ostreePayloadStages(options, ostreeRepoPath))
+//	pipelines = append(pipelines, imageTreePipeline)
+//	imagePipeline := *simplifiedInstallerImagePipeline(imgName, imageTreePipeline.Name, &partitionTable, t.arch)
+//	pipelines = append(pipelines, imagePipeline)
+//	xzArchivePipeline := *xzArchivePipeline(imagePipeline.Name, imgName, imgNameCompressed)
+//	pipelines = append(pipelines, xzArchivePipeline)
+//	installerTreePipeline := *simplifiedInstallerTreePipeline(repos, installerPackages, kernelVer, t.Arch().Name())
+//	pipelines = append(pipelines, installerTreePipeline)
+//	//	efibootTreePipeline := *simplifiedInstallerEFIBootTreePipeline(options.InstallationDevice, kernelVer, t.arch.name)
+//	// TODO: Installation device /dev/vda from blueprint
+//	efibootTreePipeline := *simplifiedInstallerEFIBootTreePipeline("/dev/vda", kernelVer, t.Arch().Name())
+//	pipelines = append(pipelines, efibootTreePipeline)
+//	bootISOTreePipeline := simplifiedInstallerBootISOTreePipeline(xzArchivePipeline.Name, kernelVer)
+//	pipelines = append(pipelines, *bootISOTreePipeline)
+//	pipelines = append(pipelines, *bootISOPipeline(t.Filename(), t.Arch().Name()))
+
+//	return pipelines, nil
+//}
 
 func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver string) *osbuild.Pipeline {
 	p := new(osbuild.Pipeline)
@@ -1029,20 +1077,24 @@ func simplifiedInstallerImagePipeline(outputFilename, inputPipelineName string, 
 	return p
 }
 
-func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer string, kernel *blueprint.KernelCustomization, arch *architecture, uefi bool, kernelOptions string, rng *rand.Rand, options distro.ImageOptions, payloadStages []*osbuild.Stage) *osbuild.Pipeline {
+func ostreeDeployPipeline(
+	t *imageType,
+	pt *disk.PartitionTable,
+	repoPath string,
+	kernel *blueprint.KernelCustomization,
+	kernelVer string,
+	rng *rand.Rand,
+	options distro.ImageOptions,
+) *osbuild.Pipeline {
+
 	p := new(osbuild.Pipeline)
 	p.Name = "image-tree"
 	p.Build = "name:build"
-	repo := "/ostree/repo"
 	osname := "redhat"
-
-	for _, stage := range payloadStages {
-		p.AddStage(stage)
-	}
 
 	p.AddStage(osbuild.OSTreeInitFsStage())
 	p.AddStage(osbuild.NewOSTreePullStage(
-		&osbuild.OSTreePullStageOptions{Repo: repo},
+		&osbuild.OSTreePullStageOptions{Repo: repoPath},
 		ostreePullStageInputs("org.osbuild.source", options.OSTree.Parent, options.OSTree.Ref),
 	))
 	p.AddStage(osbuild.NewOSTreeOsInitStage(
@@ -1050,7 +1102,7 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 			OSName: osname,
 		},
 	))
-	p.AddStage(osbuild.NewOSTreeConfigStage(ostreeConfigStageOptions(repo, true)))
+	p.AddStage(osbuild.NewOSTreeConfigStage(ostreeConfigStageOptions(repoPath, true)))
 	p.AddStage(osbuild.NewMkdirStage(efiMkdirStageOptions()))
 	p.AddStage(osbuild.NewOSTreeDeployStage(
 		&osbuild.OSTreeDeployStageOptions{
@@ -1086,6 +1138,8 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 	}
 	p.AddStage(osbuild2.NewFSTabStage(fstabOptions))
 
+	// TODO: Add users
+
 	p.AddStage(osbuild.NewOSTreeSelinuxStage(
 		&osbuild.OSTreeSelinuxStageOptions{
 			Deployment: osbuild.OSTreeDeployment{
@@ -1094,9 +1148,7 @@ func simplifiedInstallerImageTreePipeline(pt *disk.PartitionTable, kernelVer str
 			},
 		},
 	))
-	grub2Options := grub2StageOptions(pt.RootPartition(), kernelOptions, kernel, kernelVer, uefi, arch.legacy)
-	grub2Options.UEFI.Install = common.BoolToPtr(true)
-	p.AddStage(osbuild.NewGRUB2Stage(grub2Options))
+	p.AddStage(bootloaderConfigStage(t, *pt, kernel, kernelVer))
 	return p
 }
 
@@ -1265,6 +1317,23 @@ func qemuPipeline(inputPipelineName, inputFilename, outputFilename, format, qcow
 
 	qemuStage := osbuild.NewQEMUStage(qemuStageOptions(outputFilename, format, qcow2Compat), qemuStageInputs(inputPipelineName, inputFilename))
 	p.AddStage(qemuStage)
+	return p
+}
+
+func xzImagePipeline(inputPipeline, inputFile, outputFile string) *osbuild.Pipeline {
+	p := new(osbuild.Pipeline)
+	p.Name = "image-xz"
+	p.Build = "name:build"
+
+	options := &osbuild.XzStageOptions{
+		Filename: outputFile,
+	}
+
+	refs := osbuild.NewFilesInputReferencesPipeline(inputPipeline, inputFile)
+	input := osbuild.NewFilesInput(refs)
+	inputs := osbuild.FilesInputs{File: input}
+	xzStage := osbuild.NewXzStage(options, inputs)
+	p.AddStage(xzStage)
 	return p
 }
 

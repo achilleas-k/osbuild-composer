@@ -306,13 +306,13 @@ func xorrisofsStageOptions(filename string, arch string) *osbuild.XorrisofsStage
 	return &osbuild.XorrisofsStageOptions{
 		Filename: filename,
 		VolID:    fmt.Sprintf("RHEL-8-5-0-BaseOS-%s", arch),
-		// SysID:    "LINUX",
-		// Boot: osbuild.XorrisofsBoot{
-		// 	Image:   "isolinux/isolinux.bin",
-		// 	Catalog: "isolinux/boot.cat",
-		// },
-		EFI: "images/efiboot.img",
-		// IsohybridMBR: "/usr/share/syslinux/isohdpfx.bin",
+		SysID:    "LINUX",
+		Boot: &osbuild.XorrisofsBoot{
+			Image:   "isolinux/isolinux.bin",
+			Catalog: "isolinux/boot.cat",
+		},
+		EFI:          "images/efiboot.img",
+		IsohybridMBR: "/usr/share/syslinux/isohdpfx.bin",
 	}
 }
 

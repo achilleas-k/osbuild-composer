@@ -603,7 +603,7 @@ func newDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
 		enabledServices: edgeServices,
 		rpmOstree:       true,
 		bootISO:         true,
-		pipelines:       edgeSimplifiedInstallerPipelines,
+		pipelines:       edgeSimplifiedInstallerPipelinesTake2,
 		exports:         []string{"bootiso"},
 	}
 
