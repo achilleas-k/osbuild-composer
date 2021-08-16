@@ -557,6 +557,7 @@ func newDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
 		enabledServices: edgeServices,
 		rpmOstree:       true,
 		bootISO:         false,
+		bootable:        true,
 		pipelines:       edgeContainerPipelines,
 		exports:         []string{containerPkgsKey},
 	}
@@ -601,7 +602,9 @@ func newDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
 			installerPkgsKey: edgeSimplifiedInstallerPackageSet(),
 		},
 		enabledServices: edgeServices,
+		defaultSize:     10 * GigaByte,
 		rpmOstree:       true,
+		bootable:        true,
 		bootISO:         true,
 		pipelines:       edgeSimplifiedInstallerPipelinesTake2,
 		exports:         []string{"bootiso"},

@@ -41,7 +41,7 @@ func qcow2Pipelines(t *imageType, customizations *blueprint.Customizations, opti
 	}
 	treePipeline.AddStage(osbuild.NewFSTabStage(partitionTable.FSTabStageOptionsV2()))
 	kernelVer := kernelVerStr(packageSetSpecs[blueprintPkgsKey], customizations.GetKernel().Name, t.Arch().Name())
-	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer))
+	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer, false))
 	treePipeline.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	pipelines = append(pipelines, *treePipeline)
 
@@ -78,7 +78,7 @@ func vhdPipelines(t *imageType, customizations *blueprint.Customizations, option
 	partitionTable := defaultPartitionTable(options, t.arch, rng)
 	treePipeline.AddStage(osbuild.NewFSTabStage(partitionTable.FSTabStageOptionsV2()))
 	kernelVer := kernelVerStr(packageSetSpecs[blueprintPkgsKey], customizations.GetKernel().Name, t.Arch().Name())
-	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer))
+	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer, false))
 	treePipeline.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	pipelines = append(pipelines, *treePipeline)
 
@@ -105,7 +105,7 @@ func vmdkPipelines(t *imageType, customizations *blueprint.Customizations, optio
 	partitionTable := defaultPartitionTable(options, t.arch, rng)
 	treePipeline.AddStage(osbuild.NewFSTabStage(partitionTable.FSTabStageOptionsV2()))
 	kernelVer := kernelVerStr(packageSetSpecs[blueprintPkgsKey], customizations.GetKernel().Name, t.Arch().Name())
-	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer))
+	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer, false))
 	treePipeline.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	pipelines = append(pipelines, *treePipeline)
 
@@ -132,7 +132,7 @@ func openstackPipelines(t *imageType, customizations *blueprint.Customizations, 
 	partitionTable := defaultPartitionTable(options, t.arch, rng)
 	treePipeline.AddStage(osbuild.NewFSTabStage(partitionTable.FSTabStageOptionsV2()))
 	kernelVer := kernelVerStr(packageSetSpecs[blueprintPkgsKey], customizations.GetKernel().Name, t.Arch().Name())
-	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer))
+	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer, false))
 	treePipeline.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	pipelines = append(pipelines, *treePipeline)
 
@@ -410,7 +410,7 @@ func ec2CommonPipelines(t *imageType, customizations *blueprint.Customizations, 
 
 	treePipeline.AddStage(osbuild.NewFSTabStage(partitionTable.FSTabStageOptionsV2()))
 	kernelVer := kernelVerStr(packageSetSpecs[blueprintPkgsKey], customizations.GetKernel().Name, t.Arch().Name())
-	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer))
+	treePipeline.AddStage(bootloaderConfigStage(t, partitionTable, customizations.GetKernel(), kernelVer, false))
 	// The last stage must be the SELinux stage
 	treePipeline.AddStage(osbuild.NewSELinuxStage(selinuxStageOptions(false)))
 	pipelines = append(pipelines, *treePipeline)
@@ -813,7 +813,7 @@ func edgeSimplifiedInstallerPipelinesTake2(t *imageType, customizations *bluepri
 	imgNameXz := imgName + ".xz"
 	ostreeRepoPath := "/ostree/repo"
 
-	partitionTable := defaultPartitionTable(options, t.arch, rng)
+	partitionTable := edgePartitionTable(options, t.arch, rng)
 
 	// prepare ostree deployment tree
 	treePipeline := ostreeDeployPipeline(t, &partitionTable, ostreeRepoPath, customizations.GetKernel(), kernelVer, rng, options)
@@ -946,8 +946,7 @@ func simplifiedInstallerBootISOTreePipeline(archivePipelineName, kver string) *o
 		VolID: "7B7795E7",
 		Label: "COI",
 	}
-	devices := &osbuild.MkfsFATStageDevices{Device: *stageDevice}
-	stage := osbuild.NewMkfsFATStage(options, devices)
+	stage := osbuild.NewMkfsFATStage(options, stageDevice)
 	p.AddStage(stage)
 
 	inputName := "root-tree"
@@ -1058,8 +1057,8 @@ func simplifiedInstallerImagePipeline(outputFilename, inputPipelineName string, 
 
 	loopback := osbuild.NewLoopbackDevice(&osbuild.LoopbackDeviceOptions{Filename: outputFilename})
 	p.AddStage(osbuild.NewTruncateStage(&osbuild.TruncateStageOptions{Filename: outputFilename, Size: fmt.Sprintf("%d", pt.Size)}))
-	sfOptions, sfDevices := sfdiskStageOptions(pt, loopback)
-	p.AddStage(osbuild.NewSfdiskStage(sfOptions, sfDevices))
+	sfOptions := sfdiskStageOptions(pt)
+	p.AddStage(osbuild.NewSfdiskStage(sfOptions, loopback))
 
 	for _, stage := range mkfsStages(pt, loopback) {
 		p.AddStage(stage)
@@ -1138,7 +1137,9 @@ func ostreeDeployPipeline(
 	}
 	p.AddStage(osbuild2.NewFSTabStage(fstabOptions))
 
-	// TODO: Add users
+	// TODO: Add users?
+
+	p.AddStage(bootloaderConfigStage(t, *pt, kernel, kernelVer, true))
 
 	p.AddStage(osbuild.NewOSTreeSelinuxStage(
 		&osbuild.OSTreeSelinuxStageOptions{
@@ -1148,7 +1149,6 @@ func ostreeDeployPipeline(
 			},
 		},
 	))
-	p.AddStage(bootloaderConfigStage(t, *pt, kernel, kernelVer))
 	return p
 }
 
@@ -1337,7 +1337,7 @@ func xzImagePipeline(inputPipeline, inputFile, outputFile string) *osbuild.Pipel
 	return p
 }
 
-func bootloaderConfigStage(t *imageType, partitionTable disk.PartitionTable, kernel *blueprint.KernelCustomization, kernelVer string) *osbuild.Stage {
+func bootloaderConfigStage(t *imageType, partitionTable disk.PartitionTable, kernel *blueprint.KernelCustomization, kernelVer string, install bool) *osbuild.Stage {
 	if t.arch.name == s390xArchName {
 		return osbuild.NewZiplStage(new(osbuild.ZiplStageOptions))
 	}
@@ -1345,7 +1345,7 @@ func bootloaderConfigStage(t *imageType, partitionTable disk.PartitionTable, ker
 	kernelOptions := t.kernelOptions
 	uefi := t.supportsUEFI()
 	legacy := t.arch.legacy
-	return osbuild.NewGRUB2Stage(grub2StageOptions(partitionTable.RootPartition(), partitionTable.BootPartition(), kernelOptions, kernel, kernelVer, uefi, legacy))
+	return osbuild.NewGRUB2Stage(grub2StageOptions(partitionTable.RootPartition(), partitionTable.BootPartition(), kernelOptions, kernel, kernelVer, uefi, legacy, install))
 }
 
 func bootloaderInstStage(filename string, pt *disk.PartitionTable, arch *architecture, kernelVer string, devices *osbuild.Devices, mounts *osbuild.Mounts, disk *osbuild.Device) *osbuild.Stage {
