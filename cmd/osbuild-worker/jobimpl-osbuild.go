@@ -84,6 +84,10 @@ func (impl *OSBuildJobImpl) Run(job worker.Job) error {
 	if err != nil {
 		return err
 	}
+
+	// copy pipeline info to the result
+	osbuildJobResult.PipelineNames = args.PipelineNames
+
 	// The specification allows multiple upload targets because it is an array, but we don't support it.
 	// Return an error to osbuild-composer.
 	if len(args.Targets) > 1 {
@@ -110,7 +114,13 @@ func (impl *OSBuildJobImpl) Run(job worker.Job) error {
 	}
 
 	// Include pipeline stages output inside the worker's logs.
-	for pipelineName, pipelineLog := range osbuildJobResult.OSBuildOutput.Log {
+	// Order pipelines based on PipelineNames from job
+	for _, pipelineName := range osbuildJobResult.PipelineNames.All() {
+		pipelineLog, hasLog := osbuildJobResult.OSBuildOutput.Log[pipelineName]
+		if !hasLog {
+			// no pipeline output
+			continue
+		}
 		log.Printf("%s pipeline results:\n", pipelineName)
 		for _, stageResult := range pipelineLog {
 			if stageResult.Success {
