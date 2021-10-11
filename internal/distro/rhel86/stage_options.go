@@ -88,15 +88,20 @@ func usersFirstBootOptions(usersStageOptions *osbuild.UsersStageOptions) *osbuil
 	cmds := make([]string, 0, 3*len(usersStageOptions.Users)+1)
 	// workaround for creating authorized_keys file for user
 	varhome := filepath.Join("/var", "home")
+	roothome := filepath.Join("/var", "roothome")
 	for name, user := range usersStageOptions.Users {
 		if user.Key != nil {
 			sshdir := filepath.Join(varhome, name, ".ssh")
+			// special case for user 'root'
+			if name == "root" {
+				sshdir = filepath.Join(roothome, ".ssh")
+			}
 			cmds = append(cmds, fmt.Sprintf("mkdir -p %s", sshdir))
 			cmds = append(cmds, fmt.Sprintf("sh -c 'echo %q >> %q'", *user.Key, filepath.Join(sshdir, "authorized_keys")))
 			cmds = append(cmds, fmt.Sprintf("chown %s:%s -Rc %s", name, name, sshdir))
 		}
 	}
-	cmds = append(cmds, fmt.Sprintf("restorecon -rvF %s", varhome))
+	cmds = append(cmds, fmt.Sprintf("restorecon -rvF %s %s", varhome, roothome))
 	options := &osbuild.FirstBootStageOptions{
 		Commands:       cmds,
 		WaitForNetwork: false,
