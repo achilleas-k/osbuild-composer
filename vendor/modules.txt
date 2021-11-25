@@ -1,5 +1,4 @@
 # cloud.google.com/go v0.94.1
-## explicit
 cloud.google.com/go
 cloud.google.com/go/compute/metadata
 cloud.google.com/go/iam
@@ -9,7 +8,7 @@ cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
 cloud.google.com/go/longrunning
 cloud.google.com/go/longrunning/autogen
-# cloud.google.com/go/cloudbuild v0.2.0
+# cloud.google.com/go/cloudbuild v1.0.0
 ## explicit
 cloud.google.com/go/cloudbuild/apiv1
 # cloud.google.com/go/storage v1.16.1
@@ -438,7 +437,7 @@ golang.org/x/text/unicode/norm
 golang.org/x/text/width
 # golang.org/x/time v0.0.0-20201208040808-7e3f01d25324
 golang.org/x/time/rate
-# google.golang.org/api v0.56.0
+# google.golang.org/api v0.57.0
 ## explicit
 google.golang.org/api/compute/v1
 google.golang.org/api/googleapi
@@ -469,7 +468,7 @@ google.golang.org/appengine/internal/socket
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/socket
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20210903162649-d08c68adba83
+# google.golang.org/genproto v0.0.0-20210921142501-181ce0d877f6
 ## explicit
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
