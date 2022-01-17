@@ -37,6 +37,7 @@ const (
 	ErrorMethodNotAllowed             ServiceErrorCode = 22
 	ErrorNotAcceptable                ServiceErrorCode = 23
 	ErrorNoBaseURLInPayloadRepository ServiceErrorCode = 24
+	ErrorInvalidOSTreeParams          ServiceErrorCode = 25
 
 	// Internal errors, these are bugs
 	ErrorFailedToInitializeBlueprint              ServiceErrorCode = 1000
@@ -97,6 +98,7 @@ func getServiceErrors() serviceErrors {
 		serviceError{ErrorMethodNotAllowed, http.StatusMethodNotAllowed, "Requested method isn't supported for resource"},
 		serviceError{ErrorNotAcceptable, http.StatusNotAcceptable, "Only 'application/json' content is supported"},
 		serviceError{ErrorNoBaseURLInPayloadRepository, http.StatusBadRequest, "BaseURL must be specified for payload repositories"},
+		serviceError{ErrorInvalidOSTreeParams, http.StatusBadRequest, "Invalid OSTree parameters or parameter combination"},
 
 		serviceError{ErrorFailedToInitializeBlueprint, http.StatusInternalServerError, "Failed to initialize blueprint"},
 		serviceError{ErrorFailedToGenerateManifestSeed, http.StatusInternalServerError, "Failed to generate manifest seed"},
