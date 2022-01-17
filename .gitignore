@@ -8,3 +8,6 @@ __pycache__
 /rpmbuild
 
 /tools/appsre-ansible/inventory
+
+coverage
+coverage.html
