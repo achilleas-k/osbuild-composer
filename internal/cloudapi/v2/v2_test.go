@@ -15,6 +15,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/distro/test_distro"
 	distro_mock "github.com/osbuild/osbuild-composer/internal/mocks/distro"
 	rpmmd_mock "github.com/osbuild/osbuild-composer/internal/mocks/rpmmd"
+	"github.com/osbuild/osbuild-composer/internal/ostree/mock_ostree_repo"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/test"
 	"github.com/osbuild/osbuild-composer/internal/worker"
@@ -130,6 +131,12 @@ func TestCompose(t *testing.T) {
 	defer os.RemoveAll(dir)
 	srv, _, cancel := newV2Server(t, dir)
 	defer cancel()
+
+	// create two ostree repos, one to serve the default test_distro ref (for fallback tests) and one to serve a custom ref
+	ostreeRepoDefault := mock_ostree_repo.Setup(test_distro.New().OSTreeRef())
+	defer ostreeRepoDefault.TearDown()
+	ostreeRepoOther := mock_ostree_repo.Setup("some/other/ref")
+	defer ostreeRepoOther.TearDown()
 
 	// unsupported distribution
 	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
@@ -248,7 +255,9 @@ func TestCompose(t *testing.T) {
 		"kind": "ComposeId"
 	}`, "id")
 
-	// ostree parameters
+	// ostree parameters (success)
+
+	// ref only
 	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
 	{
 		"distribution": "%s",
@@ -272,7 +281,109 @@ func TestCompose(t *testing.T) {
 		"kind": "ComposeId"
 	}`, "id")
 
+	// url only (must use ostreeRepoDefault for default ref)
+	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
+	{
+		"distribution": "%s",
+		"image_request":{
+			"architecture": "%s",
+			"image_type": "edge-commit",
+			"repositories": [{
+				"baseurl": "somerepo.org",
+				"rhsm": false
+			}],
+			"upload_options": {
+				"region": "eu-central-1"
+			},
+			"ostree": {
+				"url": "%s"
+			}
+		 }
+	}`, test_distro.TestDistroName, test_distro.TestArch3Name, ostreeRepoDefault.Server.URL), http.StatusCreated, `
+	{
+		"href": "/api/image-builder-composer/v2/compose",
+		"kind": "ComposeId"
+	}`, "id")
+
+	// ref + url
+	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
+	{
+		"distribution": "%s",
+		"image_request":{
+			"architecture": "%s",
+			"image_type": "edge-commit",
+			"repositories": [{
+				"baseurl": "somerepo.org",
+				"rhsm": false
+			}],
+			"upload_options": {
+				"region": "eu-central-1"
+			},
+			"ostree": {
+				"ref": "%s",
+				"url": "%s"
+			}
+		 }
+	}`, test_distro.TestDistroName, test_distro.TestArch3Name, ostreeRepoDefault.OSTreeRef, ostreeRepoDefault.Server.URL), http.StatusCreated, `
+	{
+		"href": "/api/image-builder-composer/v2/compose",
+		"kind": "ComposeId"
+	}`, "id")
+
+	// parent + url
+	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
+	{
+		"distribution": "%s",
+		"image_request":{
+			"architecture": "%s",
+			"image_type": "edge-commit",
+			"repositories": [{
+				"baseurl": "somerepo.org",
+				"rhsm": false
+			}],
+			"upload_options": {
+				"region": "eu-central-1"
+			},
+			"ostree": {
+				"parent": "%s",
+				"url": "%s"
+			}
+		 }
+	}`, test_distro.TestDistroName, test_distro.TestArch3Name, ostreeRepoDefault.OSTreeRef, ostreeRepoDefault.Server.URL), http.StatusCreated, `
+	{
+		"href": "/api/image-builder-composer/v2/compose",
+		"kind": "ComposeId"
+	}`, "id")
+
+	// ref + parent + url
+	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
+	{
+		"distribution": "%s",
+		"image_request":{
+			"architecture": "%s",
+			"image_type": "edge-commit",
+			"repositories": [{
+				"baseurl": "somerepo.org",
+				"rhsm": false
+			}],
+			"upload_options": {
+				"region": "eu-central-1"
+			},
+			"ostree": {
+				"parent": "%s",
+				"url": "%s",
+				"ref": "a/new/ref"
+			}
+		 }
+	}`, test_distro.TestDistroName, test_distro.TestArch3Name, ostreeRepoOther.OSTreeRef, ostreeRepoOther.Server.URL), http.StatusCreated, `
+	{
+		"href": "/api/image-builder-composer/v2/compose",
+		"kind": "ComposeId"
+	}`, "id")
+
 	// ostree errors
+
+	// bad url
 	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
 	{
 		"distribution": "%s",
@@ -300,6 +411,7 @@ func TestCompose(t *testing.T) {
 		"reason": "Error resolving OSTree repo"
 	}`, "operation_id")
 
+	// bad ref
 	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
 	{
 		"distribution": "%s",
@@ -314,8 +426,7 @@ func TestCompose(t *testing.T) {
 				"region": "eu-central-1"
 			},
 			"ostree": {
-				"ref": "/bad/ref",
-				"url": "http://example.org"
+				"ref": "/bad/ref"
 			}
 		 }
 	}`, test_distro.TestDistroName, test_distro.TestArch3Name), http.StatusBadRequest, `
@@ -327,6 +438,7 @@ func TestCompose(t *testing.T) {
 		"reason": "Invalid OSTree ref"
 	}`, "operation_id")
 
+	// bad parent ref
 	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
 	{
 		"distribution": "%s",
@@ -341,12 +453,12 @@ func TestCompose(t *testing.T) {
 				"region": "eu-central-1"
 			},
 			"ostree": {
-				"ref": "good/edge/ref",
-				"url": "http://example.org",
-				"parent": "aparent"
+				"ref": "%s",
+				"url": "%s",
+				"parent": "/bad/ref/number/2"
 			}
 		 }
-	}`, test_distro.TestDistroName, test_distro.TestArch3Name), http.StatusBadRequest, `
+	}`, test_distro.TestDistroName, test_distro.TestArch3Name, ostreeRepoDefault.OSTreeRef, ostreeRepoDefault.Server.URL), http.StatusBadRequest, `
 	{
 		"href": "/api/image-builder-composer/v2/errors/9",
 		"id": "9",
@@ -355,6 +467,7 @@ func TestCompose(t *testing.T) {
 		"reason": "Invalid OSTree ref"
 	}`, "operation_id")
 
+	// incorrect ref for URL
 	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
 	{
 		"distribution": "%s",
@@ -369,17 +482,44 @@ func TestCompose(t *testing.T) {
 				"region": "eu-central-1"
 			},
 			"ostree": {
-				"url": "http://example.org",
-				"parent": "aparent"
+				"url": "%s",
+				"parent": "incorrect/ref"
+			}
+		 }
+	}`, test_distro.TestDistroName, test_distro.TestArch3Name, ostreeRepoOther.Server.URL), http.StatusBadRequest, `
+	{
+		"href": "/api/image-builder-composer/v2/errors/10",
+		"id": "10",
+		"kind": "Error",
+		"code": "IMAGE-BUILDER-COMPOSER-10",
+		"reason": "Error resolving OSTree repo"
+	}`, "operation_id")
+
+	// parent ref without URL
+	test.TestRoute(t, srv.Handler("/api/image-builder-composer/v2"), false, "POST", "/api/image-builder-composer/v2/compose", fmt.Sprintf(`
+	{
+		"distribution": "%s",
+		"image_request":{
+			"architecture": "%s",
+			"image_type": "edge-commit",
+			"repositories": [{
+				"baseurl": "somerepo.org",
+				"rhsm": false
+			}],
+			"upload_options": {
+				"region": "eu-central-1"
+			},
+			"ostree": {
+				"parent": "some/ref"
 			}
 		 }
 	}`, test_distro.TestDistroName, test_distro.TestArch3Name), http.StatusBadRequest, `
 	{
-		"href": "/api/image-builder-composer/v2/errors/9",
-		"id": "9",
+		"href": "/api/image-builder-composer/v2/errors/25",
+		"id": "25",
 		"kind": "Error",
-		"code": "IMAGE-BUILDER-COMPOSER-9",
-		"reason": "Invalid OSTree ref"
+		"code": "IMAGE-BUILDER-COMPOSER-25",
+		"reason": "Invalid OSTree parameters or parameter combination"
 	}`, "operation_id")
 }
 
