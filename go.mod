@@ -17,7 +17,6 @@ require (
 	github.com/BurntSushi/toml v0.4.1
 	github.com/aws/aws-sdk-go v1.42.25
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/coreos/go-semver v0.3.0
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 	github.com/deepmap/oapi-codegen v1.8.2
@@ -38,9 +37,7 @@ require (
 	github.com/labstack/gommon v0.3.0
 	github.com/openshift-online/ocm-sdk-go v0.1.214
 	github.com/oracle/oci-go-sdk/v54 v54.0.0
-	github.com/prometheus/client_golang v1.11.0
-	github.com/prometheus/common v0.30.0 // indirect
-	github.com/prometheus/procfs v0.7.3 // indirect
+	github.com/prometheus/client_golang v1.12.1
 	github.com/segmentio/ksuid v1.0.4
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v0.0.3
@@ -49,7 +46,7 @@ require (
 	github.com/vmware/govmomi v0.26.1
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678
+	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
 	google.golang.org/api v0.58.0
 	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0
 	google.golang.org/protobuf v1.27.1
