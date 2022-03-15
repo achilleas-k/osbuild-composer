@@ -19,6 +19,7 @@ from multiprocessing import Lock
 import dnf
 import hawkey
 
+
 # Logging setup (to systemd if available)
 formatter = logging.Formatter(
     fmt="%(asctime)s %(name)s.%(levelname)s: %(message)s",
@@ -29,9 +30,6 @@ handler.setFormatter(formatter)
 log = logging.getLogger('dnf-json')
 log.addHandler(handler)
 log.setLevel(logging.INFO)
-
-# Synchronisation necessary for the multiprocess request handling.
-process_lock = Lock()
 
 
 class CacheState():
@@ -253,6 +251,10 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
     Answers Http requests to depsolve or dump packages.
     """
 
+    # Synchronisation necessary for the multiprocess request handling.
+    # Class property shared across all instances
+    _process_lock = Lock()
+
     def __init__(self, *args, **kwargs):
         self.cache_dir = None
         super().__init__(*args, **kwargs)
@@ -312,7 +314,7 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
 
         This method is multiprocess safe.
         """
-        with process_lock:
+        with self._process_lock:
             try:
                 content_len = int(self.headers.get('Content-Length'))
                 data = self.rfile.read(content_len)
@@ -381,17 +383,17 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
                 cache_state.store()
 
 
-log.info("Starting the dnf-json server")
-
-LISTEN_FDS = int(os.environ.get("LISTEN_FDS", 0))
-# set from entrypoint if differs from 3
-LISTEN_FD = int(os.environ.get("LISTEN_FD", 3))
-
-
 # The dnf-json web server has to use forks to serve the requests. Because the
 # dnf library is leaking memory in its Cpp side.
 class SystemDActivationSocketServer(socketserver.ForkingMixIn, socketserver.UnixStreamServer):
+
+    def __init__(self):
+        super().__init__('', DnfJsonRequestHandler)
+
     def server_bind(self):
+        LISTEN_FDS = int(os.environ.get("LISTEN_FDS", 0))
+        # set from entrypoint if differs from 3
+        LISTEN_FD = int(os.environ.get("LISTEN_FD", 3))
         log.debug("service bind")
         log.debug("rebind socket")
         log.debug("address_family: %d ", self.address_family)
@@ -401,6 +403,13 @@ class SystemDActivationSocketServer(socketserver.ForkingMixIn, socketserver.Unix
         self.socket = socket.fromfd(LISTEN_FD, self.address_family, self.socket_type)
 
 
-# start the web server
-server = SystemDActivationSocketServer('', DnfJsonRequestHandler)
-server.serve_forever()
+def daemon():
+
+    log.info("Starting the dnf-json server")
+    # start the web server
+    server = SystemDActivationSocketServer()
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    daemon()
