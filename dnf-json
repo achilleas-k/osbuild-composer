@@ -1,6 +1,15 @@
 #!/usr/bin/python3
 # pylint: disable=invalid-name
 
+"""
+A JSON-based interface for depsolving using DNF.
+
+By default it runs in daemon mode, meant to be run as a systemd service, and listens for requests on a socket.
+In interactive mode, it reads a request through stdin, prints the result to stdout, and exits.
+"""
+
+
+import argparse
 import hashlib
 import json
 import logging
@@ -21,12 +30,7 @@ import hawkey
 
 
 # Logging setup (to systemd if available)
-formatter = logging.Formatter(
-    fmt="%(asctime)s %(name)s.%(levelname)s: %(message)s",
-    datefmt="%Y.%m.%d %H:%M:%S"
-)
 handler = logging.StreamHandler(stream=sys.stdout)
-handler.setFormatter(formatter)
 log = logging.getLogger('dnf-json')
 log.addHandler(handler)
 log.setLevel(logging.INFO)
@@ -404,12 +408,36 @@ class SystemDActivationSocketServer(socketserver.ForkingMixIn, socketserver.Unix
 
 
 def daemon():
-
+    formatter = logging.Formatter(
+        fmt="%(asctime)s %(name)s.%(levelname)s: %(message)s",
+        datefmt="%Y.%m.%d %H:%M:%S"
+    )
+    handler.setFormatter(formatter)
     log.info("Starting the dnf-json server")
     # start the web server
     server = SystemDActivationSocketServer()
     server.serve_forever()
 
 
+def interactive():
+    pass
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--mode", "-m", dest="mode", type=str, default="daemon",
+                        help="run mode: 'daemon' or 'interactive'")
+    args = parser.parse_args()
+    mode = args.mode
+
+    if mode == "daemon":
+        daemon()
+    elif mode == "interactive":
+        interactive()
+    else:
+        print(f"invalid mode: {mode}")
+        sys.exit(1)
+
+
 if __name__ == "__main__":
-    daemon()
+    main()
