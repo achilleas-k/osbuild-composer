@@ -319,72 +319,27 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
         This method is multiprocess safe.
         """
         with self._process_lock:
+            request = {}
+            cache_state = None
             try:
                 content_len = int(self.headers.get('Content-Length'))
-                data = self.rfile.read(content_len)
-                call = json.loads(data.decode("utf-8"))
-                command = call["command"]
-                arguments = call["arguments"]
-                repos = arguments.get("repos", {})
-                arch = arguments["arch"]
-                module_platform_id = arguments["module_platform_id"]
-
-                # If dnf-json is run as a service, we don't want users to be able to set the cache
-                self.cache_dir = os.environ.get("OVERWRITE_CACHE_DIR", "")
-                if self.cache_dir:
-                    self.cache_dir = os.path.join(self.cache_dir, arch)
-                else:
-                    self.cache_dir = arguments.get("cachedir", "")
-
-                if not self.cache_dir:
-                    self.response_failure({"kind": "Error", "reason": "No cache dir set"})
+                request_raw = self.rfile.read(content_len)
+                request = json.loads(request_raw.decode("utf-8"))
+                self.cache_dir, err = setup_cachedir(request)
+                if err is not None:
+                    self.response_failure(err)
                 cache_state = CacheState.load(self.cache_dir)
-
-                with tempfile.TemporaryDirectory() as persistdir:
-                    try:
-                        solver = Solver(
-                            repos,
-                            module_platform_id,
-                            persistdir,
-                            self.cache_dir,
-                            arch
-                        )
-                        if command == "dump":
-                            self.response_success(solver.dump())
-                            log.info("dump success")
-                        elif command == "depsolve":
-                            self.response_success(
-                                solver.depsolve(
-                                    arguments["package-specs"],
-                                    arguments.get("exclude-specs", [])
-                                )
-                            )
-                            log.info("depsolve success")
-
-                    except dnf.exceptions.MarkingErrors as e:
-                        log.info("error install_specs")
-                        self.response_with_dnf_error(
-                            "MarkingErrors",
-                            f"Error occurred when marking packages for installation: {e}"
-                        )
-                    except dnf.exceptions.DepsolveError as e:
-                        log.info("error depsolve")
-                        self.response_with_dnf_error(
-                            "DepsolveError",
-                            (
-                                "There was a problem depsolving "
-                                f"{arguments['package-specs']}: {e}"
-                            )
-                        )
-                    except dnf.exceptions.Error as e:
-                        self.response_with_dnf_error(
-                            type(e).__name__,
-                            f"Error occurred when setting up repo: {e}")
+                result, err = solve(request, self.cache_dir)
+                if err is not None:
+                    self.response_with_dnf_error(*err)
+                else:
+                    self.response_success(result)
             finally:
-                for cache_folder in self.init_cache_folder_list(repos):
-                    cache_state.update_used(cache_folder)
-                cache_state.clean_unused()
-                cache_state.store()
+                if cache_state is not None:
+                    for cache_folder in self.init_cache_folder_list(request.get("repos", [])):
+                        cache_state.update_used(cache_folder)
+                    cache_state.clean_unused()
+                    cache_state.store()
 
 
 # The dnf-json web server has to use forks to serve the requests. Because the
@@ -405,6 +360,69 @@ class SystemDActivationSocketServer(socketserver.ForkingMixIn, socketserver.Unix
         if LISTEN_FDS > 1:
             log.warning("More than one LISTEN_FDS")
         self.socket = socket.fromfd(LISTEN_FD, self.address_family, self.socket_type)
+
+
+def setup_cachedir(request):
+    arguments = request["arguments"]
+    arch = arguments["arch"]
+    # If dnf-json is run as a service, we don't want users to be able to set the cache
+    cache_dir = os.environ.get("OVERWRITE_CACHE_DIR", "")
+    if cache_dir:
+        cache_dir = os.path.join(cache_dir, arch)
+    else:
+        cache_dir = arguments.get("cachedir", "")
+
+    if not cache_dir:
+        return "", {"kind": "Error", "reason": "No cache dir set"}
+
+    return cache_dir, None
+
+
+def solve(request, cache_dir):
+    command = request["command"]
+    arguments = request["arguments"]
+    repos = arguments.get("repos", {})
+    arch = arguments["arch"]
+    module_platform_id = arguments["module_platform_id"]
+
+    with tempfile.TemporaryDirectory() as persistdir:
+        try:
+            solver = Solver(
+                repos,
+                module_platform_id,
+                persistdir,
+                cache_dir,
+                arch
+            )
+            if command == "dump":
+                result = solver.dump()
+                log.info("dump success")
+            elif command == "depsolve":
+                result = solver.depsolve(
+                    arguments["package-specs"],
+                    arguments.get("exclude-specs", [])
+                )
+                log.info("depsolve success")
+            return result, None
+
+        except dnf.exceptions.MarkingErrors as e:
+            log.info("error install_specs")
+            return None, (
+                "MarkingErrors",
+                f"Error occurred when marking packages for installation: {e}"
+            )
+        except dnf.exceptions.DepsolveError as e:
+            log.info("error depsolve")
+            return None, (
+                "DepsolveError",
+                f"There was a problem depsolving {arguments['package-specs']}: {e}"
+            )
+        except dnf.exceptions.Error as e:
+            log.info("error repository setup")
+            return None, (
+                type(e).__name__,
+                f"Error occurred when setting up repo: {e}"
+            )
 
 
 def daemon():
