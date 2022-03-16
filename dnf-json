@@ -282,23 +282,9 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
     def _send(self):
         self.client_address = ('', 0)
 
-    def response_with_dnf_error(self, response):
+    def respond(self, code, response):
         self._send()
-        self.send_response(500)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps(response).encode("utf-8"))
-
-    def response_failure(self, response):
-        self._send()
-        self.send_response(500)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps(response).encode("utf-8"))
-
-    def response_success(self, response):
-        self._send()
-        self.send_response(200)
+        self.send_response(code)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
         self.wfile.write(json.dumps(response).encode("utf-8"))
@@ -326,13 +312,13 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
                 request = json.loads(request_raw.decode("utf-8"))
                 self.cache_dir, err = setup_cachedir(request)
                 if err is not None:
-                    self.response_failure(err)
+                    self.respond(500, err)
                 cache_state = CacheState.load(self.cache_dir)
                 result, err = solve(request, self.cache_dir)
                 if err is not None:
-                    self.response_with_dnf_error(err)
+                    self.respond(500, err)
                 else:
-                    self.response_success(result)
+                    self.respond(200, result)
             finally:
                 if cache_state is not None:
                     for cache_folder in self.init_cache_folder_list(request.get("repos", [])):
