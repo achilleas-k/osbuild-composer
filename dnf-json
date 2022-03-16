@@ -30,9 +30,7 @@ import hawkey
 
 
 # Logging setup (to systemd if available)
-handler = logging.StreamHandler(stream=sys.stdout)
 log = logging.getLogger('dnf-json')
-log.addHandler(handler)
 log.setLevel(logging.INFO)
 
 
@@ -415,15 +413,36 @@ def daemon():
         fmt="%(asctime)s %(name)s.%(levelname)s: %(message)s",
         datefmt="%Y.%m.%d %H:%M:%S"
     )
+    handler = logging.StreamHandler(stream=sys.stdout)
     handler.setFormatter(formatter)
+    log.addHandler(handler)
     log.info("Starting the dnf-json server")
     # start the web server
     server = SystemDActivationSocketServer()
     server.serve_forever()
 
 
+def fail(err):
+    log.error("%s: %s", err["kind"], err["reason"])
+    sys.exit(1)
+
+
+def respond(result):
+    print(json.dumps(result))
+
+
 def interactive():
-    pass
+    handler = logging.StreamHandler(stream=sys.stderr)
+    log.addHandler(handler)
+    request = json.load(sys.stdin)
+    cachedir, err = setup_cachedir(request)
+    if err is not None:
+        fail(err)
+    result, err = solve(request, cachedir)
+    if err is not None:
+        fail(err)
+    else:
+        respond(result)
 
 
 def main():
