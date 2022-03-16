@@ -282,27 +282,26 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
     def _send(self):
         self.client_address = ('', 0)
 
-    def response_with_dnf_error(self, kind: str, reason: str):
+    def response_with_dnf_error(self, response):
         self._send()
         self.send_response(500)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps({"kind": kind, "reason":
-                                     reason}).encode("utf-8"))
+        self.wfile.write(json.dumps(response).encode("utf-8"))
 
-    def response_failure(self, json_object):
+    def response_failure(self, response):
         self._send()
         self.send_response(500)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps(json_object).encode("utf-8"))
+        self.wfile.write(json.dumps(response).encode("utf-8"))
 
-    def response_success(self, json_object):
+    def response_success(self, response):
         self._send()
         self.send_response(200)
         self.send_header("Content-Type", "application/json")
         self.end_headers()
-        self.wfile.write(json.dumps(json_object).encode("utf-8"))
+        self.wfile.write(json.dumps(response).encode("utf-8"))
 
     def do_POST(self):
         """
@@ -331,7 +330,7 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
                 cache_state = CacheState.load(self.cache_dir)
                 result, err = solve(request, self.cache_dir)
                 if err is not None:
-                    self.response_with_dnf_error(*err)
+                    self.response_with_dnf_error(err)
                 else:
                     self.response_success(result)
             finally:
@@ -407,22 +406,22 @@ def solve(request, cache_dir):
 
         except dnf.exceptions.MarkingErrors as e:
             log.info("error install_specs")
-            return None, (
-                "MarkingErrors",
-                f"Error occurred when marking packages for installation: {e}"
-            )
+            return None, {
+                "kind": "MarkingErrors",
+                "reason": f"Error occurred when marking packages for installation: {e}"
+            }
         except dnf.exceptions.DepsolveError as e:
             log.info("error depsolve")
-            return None, (
-                "DepsolveError",
-                f"There was a problem depsolving {arguments['package-specs']}: {e}"
-            )
+            return None, {
+                "kind": "DepsolveError",
+                "reason": f"There was a problem depsolving {arguments['package-specs']}: {e}"
+            }
         except dnf.exceptions.Error as e:
             log.info("error repository setup")
-            return None, (
-                type(e).__name__,
-                f"Error occurred when setting up repo: {e}"
-            )
+            return None, {
+                "kind": type(e).__name__,
+                "reason":    f"Error occurred when setting up repo: {e}"
+            }
 
 
 def daemon():
