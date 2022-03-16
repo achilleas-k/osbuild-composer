@@ -308,6 +308,9 @@ class DnfJsonRequestHandler(BaseHTTPRequestHandler):
                 content_len = int(self.headers.get('Content-Length'))
                 request_raw = self.rfile.read(content_len)
                 request = json.loads(request_raw.decode("utf-8"))
+                err = validate_request(request)
+                if err is not None:
+                    self.respond(400, err)  # bad request
                 self.cache_dir, err = setup_cachedir(request)
                 if err is not None:
                     self.respond(500, err)
@@ -364,7 +367,7 @@ def setup_cachedir(request):
 def solve(request, cache_dir):
     command = request["command"]
     arguments = request["arguments"]
-    repos = arguments.get("repos", {})
+    repos = arguments["repos"]
     arch = arguments["arch"]
     module_platform_id = arguments["module_platform_id"]
 
@@ -431,10 +434,53 @@ def respond(result):
     print(json.dumps(result))
 
 
+def validate_request(request):
+    command = request.get("command")
+    if command not in ("depsolve", "dump"):
+        return {
+            "kind": "InvalidRequest",
+            "reason": "invalid command '{command}': must be either 'depsolve' or 'dump'"
+        }
+
+    arguments = request.get("arguments")
+    if not arguments:
+        return {
+            "kind": "InvalidRequest",
+            "reason": "empty 'arguments'"
+        }
+
+    repos = arguments.get("repos")
+    if not repos:
+        return {
+            "kind": "InvalidRequest",
+            "reason": "no 'repos' specified"
+        }
+
+    arch = arguments.get("arch")
+    if not arch:
+        return {
+            "kind": "InvalidRequest",
+            "reason": "no 'arch' specified"
+        }
+
+    module_platform_id = arguments.get("module_platform_id")
+    if not module_platform_id:
+        return {
+            "kind": "InvalidRequest",
+            "reason": "no 'module_platform_id' specified"
+        }
+    return None
+
+
 def interactive():
     handler = logging.StreamHandler(stream=sys.stderr)
     log.addHandler(handler)
+
     request = json.load(sys.stdin)
+    err = validate_request(request)
+    if err is not None:
+        fail(err)
+
     cachedir, err = setup_cachedir(request)
     if err is not None:
         fail(err)
