@@ -113,6 +113,30 @@ func ReposFromRPMMD(rpmRepos []rpmmd.RepoConfig, arch string, releaseVer string)
 	return dnfRepos, nil
 }
 
+func DepsToRPMMD(dependencies []PackageSpec, repos []rpmmd.RepoConfig) []rpmmd.PackageSpec {
+	rpmDependencies := make([]rpmmd.PackageSpec, len(dependencies))
+	for i, dep := range dependencies {
+		id, err := strconv.Atoi(dep.RepoID)
+		if err != nil {
+			panic(err)
+		}
+		repo := repos[id]
+		dep := dependencies[i]
+		rpmDependencies[i].Name = dep.Name
+		rpmDependencies[i].Epoch = dep.Epoch
+		rpmDependencies[i].Version = dep.Version
+		rpmDependencies[i].Release = dep.Release
+		rpmDependencies[i].Arch = dep.Arch
+		rpmDependencies[i].RemoteLocation = dep.RemoteLocation
+		rpmDependencies[i].Checksum = dep.Checksum
+		rpmDependencies[i].CheckGPG = repo.CheckGPG
+		if repo.RHSM {
+			rpmDependencies[i].Secrets = "org.osbuild.rhsm"
+		}
+	}
+	return rpmDependencies
+}
+
 // Request command and arguments for dnf-json
 type Request struct {
 	Command   string    `json:"command"`
