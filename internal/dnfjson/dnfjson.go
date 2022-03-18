@@ -6,6 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
+
+	"github.com/osbuild/osbuild-composer/internal/rhsm"
+	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
 // Solver is configured with a set of repositories and system information in
@@ -71,6 +75,42 @@ type RepoConfig struct {
 	SSLClientKey   string `json:"sslclientkey,omitempty"`
 	SSLClientCert  string `json:"sslclientcert,omitempty"`
 	MetadataExpire string `json:"metadata_expire,omitempty"`
+}
+
+// ReposFromRPMMD converts an rpmmd.RepoConfig to a RepoConfig. If the
+// repository requires a subscription, the system subscriptions are loaded and
+// included in the new configs.
+func ReposFromRPMMD(rpmRepos []rpmmd.RepoConfig, arch string, releaseVer string) ([]RepoConfig, error) {
+	subscriptions, _ := rhsm.LoadSystemSubscriptions()
+	dnfRepos := make([]RepoConfig, len(rpmRepos))
+	for idx, rr := range rpmRepos {
+		id := strconv.Itoa(idx)
+		dr := RepoConfig{
+			ID:             id,
+			Name:           rr.Name,
+			BaseURL:        rr.BaseURL,
+			Metalink:       rr.Metalink,
+			MirrorList:     rr.MirrorList,
+			GPGKey:         rr.GPGKey,
+			IgnoreSSL:      rr.IgnoreSSL,
+			MetadataExpire: rr.MetadataExpire,
+		}
+		if rr.RHSM {
+			if subscriptions == nil {
+				return nil, fmt.Errorf("This system does not have any valid subscriptions. Subscribe it before specifying rhsm: true in sources.")
+			}
+			secrets, err := subscriptions.GetSecretsForBaseurl(rr.BaseURL, arch, releaseVer)
+			if err != nil {
+				return nil, fmt.Errorf("RHSM secrets not found on the host for this baseurl: %s", rr.BaseURL)
+			}
+			dr.SSLCACert = secrets.SSLCACert
+			dr.SSLClientKey = secrets.SSLClientKey
+			dr.SSLClientCert = secrets.SSLClientCert
+
+		}
+		dnfRepos[idx] = dr
+	}
+	return dnfRepos, nil
 }
 
 // Request command and arguments for dnf-json
