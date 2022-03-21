@@ -179,14 +179,13 @@ class Solver():
 
 
 def setup_cachedir(request):
-    arguments = request["arguments"]
-    arch = arguments["arch"]
+    arch = request["arch"]
     # If dnf-json is run as a service, we don't want users to be able to set the cache
     cache_dir = os.environ.get("OVERWRITE_CACHE_DIR", "")
     if cache_dir:
         cache_dir = os.path.join(cache_dir, arch)
     else:
-        cache_dir = arguments.get("cachedir", "")
+        cache_dir = request.get("cachedir", "")
 
     if not cache_dir:
         return "", {"kind": "Error", "reason": "No cache dir set"}
@@ -196,10 +195,10 @@ def setup_cachedir(request):
 
 def solve(request, cache_dir):
     command = request["command"]
+    arch = request["arch"]
+    module_platform_id = request["module_platform_id"]
     arguments = request["arguments"]
     repos = arguments["repos"]
-    arch = arguments["arch"]
-    module_platform_id = arguments["module_platform_id"]
 
     with tempfile.TemporaryDirectory() as persistdir:
         try:
@@ -263,6 +262,19 @@ def validate_request(request):
             "reason": f"invalid command '{command}': must be either 'depsolve' or 'dump'"
         }
 
+    arch = request.get("arch")
+    if not arch:
+        return {
+            "kind": "InvalidRequest",
+            "reason": "no 'arch' specified"
+        }
+
+    module_platform_id = request.get("module_platform_id")
+    if not module_platform_id:
+        return {
+            "kind": "InvalidRequest",
+            "reason": "no 'module_platform_id' specified"
+        }
     arguments = request.get("arguments")
     if not arguments:
         return {
@@ -277,19 +289,6 @@ def validate_request(request):
             "reason": "no 'repos' specified"
         }
 
-    arch = arguments.get("arch")
-    if not arch:
-        return {
-            "kind": "InvalidRequest",
-            "reason": "no 'arch' specified"
-        }
-
-    module_platform_id = arguments.get("module_platform_id")
-    if not module_platform_id:
-        return {
-            "kind": "InvalidRequest",
-            "reason": "no 'module_platform_id' specified"
-        }
     return None
 
 

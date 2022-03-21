@@ -12,12 +12,9 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
-// Solver is configured with a set of repositories and system information in
-// order to resolve dependencies for RPM packages using DNF.
+// Solver is configured with system information in order to resolve
+// dependencies for RPM packages using DNF.
 type Solver struct {
-	// Repositories to use for depsolving
-	Repos []RepoConfig `json:"repos"`
-
 	// Platform ID, e.g., "platform:el8"
 	ModulePlatformID string `json:"module_platform_id"`
 
@@ -29,33 +26,34 @@ type Solver struct {
 }
 
 // Create a new Solver with the given configuration
-func NewSolver(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) *Solver {
+func NewSolver(modulePlatformID string, arch string, cacheDir string) *Solver {
 	return &Solver{
-		Repos:            repos,
 		ModulePlatformID: modulePlatformID,
 		Arch:             arch,
 		CacheDir:         cacheDir,
 	}
 }
 
-// Depsolve the given packages with explicit excludes using the solver configuration
-func (s *Solver) Depsolve(includes []string, excludes []string) (*Result, error) {
+// Depsolve the given packages with explicit excludes using the solver configuration and provided repos
+func (s *Solver) Depsolve(includes []string, excludes []string, repos []RepoConfig) (*Result, error) {
 	req := Request{
 		Command: "depsolve",
+		Solver:  s,
 		Arguments: Arguments{
 			PackageSpecs: includes,
 			ExcludSpecs:  excludes,
-			Solver:       *s,
+			Repos:        repos,
 		},
 	}
 	return run(req)
 }
 
-func (s *Solver) FetchMetadata() (*Result, error) {
+func (s *Solver) FetchMetadata(repos []RepoConfig) (*Result, error) {
 	req := Request{
 		Command: "dump",
+		Solver:  s,
 		Arguments: Arguments{
-			Solver: *s,
+			Repos: repos,
 		},
 	}
 	return run(req)
@@ -139,20 +137,21 @@ func DepsToRPMMD(dependencies []PackageSpec, repos []rpmmd.RepoConfig) []rpmmd.P
 
 // Request command and arguments for dnf-json
 type Request struct {
-	Command   string    `json:"command"`
+	Command string `json:"command"`
+	*Solver
 	Arguments Arguments `json:"arguments"`
 }
 
 // Arguments for a dnf-json request
 type Arguments struct {
+	// Repositories to use for depsolving
+	Repos []RepoConfig `json:"repos"`
+
 	// Packages to depsolve
 	PackageSpecs []string `json:"package-specs"`
 
 	// Packages to exclude from results
 	ExcludSpecs []string `json:"exclude-specs"`
-
-	// Solver configuration
-	Solver
 }
 
 // Result of a dnf-json depsolve run
@@ -188,19 +187,19 @@ func (err Error) Error() string {
 	return fmt.Sprintf("DNF error occurred: %s: %s", err.Kind, err.Reason)
 }
 
-// Depsolve the given packages with explicit excludes using the given configuration
+// Depsolve the given packages with explicit excludes using the given configuration and repos
 func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (*Result, error) {
 	req := Request{
 		Command: "depsolve",
+		Solver: &Solver{
+			ModulePlatformID: modulePlatformID,
+			Arch:             arch,
+			CacheDir:         cacheDir,
+		},
 		Arguments: Arguments{
 			PackageSpecs: packages,
 			ExcludSpecs:  excludes,
-			Solver: Solver{
-				Repos:            repos,
-				ModulePlatformID: modulePlatformID,
-				Arch:             arch,
-				CacheDir:         cacheDir,
-			},
+			Repos:        repos,
 		},
 	}
 	return run(req)
@@ -209,13 +208,13 @@ func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePl
 func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (*Result, error) {
 	req := Request{
 		Command: "dump",
+		Solver: &Solver{
+			ModulePlatformID: modulePlatformID,
+			Arch:             arch,
+			CacheDir:         cacheDir,
+		},
 		Arguments: Arguments{
-			Solver: Solver{
-				Repos:            repos,
-				ModulePlatformID: modulePlatformID,
-				Arch:             arch,
-				CacheDir:         cacheDir,
-			},
+			Repos: repos,
 		},
 	}
 	return run(req)
