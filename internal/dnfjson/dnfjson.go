@@ -35,15 +35,22 @@ func NewSolver(modulePlatformID string, arch string, cacheDir string) *Solver {
 }
 
 // Depsolve the given packages with explicit excludes using the solver configuration and provided repos
-func (s *Solver) Depsolve(pkgSet rpmmd.PackageSet, repos []RepoConfig) (Results, error) {
+func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]RepoConfig) (Results, error) {
+	if len(pkgSets) != len(repoSets) {
+		return nil, fmt.Errorf("error: different number of package sets and repositories: %d != %d", len(pkgSets), len(repoSets))
+	}
+	args := make([]Arguments, len(pkgSets))
+	for idx := range pkgSets {
+		args[idx] = Arguments{
+			PackageSpecs: pkgSets[idx].Include,
+			ExcludSpecs:  pkgSets[idx].Exclude,
+			Repos:        repoSets[idx],
+		}
+	}
 	req := Request{
-		Command: "depsolve",
-		Solver:  s,
-		Arguments: []Arguments{{
-			PackageSpecs: pkgSet.Include,
-			ExcludSpecs:  pkgSet.Exclude,
-			Repos:        repos,
-		}},
+		Command:   "depsolve",
+		Solver:    s,
+		Arguments: args,
 	}
 	return run(req)
 }
@@ -188,8 +195,8 @@ func (err Error) Error() string {
 }
 
 // Depsolve the given packages with explicit excludes using the given configuration and repos
-func Depsolve(pkgSet rpmmd.PackageSet, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
-	return NewSolver(modulePlatformID, arch, cacheDir).Depsolve(pkgSet, repos)
+func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
+	return NewSolver(modulePlatformID, arch, cacheDir).Depsolve(pkgSets, repoSets)
 }
 
 func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {

@@ -80,11 +80,12 @@ func depsolve(cacheDir string, packageSets map[string]rpmmd.PackageSet, repos []
 	solver := dnfjson.NewSolver(d.ModulePlatformID(), arch, cacheDir)
 	packageSpecSets := make(map[string][]rpmmd.PackageSpec)
 	for name, packages := range packageSets {
-		results, err := solver.Depsolve(packages, dnfRepos)
+		results, err := solver.Depsolve([]rpmmd.PackageSet{packages}, [][]dnfjson.RepoConfig{dnfRepos})
 		if err != nil {
 			fmt.Printf("Could not depsolve: %s", err.Error())
 			return nil, err
 		}
+
 		// NOTE: we only depsolve one package set at a time for now
 		result := results[0]
 		packageSpecSets[name] = dnfjson.DepsToRPMMD(result.Dependencies, repos)
