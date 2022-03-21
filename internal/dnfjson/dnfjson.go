@@ -35,26 +35,24 @@ func NewSolver(modulePlatformID string, arch string, cacheDir string) *Solver {
 }
 
 // Depsolve the given packages with explicit excludes using the solver configuration and provided repos
-func (s *Solver) Depsolve(includes []string, excludes []string, repos []RepoConfig) (*Result, error) {
+func (s *Solver) Depsolve(includes []string, excludes []string, repos []RepoConfig) (Results, error) {
 	req := Request{
 		Command: "depsolve",
 		Solver:  s,
-		Arguments: Arguments{
+		Arguments: []Arguments{{
 			PackageSpecs: includes,
 			ExcludSpecs:  excludes,
 			Repos:        repos,
-		},
+		}},
 	}
 	return run(req)
 }
 
-func (s *Solver) FetchMetadata(repos []RepoConfig) (*Result, error) {
+func (s *Solver) FetchMetadata(repos []RepoConfig) (Results, error) {
 	req := Request{
-		Command: "dump",
-		Solver:  s,
-		Arguments: Arguments{
-			Repos: repos,
-		},
+		Command:   "dump",
+		Solver:    s,
+		Arguments: []Arguments{{Repos: repos}},
 	}
 	return run(req)
 }
@@ -139,7 +137,7 @@ func DepsToRPMMD(dependencies []PackageSpec, repos []rpmmd.RepoConfig) []rpmmd.P
 type Request struct {
 	Command string `json:"command"`
 	*Solver
-	Arguments Arguments `json:"arguments"`
+	Arguments []Arguments `json:"arguments"`
 }
 
 // Arguments for a dnf-json request
@@ -153,6 +151,8 @@ type Arguments struct {
 	// Packages to exclude from results
 	ExcludSpecs []string `json:"exclude-specs"`
 }
+
+type Results []Result
 
 // Result of a dnf-json depsolve run
 type Result struct {
@@ -188,7 +188,7 @@ func (err Error) Error() string {
 }
 
 // Depsolve the given packages with explicit excludes using the given configuration and repos
-func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (*Result, error) {
+func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
 	req := Request{
 		Command: "depsolve",
 		Solver: &Solver{
@@ -196,16 +196,16 @@ func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePl
 			Arch:             arch,
 			CacheDir:         cacheDir,
 		},
-		Arguments: Arguments{
+		Arguments: []Arguments{{
 			PackageSpecs: packages,
 			ExcludSpecs:  excludes,
 			Repos:        repos,
-		},
+		}},
 	}
 	return run(req)
 }
 
-func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (*Result, error) {
+func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
 	req := Request{
 		Command: "dump",
 		Solver: &Solver{
@@ -213,14 +213,14 @@ func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cac
 			Arch:             arch,
 			CacheDir:         cacheDir,
 		},
-		Arguments: Arguments{
+		Arguments: []Arguments{{
 			Repos: repos,
-		},
+		}},
 	}
 	return run(req)
 }
 
-func run(req Request) (*Result, error) {
+func run(req Request) (Results, error) {
 	cmd := exec.Command("osbuild-dnf-json")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -254,8 +254,8 @@ func run(req Request) (*Result, error) {
 		return nil, err
 	}
 
-	res := new(Result)
-	if err := json.Unmarshal(output, res); err != nil {
+	var res Results
+	if err := json.Unmarshal(output, &res); err != nil {
 		return nil, err
 	}
 

@@ -198,46 +198,49 @@ def solve(request, cache_dir):
     arch = request["arch"]
     module_platform_id = request["module_platform_id"]
     arguments = request["arguments"]
-    repos = arguments["repos"]
 
+    results = []
     with tempfile.TemporaryDirectory() as persistdir:
-        try:
-            solver = Solver(
-                repos,
-                module_platform_id,
-                persistdir,
-                cache_dir,
-                arch
-            )
-            if command == "dump":
-                result = solver.dump()
-                printe("dump success")
-            elif command == "depsolve":
-                result = solver.depsolve(
-                    arguments["package-specs"],
-                    arguments.get("exclude-specs", [])
+        for job in arguments:
+            repos = job["repos"]
+            try:
+                solver = Solver(
+                    repos,
+                    module_platform_id,
+                    persistdir,
+                    cache_dir,
+                    arch
                 )
-                printe("depsolve success")
-            return result, None
+                if command == "dump":
+                    result = solver.dump()
+                    printe("dump success")
+                elif command == "depsolve":
+                    result = solver.depsolve(
+                        job["package-specs"],
+                        job.get("exclude-specs", [])
+                    )
+                    printe("depsolve success")
+                results.append(result)
 
-        except dnf.exceptions.MarkingErrors as e:
-            printe("error install_specs")
-            return None, {
-                "kind": "MarkingErrors",
-                "reason": f"Error occurred when marking packages for installation: {e}"
-            }
-        except dnf.exceptions.DepsolveError as e:
-            printe("error depsolve")
-            return None, {
-                "kind": "DepsolveError",
-                "reason": f"There was a problem depsolving {arguments['package-specs']}: {e}"
-            }
-        except dnf.exceptions.Error as e:
-            printe("error repository setup")
-            return None, {
-                "kind": type(e).__name__,
-                "reason":    f"Error occurred when setting up repo: {e}"
-            }
+            except dnf.exceptions.MarkingErrors as e:
+                printe("error install_specs")
+                return None, {
+                    "kind": "MarkingErrors",
+                    "reason": f"Error occurred when marking packages for installation: {e}"
+                }
+            except dnf.exceptions.DepsolveError as e:
+                printe("error depsolve")
+                return None, {
+                    "kind": "DepsolveError",
+                    "reason": f"There was a problem depsolving {arguments['package-specs']}: {e}"
+                }
+            except dnf.exceptions.Error as e:
+                printe("error repository setup")
+                return None, {
+                    "kind": type(e).__name__,
+                    "reason":    f"Error occurred when setting up repo: {e}"
+                }
+    return results, None
 
 
 def printe(*msg):
@@ -282,12 +285,13 @@ def validate_request(request):
             "reason": "empty 'arguments'"
         }
 
-    repos = arguments.get("repos")
-    if not repos:
-        return {
-            "kind": "InvalidRequest",
-            "reason": "no 'repos' specified"
-        }
+    for idx, args in enumerate(arguments):
+        repos = args.get("repos")
+        if not repos:
+            return {
+                "kind": "InvalidRequest",
+                "reason": f"no 'repos' specified for arguments at index {idx}"
+            }
 
     return None
 
