@@ -189,35 +189,11 @@ func (err Error) Error() string {
 
 // Depsolve the given packages with explicit excludes using the given configuration and repos
 func Depsolve(pkgSet rpmmd.PackageSet, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
-	req := Request{
-		Command: "depsolve",
-		Solver: &Solver{
-			ModulePlatformID: modulePlatformID,
-			Arch:             arch,
-			CacheDir:         cacheDir,
-		},
-		Arguments: []Arguments{{
-			PackageSpecs: pkgSet.Include,
-			ExcludSpecs:  pkgSet.Exclude,
-			Repos:        repos,
-		}},
-	}
-	return run(req)
+	return NewSolver(modulePlatformID, arch, cacheDir).Depsolve(pkgSet, repos)
 }
 
 func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
-	req := Request{
-		Command: "dump",
-		Solver: &Solver{
-			ModulePlatformID: modulePlatformID,
-			Arch:             arch,
-			CacheDir:         cacheDir,
-		},
-		Arguments: []Arguments{{
-			Repos: repos,
-		}},
-	}
-	return run(req)
+	return NewSolver(modulePlatformID, arch, cacheDir).FetchMetadata(repos)
 }
 
 func run(req Request) (Results, error) {
