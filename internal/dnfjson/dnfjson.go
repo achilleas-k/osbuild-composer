@@ -35,13 +35,13 @@ func NewSolver(modulePlatformID string, arch string, cacheDir string) *Solver {
 }
 
 // Depsolve the given packages with explicit excludes using the solver configuration and provided repos
-func (s *Solver) Depsolve(includes []string, excludes []string, repos []RepoConfig) (Results, error) {
+func (s *Solver) Depsolve(pkgSet rpmmd.PackageSet, repos []RepoConfig) (Results, error) {
 	req := Request{
 		Command: "depsolve",
 		Solver:  s,
 		Arguments: []Arguments{{
-			PackageSpecs: includes,
-			ExcludSpecs:  excludes,
+			PackageSpecs: pkgSet.Include,
+			ExcludSpecs:  pkgSet.Exclude,
 			Repos:        repos,
 		}},
 	}
@@ -188,7 +188,7 @@ func (err Error) Error() string {
 }
 
 // Depsolve the given packages with explicit excludes using the given configuration and repos
-func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
+func Depsolve(pkgSet rpmmd.PackageSet, repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
 	req := Request{
 		Command: "depsolve",
 		Solver: &Solver{
@@ -197,8 +197,8 @@ func Depsolve(packages []string, excludes []string, repos []RepoConfig, modulePl
 			CacheDir:         cacheDir,
 		},
 		Arguments: []Arguments{{
-			PackageSpecs: packages,
-			ExcludSpecs:  excludes,
+			PackageSpecs: pkgSet.Include,
+			ExcludSpecs:  pkgSet.Exclude,
 			Repos:        repos,
 		}},
 	}
