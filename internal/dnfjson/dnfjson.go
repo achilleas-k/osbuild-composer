@@ -40,7 +40,7 @@ func NewSolver(modulePlatformID string, releaseVer string, arch string, cacheDir
 }
 
 // Depsolve the given packages with explicit excludes using the solver configuration and provided repos
-func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig) (Results, error) {
+func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig) ([]DepsolveResult, error) {
 	if len(pkgSets) != len(repoSets) {
 		return nil, fmt.Errorf("error: different number of package sets and repositories: %d != %d", len(pkgSets), len(repoSets))
 	}
@@ -61,10 +61,19 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoCon
 		Solver:    s,
 		Arguments: args,
 	}
-	return run(req)
+	output, err := run(req)
+	if err != nil {
+		return nil, err
+	}
+	var result []depsolveResult
+	if err := json.Unmarshal(output, &result); err != nil {
+		return nil, err
+	}
+
+	return resultsToPublic(result, repoSets), nil
 }
 
-func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (Results, error) {
+func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 	dnfRepos, err := ReposFromRPMMD(repos, s.Arch, "")
 	if err != nil {
 		return nil, err
@@ -74,7 +83,16 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (Results, error) {
 		Solver:    s,
 		Arguments: []Arguments{{Repos: dnfRepos}},
 	}
-	return run(req)
+	result, err := run(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var metadata *Metadata
+	if err := json.Unmarshal(result, metadata); err != nil {
+		return nil, err
+	}
+	return metadata, nil
 }
 
 // Repository configuration for resolving dependencies for a set of packages. A
@@ -129,7 +147,24 @@ func ReposFromRPMMD(rpmRepos []rpmmd.RepoConfig, arch string, releaseVer string)
 	return dnfRepos, nil
 }
 
-func DepsToRPMMD(dependencies []PackageSpec, repos []rpmmd.RepoConfig) []rpmmd.PackageSpec {
+// convert a slice of internal depsolveResult to a slice of public DepsolveResult
+func resultsToPublic(results []depsolveResult, repoSets [][]rpmmd.RepoConfig) []DepsolveResult {
+	pubRes := make([]DepsolveResult, len(results))
+	for idx := range results {
+		pubRes[idx] = resultToPublic(results[idx], repoSets[idx])
+	}
+	return pubRes
+}
+
+// convert an internal depsolveResult to a public DepsolveResult
+func resultToPublic(result depsolveResult, repos []rpmmd.RepoConfig) DepsolveResult {
+	return DepsolveResult{
+		Checksums:    result.Checksums,
+		Dependencies: depsToRPMMD(result.Dependencies, repos),
+	}
+}
+
+func depsToRPMMD(dependencies []PackageSpec, repos []rpmmd.RepoConfig) []rpmmd.PackageSpec {
 	rpmDependencies := make([]rpmmd.PackageSpec, len(dependencies))
 	for i, dep := range dependencies {
 		id, err := strconv.Atoi(dep.RepoID)
@@ -172,15 +207,29 @@ type Arguments struct {
 	ExcludSpecs []string `json:"exclude-specs"`
 }
 
-type Results []Result
-
-// Result of a dnf-json depsolve run
-type Result struct {
+// Private version of the depsolve result.  Uses a slightly different
+// PackageSpec than the public one that uses the rpmmd type.
+type depsolveResult struct {
 	// Repository checksums
 	Checksums map[string]string `json:"checksums"`
 
 	// Resolved package dependencies
 	Dependencies []PackageSpec `json:"dependencies"`
+}
+
+// DepsolveResult is the result returned from a Depsolve call.
+type DepsolveResult struct {
+	// Repository checksums
+	Checksums map[string]string
+
+	// Resolved package dependencies
+	Dependencies []rpmmd.PackageSpec
+}
+
+// Metadata is the result returned from a FetchMetadata call.
+type Metadata struct {
+	Checksums map[string]string `json:"checksums"`
+	Packages  rpmmd.PackageList `json:"packages"`
 }
 
 // Package specification
@@ -208,15 +257,15 @@ func (err Error) Error() string {
 }
 
 // Depsolve the given packages with explicit excludes using the given configuration and repos
-func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (Results, error) {
+func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) ([]DepsolveResult, error) {
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).Depsolve(pkgSets, repoSets)
 }
 
-func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (Results, error) {
+func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (*Metadata, error) {
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).FetchMetadata(repos)
 }
 
-func run(req Request) (Results, error) {
+func run(req Request) ([]byte, error) {
 	cmd := exec.Command("osbuild-dnf-json")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -250,10 +299,5 @@ func run(req Request) (Results, error) {
 		return nil, err
 	}
 
-	var res Results
-	if err := json.Unmarshal(output, &res); err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	return output, nil
 }

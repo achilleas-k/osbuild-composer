@@ -83,7 +83,7 @@ func depsolve(cacheDir string, packageSets map[string]rpmmd.PackageSet, repos []
 
 		// NOTE: we only depsolve one package set at a time for now
 		result := results[0]
-		packageSpecSets[name] = dnfjson.DepsToRPMMD(result.Dependencies, repos)
+		packageSpecSets[name] = result.Dependencies
 	}
 	return packageSpecSets, nil
 }
