@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/worker"
 	"github.com/osbuild/osbuild-composer/internal/worker/clienterrors"
@@ -19,8 +20,7 @@ type DepsolveJobImpl struct {
 // packageSetsRepos are only used for the package set with the same name
 // (matching map keys).
 func (impl *DepsolveJobImpl) depsolve(packageSets map[string]rpmmd.PackageSet, repos []rpmmd.RepoConfig, packageSetsRepos map[string][]rpmmd.RepoConfig, modulePlatformID, arch, releasever string) (map[string][]rpmmd.PackageSpec, error) {
-	rpmMD := rpmmd.NewRPMMD(impl.RPMMDCache)
-
+	solver := dnfjson.NewSolver(modulePlatformID, releasever, arch, impl.RPMMDCache)
 	packageSpecs := make(map[string][]rpmmd.PackageSpec)
 	for name, packageSet := range packageSets {
 		repositories := make([]rpmmd.RepoConfig, len(repos))
@@ -28,11 +28,11 @@ func (impl *DepsolveJobImpl) depsolve(packageSets map[string]rpmmd.PackageSet, r
 		if packageSetRepositories, ok := packageSetsRepos[name]; ok {
 			repositories = append(repositories, packageSetRepositories...)
 		}
-		packageSpec, _, err := rpmMD.Depsolve(packageSet, repositories, modulePlatformID, arch, releasever)
+		res, err := solver.Depsolve([]rpmmd.PackageSet{packageSet}, [][]rpmmd.RepoConfig{repositories})
 		if err != nil {
 			return nil, err
 		}
-		packageSpecs[name] = packageSpec
+		packageSpecs[name] = res[0].Dependencies
 	}
 	return packageSpecs, nil
 }

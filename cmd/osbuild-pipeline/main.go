@@ -10,6 +10,7 @@ import (
 	"path"
 
 	"github.com/osbuild/osbuild-composer/internal/distroregistry"
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/ostree"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
@@ -124,15 +125,17 @@ func main() {
 		panic("os.UserHomeDir(): " + err.Error())
 	}
 
-	rpm_md := rpmmd.NewRPMMD(path.Join(home, ".cache/osbuild-composer/rpmmd"))
-
+	solver := dnfjson.NewSolver(d.ModulePlatformID(), d.Releasever(), arch.Name(), path.Join(home, ".cache/osbuild-composer/rpmmd"))
 	packageSpecSets := make(map[string][]rpmmd.PackageSpec)
 	for name, packages := range packageSets {
-		packageSpecs, _, err := rpm_md.Depsolve(packages, repos, d.ModulePlatformID(), arch.Name(), d.Releasever())
+		res, err := solver.Depsolve([]rpmmd.PackageSet{packages}, [][]rpmmd.RepoConfig{repos})
 		if err != nil {
 			panic("Could not depsolve: " + err.Error())
 		}
-		packageSpecSets[name] = packageSpecs
+		if len(res) != 1 {
+			panic(fmt.Sprintf("got %d results - expected 1", len(res)))
+		}
+		packageSpecSets[name] = res[0].Dependencies
 	}
 
 	var bytes []byte

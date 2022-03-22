@@ -122,6 +122,7 @@ func (c *Composer) InitWeldr(repoPaths []string, weldrListener net.Listener,
 		return err
 	}
 	c.weldrListener = weldrListener
+	c.weldr.RPMCacheDir = c.cacheDir
 
 	return nil
 }

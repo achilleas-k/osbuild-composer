@@ -33,6 +33,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	"github.com/osbuild/osbuild-composer/internal/distroregistry"
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/jobqueue"
 	osbuild "github.com/osbuild/osbuild-composer/internal/osbuild2"
 	"github.com/osbuild/osbuild-composer/internal/ostree"
@@ -63,6 +64,10 @@ type API struct {
 
 	//  List of ImageType names, which should not be exposed by the API
 	distrosImageTypeDenylist map[string][]string
+
+	// NOTE: need cache dir temporarily here while transitioning from rpmmd to
+	// dnfjson for depsolve
+	RPMCacheDir string
 }
 
 type ComposeState int
@@ -1334,11 +1339,14 @@ func (api *API) projectsDepsolveHandler(writer http.ResponseWriter, request *htt
 		return
 	}
 
-	packages, _, err := api.rpmmd.Depsolve(rpmmd.PackageSet{Include: names},
-		repos,
+	solved, err := dnfjson.Depsolve(
+		[]rpmmd.PackageSet{{Include: names}},
+		[][]rpmmd.RepoConfig{repos},
 		d.ModulePlatformID(),
+		d.Releasever(),
 		api.archName,
-		d.Releasever())
+		api.RPMCacheDir,
+	)
 	if err != nil {
 		errors := responseError{
 			ID:  "ProjectsError",
@@ -1347,9 +1355,17 @@ func (api *API) projectsDepsolveHandler(writer http.ResponseWriter, request *htt
 		statusResponseError(writer, http.StatusBadRequest, errors)
 		return
 	}
+	if len(solved) != 1 {
+		errors := responseError{
+			ID:  "ProjectsError",
+			Msg: fmt.Sprintf("unexpected number of results received: %d (expected 1)", len(solved)),
+		}
+		statusResponseError(writer, http.StatusBadRequest, errors)
+		return
+	}
 
 	err = json.NewEncoder(writer).Encode(reply{
-		Projects: packages,
+		Projects: solved[0].Dependencies,
 	})
 	common.PanicOnError(err)
 }
@@ -2138,18 +2154,19 @@ func (api *API) depsolveBlueprintForImageType(bp blueprint.Blueprint, imageType 
 	if err != nil {
 		return nil, err
 	}
+
 	platformID := imageType.Arch().Distro().ModulePlatformID()
 	releasever := imageType.Arch().Distro().Releasever()
+	solver := dnfjson.NewSolver(platformID, releasever, api.archName, api.RPMCacheDir)
 	for name, packageSet := range packageSets {
-		packageSpecs, _, err := api.rpmmd.Depsolve(packageSet,
-			imageTypeRepos,
-			platformID,
-			api.archName,
-			releasever)
+		solved, err := solver.Depsolve([]rpmmd.PackageSet{packageSet}, [][]rpmmd.RepoConfig{imageTypeRepos})
 		if err != nil {
 			return nil, err
 		}
-		packageSpecSets[name] = packageSpecs
+		if len(solved) != 1 {
+			return nil, fmt.Errorf("Depsolve - unexpected number of results received: %d (expected 1)", len(solved))
+		}
+		packageSpecSets[name] = solved[0].Dependencies
 	}
 	return packageSpecSets, nil
 }
@@ -3171,10 +3188,16 @@ func (api *API) depsolveBlueprint(bp blueprint.Blueprint) ([]rpmmd.PackageSpec, 
 		return nil, err
 	}
 
-	packages, _, err := api.rpmmd.Depsolve(rpmmd.PackageSet{Include: bp.GetPackages()}, repos, d.ModulePlatformID(), api.archName, d.Releasever())
+	solved, err := dnfjson.Depsolve([]rpmmd.PackageSet{{Include: bp.GetPackages()}}, [][]rpmmd.RepoConfig{repos}, d.ModulePlatformID(), d.Releasever(), api.archName, api.RPMCacheDir)
 	if err != nil {
 		return nil, err
 	}
+
+	if len(solved) != 1 {
+		return nil, fmt.Errorf("Depsolve - unexpected number of results received: %d (expected 1)", len(solved))
+	}
+
+	packages := solved[0].Dependencies
 
 	return packages, err
 }

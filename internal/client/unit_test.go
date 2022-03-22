@@ -1,6 +1,7 @@
 // Package client contains functions for communicating with the API server
 // Copyright (C) 2020 by Red Hat, Inc.
 
+//go:build !integration
 // +build !integration
 
 package client

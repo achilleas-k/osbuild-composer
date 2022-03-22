@@ -18,6 +18,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	"github.com/osbuild/osbuild-composer/internal/distroregistry"
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/kojiapi/api"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/worker"
@@ -29,6 +30,10 @@ type Server struct {
 	workers     *worker.Server
 	rpmMetadata rpmmd.RPMMD
 	distros     *distroregistry.Registry
+
+	// NOTE: need cache dir temporarily here while transitioning from rpmmd to
+	// dnfjson for depsolve
+	RPMCacheDir string
 }
 
 // NewServer creates a new koji server
@@ -122,14 +127,18 @@ func (h *apiHandlers) PostCompose(ctx echo.Context) error {
 			panic("Could not initialize empty blueprint.")
 		}
 
+		solver := dnfjson.NewSolver(d.ModulePlatformID(), d.Releasever(), arch.Name(), h.server.RPMCacheDir)
 		packageSets := imageType.PackageSets(*bp)
 		packageSpecSets := make(map[string][]rpmmd.PackageSpec)
 		for name, packages := range packageSets {
-			packageSpecs, _, err := h.server.rpmMetadata.Depsolve(packages, repositories, d.ModulePlatformID(), arch.Name(), d.Releasever())
+			res, err := solver.Depsolve([]rpmmd.PackageSet{packages}, [][]rpmmd.RepoConfig{repositories})
 			if err != nil {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("Failed to depsolve base base packages for %s/%s/%s: %s", ir.ImageType, ir.Architecture, request.Distribution, err))
 			}
-			packageSpecSets[name] = packageSpecs
+			if len(res) != 1 {
+				return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf("Unexpected number of results received: %d (expected 1)", len(res)))
+			}
+			packageSpecSets[name] = res[0].Dependencies
 		}
 
 		manifest, err := imageType.Manifest(nil, distro.ImageOptions{Size: imageType.Size(0)}, repositories, packageSpecSets, manifestSeed)

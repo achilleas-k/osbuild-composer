@@ -88,6 +88,7 @@ func main() {
 		if err != nil {
 			logrus.Fatalf("Error initializing weldr API: %v", err)
 		}
+		composer.weldr.RPMCacheDir = cacheDir
 	}
 
 	if l, exists := listeners["osbuild-local-worker.socket"]; exists {
@@ -107,6 +108,7 @@ func main() {
 		if err != nil {
 			logrus.Fatalf("Error initializing koji API: %v", err)
 		}
+		composer.koji.RPMCacheDir = cacheDir
 	}
 
 	if l, exists := listeners["osbuild-remote-worker.socket"]; exists {

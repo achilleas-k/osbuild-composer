@@ -15,6 +15,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	"github.com/osbuild/osbuild-composer/internal/distroregistry"
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/ostree"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
@@ -139,15 +140,17 @@ func TestDistro_Manifest(t *testing.T, pipelinePath string, prefix string, regis
 func getImageTypePkgSpecSets(imageType distro.ImageType, bp blueprint.Blueprint, repos []rpmmd.RepoConfig, cacheDir, dnfJsonPath string) map[string][]rpmmd.PackageSpec {
 	imgPackageSets := imageType.PackageSets(bp)
 
-	rpm_md := rpmmd.NewRPMMD(cacheDir)
-
+	solver := dnfjson.NewSolver(imageType.Arch().Distro().ModulePlatformID(), imageType.Arch().Distro().Releasever(), imageType.Arch().Name(), cacheDir)
 	imgPackageSpecSets := make(map[string][]rpmmd.PackageSpec)
 	for name, packages := range imgPackageSets {
-		packageSpecs, _, err := rpm_md.Depsolve(packages, repos, imageType.Arch().Distro().ModulePlatformID(), imageType.Arch().Name(), imageType.Arch().Distro().Releasever())
+		res, err := solver.Depsolve([]rpmmd.PackageSet{packages}, [][]rpmmd.RepoConfig{repos})
 		if err != nil {
 			panic("Could not depsolve: " + err.Error())
 		}
-		imgPackageSpecSets[name] = packageSpecs
+		if len(res) != 1 {
+			panic(fmt.Sprintf("got %d results - expected 1", len(res)))
+		}
+		imgPackageSpecSets[name] = res[0].Dependencies
 	}
 
 	return imgPackageSpecSets
