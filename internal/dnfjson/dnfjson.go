@@ -27,6 +27,9 @@ type Solver struct {
 	// Release version of the distro. This is used in repo files on the host
 	// system and required for subscription support.
 	releaseVer string `json:"-"`
+
+	// Path to the dnf-json binary (default: "osbuild-dnf-json", assumed in $PATH)
+	dnfJsonPath string `json:"-"`
 }
 
 // Create a new Solver with the given configuration
@@ -36,6 +39,7 @@ func NewSolver(modulePlatformID string, releaseVer string, arch string, cacheDir
 		Arch:             arch,
 		CacheDir:         cacheDir,
 		releaseVer:       releaseVer,
+		dnfJsonPath:      "osbuild-dnf-json",
 	}
 }
 
@@ -61,7 +65,7 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoCon
 		Solver:    s,
 		Arguments: args,
 	}
-	output, err := run(req)
+	output, err := run(s.dnfJsonPath, req)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +87,7 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 		Solver:    s,
 		Arguments: []Arguments{{Repos: dnfRepos}},
 	}
-	result, err := run(req)
+	result, err := run(s.dnfJsonPath, req)
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +97,10 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 		return nil, err
 	}
 	return metadata, nil
+}
+
+func (s *Solver) SetDNFJSONPath(path string) {
+	s.dnfJsonPath = path
 }
 
 // Repository configuration for resolving dependencies for a set of packages. A
@@ -265,8 +273,8 @@ func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).FetchMetadata(repos)
 }
 
-func run(req Request) ([]byte, error) {
-	cmd := exec.Command("osbuild-dnf-json")
+func run(dnfJsonBin string, req Request) ([]byte, error) {
+	cmd := exec.Command(dnfJsonBin)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, err
