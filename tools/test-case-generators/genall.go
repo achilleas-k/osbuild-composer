@@ -72,15 +72,10 @@ func readRepos() DistroArchRepoMap {
 }
 
 func depsolve(cacheDir string, packageSets map[string]rpmmd.PackageSet, repos []rpmmd.RepoConfig, d distro.Distro, arch string) (map[string][]rpmmd.PackageSpec, error) {
-	// convert distro repos
-	dnfRepos, err := dnfjson.ReposFromRPMMD(repos, arch, d.Releasever())
-	if err != nil {
-		return nil, err
-	}
-	solver := dnfjson.NewSolver(d.ModulePlatformID(), arch, cacheDir)
+	solver := dnfjson.NewSolver(d.ModulePlatformID(), d.Releasever(), arch, cacheDir)
 	packageSpecSets := make(map[string][]rpmmd.PackageSpec)
 	for name, packages := range packageSets {
-		results, err := solver.Depsolve([]rpmmd.PackageSet{packages}, [][]dnfjson.RepoConfig{dnfRepos})
+		results, err := solver.Depsolve([]rpmmd.PackageSet{packages}, [][]rpmmd.RepoConfig{repos})
 		if err != nil {
 			fmt.Printf("Could not depsolve: %s", err.Error())
 			return nil, err

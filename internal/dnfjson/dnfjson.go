@@ -23,28 +23,37 @@ type Solver struct {
 
 	// Cache directory for the DNF metadata
 	CacheDir string `json:"cachedir"`
+
+	// Release version of the distro. This is used in repo files on the host
+	// system and required for subscription support.
+	releaseVer string `json:"-"`
 }
 
 // Create a new Solver with the given configuration
-func NewSolver(modulePlatformID string, arch string, cacheDir string) *Solver {
+func NewSolver(modulePlatformID string, releaseVer string, arch string, cacheDir string) *Solver {
 	return &Solver{
 		ModulePlatformID: modulePlatformID,
 		Arch:             arch,
 		CacheDir:         cacheDir,
+		releaseVer:       releaseVer,
 	}
 }
 
 // Depsolve the given packages with explicit excludes using the solver configuration and provided repos
-func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]RepoConfig) (Results, error) {
+func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig) (Results, error) {
 	if len(pkgSets) != len(repoSets) {
 		return nil, fmt.Errorf("error: different number of package sets and repositories: %d != %d", len(pkgSets), len(repoSets))
 	}
 	args := make([]Arguments, len(pkgSets))
 	for idx := range pkgSets {
+		repos, err := ReposFromRPMMD(repoSets[idx], s.Arch, s.releaseVer)
+		if err != nil {
+			return nil, err
+		}
 		args[idx] = Arguments{
 			PackageSpecs: pkgSets[idx].Include,
 			ExcludSpecs:  pkgSets[idx].Exclude,
-			Repos:        repoSets[idx],
+			Repos:        repos,
 		}
 	}
 	req := Request{
@@ -55,11 +64,15 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]RepoConfig) (
 	return run(req)
 }
 
-func (s *Solver) FetchMetadata(repos []RepoConfig) (Results, error) {
+func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (Results, error) {
+	dnfRepos, err := ReposFromRPMMD(repos, s.Arch, "")
+	if err != nil {
+		return nil, err
+	}
 	req := Request{
 		Command:   "dump",
 		Solver:    s,
-		Arguments: []Arguments{{Repos: repos}},
+		Arguments: []Arguments{{Repos: dnfRepos}},
 	}
 	return run(req)
 }
@@ -195,12 +208,12 @@ func (err Error) Error() string {
 }
 
 // Depsolve the given packages with explicit excludes using the given configuration and repos
-func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
-	return NewSolver(modulePlatformID, arch, cacheDir).Depsolve(pkgSets, repoSets)
+func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (Results, error) {
+	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).Depsolve(pkgSets, repoSets)
 }
 
-func FetchMetadata(repos []RepoConfig, modulePlatformID string, arch string, cacheDir string) (Results, error) {
-	return NewSolver(modulePlatformID, arch, cacheDir).FetchMetadata(repos)
+func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (Results, error) {
+	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).FetchMetadata(repos)
 }
 
 func run(req Request) (Results, error) {
