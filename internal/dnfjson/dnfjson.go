@@ -264,6 +264,18 @@ func (err Error) Error() string {
 	return fmt.Sprintf("DNF error occurred: %s: %s", err.Kind, err.Reason)
 }
 
+func ParseError(data []byte) Error {
+	var e Error
+	if err := json.Unmarshal(data, &e); err != nil {
+		// dumping the error into the Reason can get noisy, but it's good for troubleshooting
+		return Error{
+			Kind:   "InternalError",
+			Reason: fmt.Sprintf("Failed to unmarshal dnf-json error output %q: %s", string(data), err.Error()),
+		}
+	}
+	return e
+}
+
 // Depsolve the given packages with explicit excludes using the given configuration and repos
 func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) ([]DepsolveResult, error) {
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).Depsolve(pkgSets, repoSets)
@@ -304,7 +316,7 @@ func run(dnfJsonBin string, req Request) ([]byte, error) {
 
 	err = cmd.Wait()
 	if runError, ok := err.(*exec.ExitError); ok && runError.ExitCode() != 0 {
-		return nil, err
+		return nil, ParseError(output)
 	}
 
 	return output, nil
