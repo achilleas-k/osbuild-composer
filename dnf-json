@@ -234,6 +234,11 @@ def solve(request, cache_dir):
                     "kind": "DepsolveError",
                     "reason": f"There was a problem depsolving {arguments['package-specs']}: {e}"
                 }
+            except dnf.exceptions.RepoError as e:
+                return None, {
+                    "kind": "RepoError",
+                    "reason": f"There was a problem reading a repository: {e}"
+                }
             except dnf.exceptions.Error as e:
                 printe("error repository setup")
                 return None, {
