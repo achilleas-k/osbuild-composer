@@ -32,6 +32,15 @@ type Solver struct {
 	dnfJsonCmd []string `json:"-"`
 }
 
+// Create a new unconfigured Solver (without platform information). It should
+// be configured using the SetConfig() function before use.
+func NewBaseSolver(cacheDir string) *Solver {
+	return &Solver{
+		CacheDir:   cacheDir,
+		dnfJsonCmd: []string{"osbuild-dnf-json"},
+	}
+}
+
 // Create a new Solver with the given configuration
 func NewSolver(modulePlatformID string, releaseVer string, arch string, cacheDir string) *Solver {
 	return &Solver{
@@ -41,6 +50,13 @@ func NewSolver(modulePlatformID string, releaseVer string, arch string, cacheDir
 		releaseVer:       releaseVer,
 		dnfJsonCmd:       []string{"osbuild-dnf-json"},
 	}
+}
+
+// SetConfig sets the platform configuration values.
+func (s *Solver) SetConfig(modulePlatformID string, releaseVer string, arch string) {
+	s.ModulePlatformID = modulePlatformID
+	s.Arch = arch
+	s.releaseVer = releaseVer
 }
 
 // Depsolve the given packages with explicit excludes using the solver configuration and provided repos
