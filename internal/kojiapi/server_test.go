@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/osbuild/osbuild-composer/internal/distro/test_distro"
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/kojiapi"
 	"github.com/osbuild/osbuild-composer/internal/kojiapi/api"
 	distro_mock "github.com/osbuild/osbuild-composer/internal/mocks/distro"
@@ -26,14 +27,13 @@ import (
 
 func newTestKojiServer(t *testing.T, dir string) (*kojiapi.Server, *worker.Server) {
 	rpm_fixture := rpmmd_mock.BaseFixture(dir)
-	rpm := rpmmd_mock.NewRPMMDMock(rpm_fixture)
-	require.NotNil(t, rpm)
 
 	distros, err := distro_mock.NewDefaultRegistry()
 	require.NoError(t, err)
 	require.NotNil(t, distros)
 
-	kojiServer := kojiapi.NewServer(nil, rpm_fixture.Workers, rpm, distros)
+	solver := dnfjson.NewBaseSolver("")
+	kojiServer := kojiapi.NewServer(nil, rpm_fixture.Workers, solver, distros)
 	require.NotNil(t, kojiServer)
 
 	return kojiServer, rpm_fixture.Workers

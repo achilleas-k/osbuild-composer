@@ -26,23 +26,19 @@ import (
 
 // Server represents the state of the koji Server
 type Server struct {
-	logger      *log.Logger
-	workers     *worker.Server
-	rpmMetadata rpmmd.RPMMD
-	distros     *distroregistry.Registry
-
-	// NOTE: need cache dir temporarily here while transitioning from rpmmd to
-	// dnfjson for depsolve
-	RPMCacheDir string
+	logger  *log.Logger
+	workers *worker.Server
+	solver  *dnfjson.Solver
+	distros *distroregistry.Registry
 }
 
 // NewServer creates a new koji server
-func NewServer(logger *log.Logger, workers *worker.Server, rpmMetadata rpmmd.RPMMD, distros *distroregistry.Registry) *Server {
+func NewServer(logger *log.Logger, workers *worker.Server, solver *dnfjson.Solver, distros *distroregistry.Registry) *Server {
 	s := &Server{
-		logger:      logger,
-		workers:     workers,
-		rpmMetadata: rpmMetadata,
-		distros:     distros,
+		logger:  logger,
+		workers: workers,
+		solver:  solver,
+		distros: distros,
 	}
 
 	return s
@@ -127,7 +123,8 @@ func (h *apiHandlers) PostCompose(ctx echo.Context) error {
 			panic("Could not initialize empty blueprint.")
 		}
 
-		solver := dnfjson.NewSolver(d.ModulePlatformID(), d.Releasever(), arch.Name(), h.server.RPMCacheDir)
+		solver := h.server.solver
+		solver.SetConfig(d.ModulePlatformID(), d.Releasever(), arch.Name())
 		packageSets := imageType.PackageSets(*bp)
 		packageSpecSets := make(map[string][]rpmmd.PackageSpec)
 		for name, packages := range packageSets {

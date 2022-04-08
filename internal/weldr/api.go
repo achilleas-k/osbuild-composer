@@ -48,7 +48,7 @@ type API struct {
 	store   *store.Store
 	workers *worker.Server
 
-	rpmmd        rpmmd.RPMMD
+	solver       *dnfjson.Solver
 	archName     string
 	repoRegistry *reporegistry.RepoRegistry
 
@@ -64,10 +64,6 @@ type API struct {
 
 	//  List of ImageType names, which should not be exposed by the API
 	distrosImageTypeDenylist map[string][]string
-
-	// NOTE: need cache dir temporarily here while transitioning from rpmmd to
-	// dnfjson for depsolve
-	RPMCacheDir string
 }
 
 type ComposeState int
@@ -126,7 +122,7 @@ func validDistros(rr *reporegistry.RepoRegistry, dr *distroregistry.Registry, ar
 var ValidBlueprintName = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
 // NewTestAPI is used for the test framework, sets up a single distro
-func NewTestAPI(rpm rpmmd.RPMMD, arch distro.Arch, dr *distroregistry.Registry,
+func NewTestAPI(solver *dnfjson.Solver, arch distro.Arch, dr *distroregistry.Registry,
 	rr *reporegistry.RepoRegistry, logger *log.Logger,
 	store *store.Store, workers *worker.Server, compatOutputDir string,
 	distrosImageTypeDenylist map[string][]string) *API {
@@ -136,7 +132,7 @@ func NewTestAPI(rpm rpmmd.RPMMD, arch distro.Arch, dr *distroregistry.Registry,
 	api := &API{
 		store:                    store,
 		workers:                  workers,
-		rpmmd:                    rpm,
+		solver:                   solver,
 		archName:                 arch.Name(),
 		repoRegistry:             rr,
 		logger:                   logger,
@@ -149,7 +145,7 @@ func NewTestAPI(rpm rpmmd.RPMMD, arch distro.Arch, dr *distroregistry.Registry,
 	return setupRouter(api)
 }
 
-func New(repoPaths []string, stateDir string, rpm rpmmd.RPMMD, dr *distroregistry.Registry,
+func New(repoPaths []string, stateDir string, solver *dnfjson.Solver, dr *distroregistry.Registry,
 	logger *log.Logger, workers *worker.Server, distrosImageTypeDenylist map[string][]string) (*API, error) {
 	if logger == nil {
 		logger = log.New(os.Stdout, "", 0)
@@ -193,7 +189,7 @@ func New(repoPaths []string, stateDir string, rpm rpmmd.RPMMD, dr *distroregistr
 	api := &API{
 		store:                    store,
 		workers:                  workers,
-		rpmmd:                    rpm,
+		solver:                   solver,
 		archName:                 archName,
 		repoRegistry:             rr,
 		logger:                   logger,
@@ -1262,8 +1258,11 @@ func (api *API) modulesInfoHandler(writer http.ResponseWriter, request *http.Req
 			return
 		}
 
+		solver := api.solver
+		solver.SetConfig(d.ModulePlatformID(), d.Releasever(), api.archName)
 		for i := range packageInfos {
-			err := packageInfos[i].FillDependencies(api.rpmmd, repos, d.ModulePlatformID(), api.archName, d.Releasever())
+			pkgName := packageInfos[i].Name
+			deps, err := solver.Depsolve([]rpmmd.PackageSet{{Include: []string{pkgName}}}, [][]rpmmd.RepoConfig{repos})
 			if err != nil {
 				errors := responseError{
 					ID:  errorId,
@@ -1272,6 +1271,7 @@ func (api *API) modulesInfoHandler(writer http.ResponseWriter, request *http.Req
 				statusResponseError(writer, http.StatusBadRequest, errors)
 				return
 			}
+			packageInfos[i].Dependencies = deps[0].Dependencies
 		}
 	}
 
@@ -1339,13 +1339,10 @@ func (api *API) projectsDepsolveHandler(writer http.ResponseWriter, request *htt
 		return
 	}
 
-	solved, err := dnfjson.Depsolve(
+	api.solver.SetConfig(d.ModulePlatformID(), d.Releasever(), api.archName)
+	solved, err := api.solver.Depsolve(
 		[]rpmmd.PackageSet{{Include: names}},
 		[][]rpmmd.RepoConfig{repos},
-		d.ModulePlatformID(),
-		d.Releasever(),
-		api.archName,
-		api.RPMCacheDir,
 	)
 	if err != nil {
 		errors := responseError{
@@ -2157,7 +2154,8 @@ func (api *API) depsolveBlueprintForImageType(bp blueprint.Blueprint, imageType 
 
 	platformID := imageType.Arch().Distro().ModulePlatformID()
 	releasever := imageType.Arch().Distro().Releasever()
-	solver := dnfjson.NewSolver(platformID, releasever, api.archName, api.RPMCacheDir)
+	solver := api.solver
+	solver.SetConfig(platformID, releasever, api.archName)
 	for name, packageSet := range packageSets {
 		solved, err := solver.Depsolve([]rpmmd.PackageSet{packageSet}, [][]rpmmd.RepoConfig{imageTypeRepos})
 		if err != nil {
@@ -3136,8 +3134,9 @@ func (api *API) fetchPackageList(distroName string) (rpmmd.PackageList, error) {
 		return nil, err
 	}
 
-	packages, _, err := api.rpmmd.FetchMetadata(repos, d.ModulePlatformID(), api.archName, d.Releasever())
-	return packages, err
+	api.solver.SetConfig(d.ModulePlatformID(), api.archName, d.Releasever())
+	packages, err := api.solver.FetchMetadata(repos)
+	return packages.Packages, err
 }
 
 // Returns all configured repositories (base, depending on the image type + sources) as rpmmd.RepoConfig
@@ -3188,7 +3187,8 @@ func (api *API) depsolveBlueprint(bp blueprint.Blueprint) ([]rpmmd.PackageSpec, 
 		return nil, err
 	}
 
-	solved, err := dnfjson.Depsolve([]rpmmd.PackageSet{{Include: bp.GetPackages()}}, [][]rpmmd.RepoConfig{repos}, d.ModulePlatformID(), d.Releasever(), api.archName, api.RPMCacheDir)
+	api.solver.SetConfig(d.ModulePlatformID(), d.Releasever(), api.archName)
+	solved, err := api.solver.Depsolve([]rpmmd.PackageSet{{Include: bp.GetPackages()}}, [][]rpmmd.RepoConfig{repos})
 	if err != nil {
 		return nil, err
 	}

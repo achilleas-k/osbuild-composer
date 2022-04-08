@@ -20,6 +20,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	"github.com/osbuild/osbuild-composer/internal/distro/test_distro"
 	"github.com/osbuild/osbuild-composer/internal/distroregistry"
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	rpmmd_mock "github.com/osbuild/osbuild-composer/internal/mocks/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/ostree/mock_ostree_repo"
 	"github.com/osbuild/osbuild-composer/internal/reporegistry"
@@ -35,7 +36,6 @@ import (
 
 func createWeldrAPI(tempdir string, fixtureGenerator rpmmd_mock.FixtureGenerator) (*API, *store.Store) {
 	fixture := fixtureGenerator(tempdir)
-	rpm := rpmmd_mock.NewRPMMDMock(fixture)
 
 	rr := reporegistry.NewFromDistrosRepoConfigs(rpmmd.DistrosRepoConfigs{
 		test_distro.TestDistroName: {
@@ -62,7 +62,9 @@ func createWeldrAPI(tempdir string, fixtureGenerator rpmmd_mock.FixtureGenerator
 		panic(err)
 	}
 
-	return NewTestAPI(rpm, arch, dr, rr, nil, fixture.Store, fixture.Workers, "", nil), fixture.Store
+	solver := dnfjson.NewBaseSolver("")
+	testApi := NewTestAPI(solver, arch, dr, rr, nil, fixture.Store, fixture.Workers, "", nil)
+	return testApi, fixture.Store
 }
 
 // createWeldrAPI2 is an alternative function to createWeldrAPI, using different test architecture
@@ -70,7 +72,6 @@ func createWeldrAPI(tempdir string, fixtureGenerator rpmmd_mock.FixtureGenerator
 func createWeldrAPI2(tempdir string, fixtureGenerator rpmmd_mock.FixtureGenerator,
 	distroImageTypeDenylist map[string][]string) (*API, *store.Store) {
 	fixture := fixtureGenerator(tempdir)
-	rpm := rpmmd_mock.NewRPMMDMock(fixture)
 
 	rr := reporegistry.NewFromDistrosRepoConfigs(rpmmd.DistrosRepoConfigs{
 		test_distro.TestDistroName: {
@@ -97,7 +98,8 @@ func createWeldrAPI2(tempdir string, fixtureGenerator rpmmd_mock.FixtureGenerato
 		panic(err)
 	}
 
-	return NewTestAPI(rpm, arch, dr, rr, nil, fixture.Store, fixture.Workers, "", distroImageTypeDenylist), fixture.Store
+	solver := dnfjson.NewBaseSolver("")
+	return NewTestAPI(solver, arch, dr, rr, nil, fixture.Store, fixture.Workers, "", distroImageTypeDenylist), fixture.Store
 }
 
 func TestBasic(t *testing.T) {
