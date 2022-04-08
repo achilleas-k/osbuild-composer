@@ -28,8 +28,8 @@ type Solver struct {
 	// system and required for subscription support.
 	releaseVer string `json:"-"`
 
-	// Path to the dnf-json binary (default: "osbuild-dnf-json", assumed in $PATH)
-	dnfJsonPath string `json:"-"`
+	// Path to the dnf-json binary and optional args (default: "osbuild-dnf-json", assumed in $PATH)
+	dnfJsonCmd []string `json:"-"`
 }
 
 // Create a new Solver with the given configuration
@@ -39,7 +39,7 @@ func NewSolver(modulePlatformID string, releaseVer string, arch string, cacheDir
 		Arch:             arch,
 		CacheDir:         cacheDir,
 		releaseVer:       releaseVer,
-		dnfJsonPath:      "osbuild-dnf-json",
+		dnfJsonCmd:       []string{"osbuild-dnf-json"},
 	}
 }
 
@@ -65,7 +65,7 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoCon
 		Solver:    s,
 		Arguments: args,
 	}
-	output, err := run(s.dnfJsonPath, req)
+	output, err := run(s.dnfJsonCmd, req)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 		Solver:    s,
 		Arguments: []Arguments{{Repos: dnfRepos}},
 	}
-	result, err := run(s.dnfJsonPath, req)
+	result, err := run(s.dnfJsonCmd, req)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +99,8 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 	return metadata, nil
 }
 
-func (s *Solver) SetDNFJSONPath(path string) {
-	s.dnfJsonPath = path
+func (s *Solver) SetDNFJSONPath(path ...string) {
+	s.dnfJsonCmd = path
 }
 
 // Repository configuration for resolving dependencies for a set of packages. A
@@ -285,8 +285,16 @@ func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).FetchMetadata(repos)
 }
 
-func run(dnfJsonBin string, req Request) ([]byte, error) {
-	cmd := exec.Command(dnfJsonBin)
+func run(dnfJsonCmd []string, req Request) ([]byte, error) {
+	if len(dnfJsonCmd) == 0 {
+		return nil, fmt.Errorf("dnf-json command undefined")
+	}
+	ex := dnfJsonCmd[0]
+	args := make([]string, len(dnfJsonCmd)-1)
+	if len(dnfJsonCmd) > 1 {
+		args = dnfJsonCmd[1:]
+	}
+	cmd := exec.Command(ex, args...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, err
