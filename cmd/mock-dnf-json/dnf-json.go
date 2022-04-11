@@ -11,9 +11,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 )
@@ -35,14 +37,14 @@ func readRequest(data []byte) dnfjson.Request {
 	return req
 }
 
-func respond(result []map[string]interface{}) {
+func respond(result interface{}) {
 	resp, err := json.Marshal(result)
 	maybeFail(err)
 	fmt.Printf(string(resp))
 }
 
-func createBaseDepsolveFixture() []dnfjson.PackageSpec {
-	return []dnfjson.PackageSpec{
+func createBaseDepsolveFixture() interface{} {
+	pkgs := []dnfjson.PackageSpec{
 		{
 			Name:    "dep-package3",
 			Epoch:   7,
@@ -68,6 +70,12 @@ func createBaseDepsolveFixture() []dnfjson.PackageSpec {
 			RepoID:  "0",
 		},
 	}
+	return []map[string]interface{}{{
+		"checksums": map[string]string{
+			"0": "test:responsechecksum",
+		},
+		"dependencies": pkgs,
+	}}
 }
 
 func generatePackageList() []dnfjson.PackageSpec {
@@ -98,7 +106,25 @@ func generatePackageList() []dnfjson.PackageSpec {
 	return packageList
 }
 
+type testResultGenerator func() interface{}
+
+var cases = map[string]testResultGenerator{
+	"base": createBaseDepsolveFixture,
+}
+
+func readTestCase() string {
+	if len(os.Args) < 2 {
+		fail(errors.New("no test case specified"))
+	}
+	if len(os.Args) > 2 {
+		fail(errors.New("invalid number of arguments: you must specify a test case"))
+	}
+	return os.Args[1]
+}
+
 func main() {
+	testFilePath := readTestCase()
+
 	input, err := ioutil.ReadAll(os.Stdin)
 	maybeFail(err)
 
@@ -109,12 +135,35 @@ func main() {
 		fail(errors.New("error: empty arguments"))
 	}
 
-	pkgs := createBaseDepsolveFixture()
-	response := []map[string]interface{}{{
-		"checksums": map[string]string{
-			"0": "test:responsechecksum",
-		},
-		"dependencies": pkgs,
-	}}
-	respond(response)
+	testFile, err := os.Open(testFilePath)
+	if err != nil {
+		fail(fmt.Errorf("failed to open test file %q\n", testFilePath))
+	}
+	defer testFile.Close()
+	response, err := io.ReadAll(testFile)
+	if err != nil {
+		fail(fmt.Errorf("failed to read test file %q\n", testFilePath))
+	}
+
+	fmt.Fprintf(os.Stderr, string(response)+"\n")
+	fmt.Print(string(response))
+	if strings.Contains(testFilePath, ".err.") {
+		os.Exit(1)
+	}
+}
+
+func main_() {
+	testCase := readTestCase()
+
+	input, err := ioutil.ReadAll(os.Stdin)
+	maybeFail(err)
+
+	req := readRequest(input)
+
+	args := req.Arguments
+	if len(args) == 0 {
+		fail(errors.New("error: empty arguments"))
+	}
+
+	respond(cases[testCase]())
 }
