@@ -124,7 +124,7 @@ func makeDumpRequest(s *Solver, repos []rpmmd.RepoConfig) (*Request, error) {
 	return &req, nil
 }
 
-func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
+func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*FetchMetadataResult, error) {
 	req, err := makeDumpRequest(s, repos)
 	if err != nil {
 		return nil, err
@@ -134,7 +134,7 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 		return nil, err
 	}
 
-	var metadata *Metadata
+	var metadata *FetchMetadataResult
 	if err := json.Unmarshal(result, metadata); err != nil {
 		return nil, err
 	}
@@ -287,8 +287,8 @@ type DepsolveResult struct {
 	Dependencies []rpmmd.PackageSpec
 }
 
-// Metadata is the result returned from a FetchMetadata call.
-type Metadata struct {
+// FetchMetadataResult is the result returned from a FetchMetadata call.
+type FetchMetadataResult struct {
 	Checksums map[string]string `json:"checksums"`
 	Packages  rpmmd.PackageList `json:"packages"`
 }
@@ -334,7 +334,7 @@ func Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig, moduleP
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).Depsolve(pkgSets, repoSets)
 }
 
-func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (*Metadata, error) {
+func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer string, arch string, cacheDir string) (*FetchMetadataResult, error) {
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).FetchMetadata(repos)
 }
 
