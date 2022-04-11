@@ -59,11 +59,7 @@ func (s *Solver) SetConfig(modulePlatformID string, releaseVer string, arch stri
 	s.releaseVer = releaseVer
 }
 
-// Depsolve the given packages with explicit excludes using the solver configuration and provided repos
-func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig) ([]DepsolveResult, error) {
-	if len(pkgSets) != len(repoSets) {
-		return nil, fmt.Errorf("error: different number of package sets and repositories: %d != %d", len(pkgSets), len(repoSets))
-	}
+func makeDepsolveRequest(s *Solver, pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig) (*Request, error) {
 	args := make([]Arguments, len(pkgSets))
 	for idx := range pkgSets {
 		repos, err := ReposFromRPMMD(repoSets[idx], s.Arch, s.releaseVer)
@@ -83,6 +79,20 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoCon
 		CacheDir:         s.CacheDir,
 		Arguments:        args,
 	}
+	return &req, nil
+}
+
+// Depsolve the given packages with explicit excludes using the solver configuration and provided repos
+func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoConfig) ([]DepsolveResult, error) {
+	if len(pkgSets) != len(repoSets) {
+		return nil, fmt.Errorf("error: different number of package sets and repositories: %d != %d", len(pkgSets), len(repoSets))
+	}
+
+	req, err := makeDepsolveRequest(s, pkgSets, repoSets)
+	if err != nil {
+		return nil, err
+	}
+
 	output, err := run(s.dnfJsonCmd, req)
 	if err != nil {
 		return nil, err
@@ -95,7 +105,7 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoCon
 	return resultsToPublic(result, repoSets), nil
 }
 
-func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
+func makeDumpRequest(s *Solver, repos []rpmmd.RepoConfig) (*Request, error) {
 	dnfRepos, err := ReposFromRPMMD(repos, s.Arch, "")
 	if err != nil {
 		return nil, err
@@ -110,6 +120,14 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 				Repos: dnfRepos,
 			},
 		},
+	}
+	return &req, nil
+}
+
+func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
+	req, err := makeDumpRequest(s, repos)
+	if err != nil {
+		return nil, err
 	}
 	result, err := run(s.dnfJsonCmd, req)
 	if err != nil {
@@ -320,7 +338,7 @@ func FetchMetadata(repos []rpmmd.RepoConfig, modulePlatformID string, releaseVer
 	return NewSolver(modulePlatformID, releaseVer, arch, cacheDir).FetchMetadata(repos)
 }
 
-func run(dnfJsonCmd []string, req Request) ([]byte, error) {
+func run(dnfJsonCmd []string, req *Request) ([]byte, error) {
 	if len(dnfJsonCmd) == 0 {
 		return nil, fmt.Errorf("dnf-json command undefined")
 	}
