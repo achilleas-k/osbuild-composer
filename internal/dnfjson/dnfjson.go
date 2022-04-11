@@ -16,20 +16,20 @@ import (
 // dependencies for RPM packages using DNF.
 type Solver struct {
 	// Platform ID, e.g., "platform:el8"
-	ModulePlatformID string `json:"module_platform_id"`
+	ModulePlatformID string
 
 	// System architecture
-	Arch string `json:"arch"`
+	Arch string
 
 	// Cache directory for the DNF metadata
-	CacheDir string `json:"cachedir"`
+	CacheDir string
 
 	// Release version of the distro. This is used in repo files on the host
 	// system and required for subscription support.
-	releaseVer string `json:"-"`
+	releaseVer string
 
 	// Path to the dnf-json binary and optional args (default: "osbuild-dnf-json", assumed in $PATH)
-	dnfJsonCmd []string `json:"-"`
+	dnfJsonCmd []string
 }
 
 // Create a new unconfigured Solver (without platform information). It should
@@ -77,9 +77,11 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet, repoSets [][]rpmmd.RepoCon
 		}
 	}
 	req := Request{
-		Command:   "depsolve",
-		Solver:    s,
-		Arguments: args,
+		Command:          "depsolve",
+		ModulePlatformID: s.ModulePlatformID,
+		Arch:             s.Arch,
+		CacheDir:         s.CacheDir,
+		Arguments:        args,
 	}
 	output, err := run(s.dnfJsonCmd, req)
 	if err != nil {
@@ -99,9 +101,15 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (*Metadata, error) {
 		return nil, err
 	}
 	req := Request{
-		Command:   "dump",
-		Solver:    s,
-		Arguments: []Arguments{{Repos: dnfRepos}},
+		Command:          "dump",
+		ModulePlatformID: s.ModulePlatformID,
+		Arch:             s.Arch,
+		CacheDir:         s.CacheDir,
+		Arguments: []Arguments{
+			{
+				Repos: dnfRepos,
+			},
+		},
 	}
 	result, err := run(s.dnfJsonCmd, req)
 	if err != nil {
@@ -214,8 +222,19 @@ func depsToRPMMD(dependencies []PackageSpec, repos []rpmmd.RepoConfig) []rpmmd.P
 
 // Request command and arguments for dnf-json
 type Request struct {
+	// Command should be either "depsolve" or "dump"
 	Command string `json:"command"`
-	*Solver
+
+	// Platform ID, e.g., "platform:el8"
+	ModulePlatformID string `json:"module_platform_id"`
+
+	// System architecture
+	Arch string `json:"arch"`
+
+	// Cache directory for the DNF metadata
+	CacheDir string `json:"cachedir"`
+
+	// One or more arguments for the action defined by Command
 	Arguments []Arguments `json:"arguments"`
 }
 
