@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	cloud.google.com/go/cloudbuild v1.2.0
-	cloud.google.com/go/compute v1.6.0
+	cloud.google.com/go/compute v1.6.1
 	cloud.google.com/go/storage v1.22.0
 	github.com/Azure/azure-pipeline-go v0.2.3
 	github.com/Azure/azure-sdk-for-go v63.1.0+incompatible
@@ -24,7 +24,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/glog v1.0.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/go-cmp v0.5.7
+	github.com/google/go-cmp v0.5.8
 	github.com/google/uuid v1.3.0
 	github.com/gophercloud/gophercloud v0.24.0
 	github.com/hashicorp/go-retryablehttp v0.7.1
@@ -45,8 +45,8 @@ require (
 	github.com/vmware/govmomi v0.27.4
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
-	google.golang.org/api v0.75.0
-	google.golang.org/genproto v0.0.0-20220414192740-2d67ff6cf2b4
+	golang.org/x/sys v0.0.0-20220502124256-b6088ccd6cba
+	google.golang.org/api v0.78.0
+	google.golang.org/genproto v0.0.0-20220429170224-98d788798c3e
 	gopkg.in/ini.v1 v1.66.4
 )
