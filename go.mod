@@ -18,9 +18,8 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
 	github.com/coreos/go-semver v0.3.0
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
-	github.com/deepmap/oapi-codegen v1.8.2
-	github.com/getkin/kin-openapi v0.93.0
-	github.com/go-openapi/swag v0.21.1 // indirect
+	github.com/deepmap/oapi-codegen v1.11.0
+	github.com/getkin/kin-openapi v0.94.0
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/glog v1.0.0 // indirect
@@ -46,7 +45,7 @@ require (
 	github.com/vmware/govmomi v0.28.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad
+	golang.org/x/sys v0.0.0-20220513210249-45d2b4557a2a
 	google.golang.org/api v0.75.0
 	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3
 	gopkg.in/ini.v1 v1.66.4
