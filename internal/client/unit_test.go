@@ -38,7 +38,7 @@ func setupDNFJSON() string {
 		panic(err)
 	}
 	dnfjsonPath = filepath.Join(tmpdir, "mock-dnf-json")
-	cmd := exec.Command("go", "build", "-o", dnfjsonPath, "../../cmd/mock-dnf-json")
+	cmd := exec.Command("go", "build", "-buildvcs=false", "-o", dnfjsonPath, "../../cmd/mock-dnf-json")
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
