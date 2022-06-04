@@ -325,3 +325,36 @@ func TestCacheUnlockError(t *testing.T) {
 	// unlock should error
 	assert.Error(cache.unlock())
 }
+
+func TestMultiCacheLock(t *testing.T) {
+	tmpdir := t.TempDir()
+	cacheA := newRPMCache(tmpdir, 101) // max size is unimportant
+	cacheB := newRPMCache(tmpdir, 102) // max size is unimportant
+
+	assert := assert.New(t)
+
+	// unlocking should be a no-op and produce no error
+	assert.NoError(cacheA.unlock())
+	assert.NoError(cacheB.unlock())
+
+	// lock A (timeout shouldn't matter)
+	assert.NoError(cacheA.lock(1 * time.Second))
+
+	// lock A again to produce error (keep timeout short to not delay the test)
+	assert.Error(cacheA.lock(2 * time.Millisecond))
+
+	// lock B to produce error (keep timeout short to not delay the test)
+	assert.Error(cacheB.lock(2 * time.Millisecond))
+
+	// run clean on A to produce lock error
+	assert.Error(cacheA.shrink())
+
+	// run clean on B to produce lock error
+	assert.Error(cacheB.shrink())
+
+	// B should not remove A's lock
+	assert.Error(cacheB.unlock())
+
+	// unlock
+	assert.NoError(cacheA.unlock())
+}
