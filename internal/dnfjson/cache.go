@@ -117,7 +117,7 @@ func createExclusive(path string) (*os.File, error) {
 // purpose of this lock is to prevent multiple concurrent cache deletions and
 // to prevent reading or updating the caches while they are being deleted.
 func (r *rpmCache) lock() error {
-	lockfile := filepath.Join(r.root, ".composer.lock")
+	lockfile := r.lockfile()
 	var fp *os.File
 	var err error
 	for fp, err = createExclusive(lockfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(lockfile) {
@@ -133,7 +133,7 @@ func (r *rpmCache) lock() error {
 // Remove the lock file.  Returns error if the file removal fails.  If the lock
 // file does not exist, this is a no-op and returns nil.
 func (r *rpmCache) unlock() error {
-	lockfile := filepath.Join(r.root, ".composer.lock")
+	lockfile := r.lockfile()
 	if _, err := os.Stat(lockfile); errors.Is(err, os.ErrNotExist) {
 		return nil
 	}
@@ -203,6 +203,11 @@ func (r *rpmCache) touchRepo(repoID string, t time.Time) error {
 		}
 	}
 	return nil
+}
+
+// the path to the global cache lockfile.
+func (r *rpmCache) lockfile() string {
+	return filepath.Join(r.root, ".composer.lock")
 }
 
 // A collection of directory paths, their total size, and their most recent
