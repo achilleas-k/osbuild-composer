@@ -1,6 +1,7 @@
 package dnfjson
 
 import (
+	"errors"
 	"fmt"
 	"io/fs"
 	"os"
@@ -105,7 +106,52 @@ func (r *rpmCache) updateInfo() {
 	r.repoRecency = repoIDs
 }
 
+// create a file only if it doesn't exist.
+func createExclusive(path string) (*os.File, error) {
+	return os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+}
+
+// Create a lock file in the rpmCache to prevent concurrent access to the
+// global cache directory.  This is not required when depsolving since dnf
+// takes care of locking individual repository cache directories.  The primary
+// purpose of this lock is to prevent multiple concurrent cache deletions and
+// to prevent reading or updating the caches while they are being deleted.
+func (r *rpmCache) lock() error {
+	lockfile := filepath.Join(r.root, ".composer.lock")
+	var fp *os.File
+	var err error
+	for fp, err = createExclusive(lockfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(lockfile) {
+		// will stop when err is nil or a different kind of error
+	}
+	if err != nil {
+		// file does not exist, but a different kind of error occurred
+		return err
+	}
+	return fp.Close()
+}
+
+// Remove the lock file.  Returns error if the file removal fails.  If the lock
+// file does not exist, this is a no-op and returns nil.
+func (r *rpmCache) unlock() error {
+	lockfile := filepath.Join(r.root, ".composer.lock")
+	if _, err := os.Stat(lockfile); errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return os.Remove(lockfile)
+}
+
 func (r *rpmCache) shrink() error {
+	if err := r.lock(); err != nil {
+		return err
+	}
+	defer func() {
+		if err := r.unlock(); err != nil {
+			// the unlock function only returns with an error if the cache is
+			// actually locked and it fails to remove the lockfile.
+			// panic if we failed to unlock, otherwise we'd stay locked forever
+			panic(fmt.Sprintf("failed to unlock cache after shrink: %s", err))
+		}
+	}()
 	// start deleting until we drop below r.maxSize
 	nDeleted := 0
 	for idx := 0; idx < len(r.repoRecency) && r.size >= r.maxSize; idx++ {

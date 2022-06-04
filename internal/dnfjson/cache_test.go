@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -272,4 +273,55 @@ func TestCacheCleanup(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestCacheLock(t *testing.T) {
+	tmpdir := t.TempDir()
+	cache := newRPMCache(tmpdir, 1024) // max size is unimportant
+
+	assert := assert.New(t)
+
+	// unlocking should be a no-op and produce no error
+	assert.NoError(cache.unlock())
+
+	// lock
+	assert.NoError(cache.lock())
+
+	// run shrink in a separate routine and let it block
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	var shrinkDone bool
+	go func() {
+		defer wg.Done()
+		assert.NoError(cache.shrink())
+		shrinkDone = true
+	}()
+
+	// wait a bit and check if shrinkDone
+	// the cache is empty so a shrink should finish instantly if it's unblocked
+	time.Sleep(50 * time.Millisecond)
+	assert.False(shrinkDone)
+
+	// unlock and check again
+	assert.NoError(cache.unlock())
+	wg.Wait()
+	assert.True(shrinkDone)
+}
+
+func TestCacheUnlockError(t *testing.T) {
+	tmpdir := t.TempDir()
+	cache := newRPMCache(tmpdir, 1024) // max size is unimportant
+
+	assert := assert.New(t)
+
+	// lock the cache
+	assert.NoError(cache.lock())
+
+	// mark cache directory read-only
+	assert.NoError(os.Chmod(tmpdir, 0500))
+	// fix permissions for tmpdir cleanup
+	defer os.Chmod(tmpdir, 0770)
+
+	// unlock should error
+	assert.Error(cache.unlock())
 }
