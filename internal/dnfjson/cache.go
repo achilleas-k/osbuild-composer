@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gobwas/glob"
+	"github.com/google/uuid"
 )
 
 type rpmCache struct {
@@ -27,6 +28,9 @@ type rpmCache struct {
 
 	// max cache size
 	maxSize uint64
+
+	// cache ID, used for locking
+	id uuid.UUID
 }
 
 func newRPMCache(path string, maxSize uint64) *rpmCache {
@@ -38,6 +42,7 @@ func newRPMCache(path string, maxSize uint64) *rpmCache {
 	}
 	// collect existing cache paths and timestamps
 	r.updateInfo()
+	r.id = uuid.New()
 	return r
 }
 
@@ -127,6 +132,7 @@ func (r *rpmCache) lock() error {
 		// file does not exist, but a different kind of error occurred
 		return err
 	}
+	fp.WriteString(r.id.String())
 	return fp.Close()
 }
 
@@ -136,6 +142,14 @@ func (r *rpmCache) unlock() error {
 	lockfile := r.lockfile()
 	if _, err := os.Stat(lockfile); errors.Is(err, os.ErrNotExist) {
 		return nil
+	}
+	// do not remove locks owned by other instances using the same cache
+	data, err := os.ReadFile(lockfile)
+	if err != nil {
+		return err
+	}
+	if string(data) != r.id.String() {
+		return fmt.Errorf("cannot unlock cache: foreign lock found")
 	}
 	return os.Remove(lockfile)
 }
