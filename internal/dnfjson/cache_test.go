@@ -1,6 +1,7 @@
 package dnfjson
 
 import (
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func truncate(path string, size int64) {
@@ -327,4 +329,78 @@ func TestCacheUnlockError(t *testing.T) {
 
 	// unlock should error
 	assert.Error(l.unlock())
+}
+
+func TestMultiCacheLock(t *testing.T) {
+	tmpdir := t.TempDir()
+
+	cacheA := newRPMCache(tmpdir, 101) // max size is unimportant
+	cacheB := newRPMCache(tmpdir, 102) // max size is unimportant
+
+	req := require.New(t)
+
+	// make 3 read locks
+	rA1, err := cacheA.rlock()
+	req.NoError(err)
+	rA2, err := cacheA.rlock()
+	req.NoError(err)
+	rB1, err := cacheB.rlock()
+	req.NoError(err)
+
+	// start a routine to wait for a write lock
+	// it should create a hold on the lock directory and block any further
+	// locks (read or write)
+	var wB *cacheLock
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var wBerr error
+		wB, wBerr = cacheB.wlock()
+		req.NoError(wBerr)
+	}()
+	// wait for hold to appear
+	deadline := time.Now().Add(time.Second)
+	for _, err := os.Stat(cacheB.holdfile()); errors.Is(err, os.ErrNotExist); _, err = os.Stat(cacheB.holdfile()) {
+		if deadline.Before(time.Now()) {
+			req.FailNow("holdfile wait time exceeded")
+		}
+		// keep loopin'
+	}
+
+	// write lock routine should still be waiting
+	req.Nil(wB)
+
+	// start a routine to wait for a read lock
+	var rA *cacheLock
+	rg := new(sync.WaitGroup)
+	rg.Add(1)
+	go func() {
+		defer rg.Done()
+		var rAerr error
+		rA, rAerr = cacheA.rlock()
+		req.NoError(rAerr)
+	}()
+
+	// release the original read locks
+	req.NoError(rA1.unlock())
+	req.NoError(rA2.unlock())
+	req.NoError(rB1.unlock())
+
+	// wait for the write lock to be acquired
+	wg.Wait()
+
+	// new write lock acquired
+	req.NotNil(wB)
+
+	// read lock routine should still be waiting for write to finish
+	req.Nil(rA)
+
+	// release write lock and check read lock
+	req.NoError(wB.unlock())
+	rg.Wait()
+	req.NotNil(rA)
+
+	// release last read lock
+	req.NoError(rA.unlock())
 }
