@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gobwas/glob"
+	"github.com/google/uuid"
 )
 
 type rpmCache struct {
@@ -106,6 +107,25 @@ func (r *rpmCache) updateInfo() {
 	r.repoRecency = repoIDs
 }
 
+// Put a hold on the cache lock directory.  This is essentially a write lock
+// for the lock directory.  wlock() and rlock() should get a hold() before
+// attempting to create lock files to avoid race conditions during the creation
+// of locks.
+func (r *rpmCache) hold() (string, error) {
+	holdfile := r.holdfile() // signals that an exclusive lock is waiting
+	var fp *os.File
+	var err error
+	for fp, err = createExclusive(holdfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(holdfile) {
+		// will stop when err is nil or a different kind of error
+	}
+	if err != nil {
+		// file does not exist, but a different kind of error occurred
+		return "", err
+	}
+	defer fp.Close()
+	return holdfile, nil
+}
+
 // create a file only if it doesn't exist.
 func createExclusive(path string) (*os.File, error) {
 	return os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
@@ -125,24 +145,26 @@ type cacheLock struct {
 // exist.  If an exclusive lock is requested, no other lock can be acquired
 // until it is released.
 func (r *rpmCache) wlock() (*cacheLock, error) {
-	ldir := r.lockdir()
+	holdfile, err := r.hold()
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(holdfile)
 
-	{ // create a hold file
-		holdfile := filepath.Join(ldir, "exclusive.hold") // signals that an exclusive lock is waiting
-		var fp *os.File
+	// with the hold, no new locks should be created, so wait for any existing ones to be released
+	{
+		readGlob := r.rglob()
+		var matches []string
 		var err error
-		for fp, err = createExclusive(holdfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(holdfile) {
+		for matches, err = filepath.Glob(readGlob); len(matches) > 0 && err == nil; matches, err = filepath.Glob(readGlob) {
 			// will stop when err is nil or a different kind of error
 		}
 		if err != nil {
-			// file does not exist, but a different kind of error occurred
 			return nil, err
 		}
-		defer fp.Close()
-		defer os.Remove(holdfile) // remove the hold if we get the lock (or fail)
 	}
 
-	lockfile := filepath.Join(ldir, "exclusive")
+	lockfile := r.wlockfile()
 	{ // create the lock file
 		var fp *os.File
 		var err error
@@ -155,6 +177,40 @@ func (r *rpmCache) wlock() (*cacheLock, error) {
 		}
 		defer fp.Close()
 	}
+	return &cacheLock{path: lockfile}, nil
+}
+
+// Create a non-exclusive read lock (rlock) file in the rpmCache to prevent
+// writes and deletes while using the cache.  This should be acquired when
+// depsolving.  dnf takes care of locking individual repository cache
+// directories, so a write lock is not required and multiple read locks can be
+// acquired simultaneously.  A read lock cannot be acquired if a write lock or
+// a hold for a write lock exists.
+func (r *rpmCache) rlock() (*cacheLock, error) {
+	holdfile, err := r.hold()
+	if err != nil {
+		return nil, err
+	}
+	defer os.Remove(holdfile)
+
+	// with the hold, no new locks should be created, so wait for any existing write lock to be released
+	// read locks are ignored
+	{
+		wlockfile := r.wlockfile()
+		var err error
+		for _, err = os.Stat(wlockfile); err == nil; _, err = os.Stat(wlockfile) {
+			// will stop when err is nil or a different kind of error
+		}
+	}
+
+	lockfile := r.rlockfile()
+	fp, err := createExclusive(lockfile)
+	if err != nil {
+		// unlikely for file to already exist because of UUID (unless the rng
+		// is having a bad day) but any other kind of error might have occurred
+		return nil, fmt.Errorf("dnfjson cache read lock failed: %s", err)
+	}
+	defer fp.Close()
 	return &cacheLock{path: lockfile}, nil
 }
 
@@ -241,6 +297,22 @@ func (r *rpmCache) lockdir() string {
 		panic(fmt.Sprintf("cache lock directory creation failed: %s", err))
 	}
 	return d
+}
+
+func (r *rpmCache) holdfile() string {
+	return filepath.Join(r.lockdir(), "exclusive.hold")
+}
+
+func (r *rpmCache) wlockfile() string {
+	return filepath.Join(r.lockdir(), "exclusive")
+}
+
+func (r *rpmCache) rlockfile() string {
+	return filepath.Join(r.lockdir(), fmt.Sprintf("read-%s", uuid.NewString()))
+}
+
+func (r *rpmCache) rglob() string {
+	return filepath.Join(r.lockdir(), "read-*")
 }
 
 // A collection of directory paths, their total size, and their most recent
