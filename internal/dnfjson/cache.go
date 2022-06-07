@@ -112,28 +112,50 @@ func createExclusive(path string) (*os.File, error) {
 }
 
 type cacheLock struct {
-	path      string
-	exclusive bool
+	path string
 }
 
-// Create a lock file in the rpmCache to prevent concurrent access to the
-// global cache directory.  This is not required when depsolving since dnf
-// takes care of locking individual repository cache directories.  The primary
-// purpose of this lock is to prevent multiple concurrent cache deletions and
-// to prevent reading or updating the caches while they are being deleted.
-func (r *rpmCache) lock() (*cacheLock, error) {
-	lockfile := r.lockfile()
-	var fp *os.File
-	var err error
-	for fp, err = createExclusive(lockfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(lockfile) {
-		// will stop when err is nil or a different kind of error
+// Create an exclusive write lock (wlock) file in the rpmCache to prevent
+// concurrent access to the global cache directory.  This is not required when
+// depsolving since dnf takes care of locking individual repository cache
+// directories.  The primary purpose of this lock is to prevent multiple
+// concurrent cache deletions and to prevent reading or updating the caches
+// while they are being deleted.
+// An exclusive lock can only be acquired if no other locks, exclusive or not,
+// exist.  If an exclusive lock is requested, no other lock can be acquired
+// until it is released.
+func (r *rpmCache) wlock() (*cacheLock, error) {
+	ldir := r.lockdir()
+
+	{ // create a hold file
+		holdfile := filepath.Join(ldir, "exclusive.hold") // signals that an exclusive lock is waiting
+		var fp *os.File
+		var err error
+		for fp, err = createExclusive(holdfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(holdfile) {
+			// will stop when err is nil or a different kind of error
+		}
+		if err != nil {
+			// file does not exist, but a different kind of error occurred
+			return nil, err
+		}
+		defer fp.Close()
+		defer os.Remove(holdfile) // remove the hold if we get the lock (or fail)
 	}
-	if err != nil {
-		// file does not exist, but a different kind of error occurred
-		return nil, err
+
+	lockfile := filepath.Join(ldir, "exclusive")
+	{ // create the lock file
+		var fp *os.File
+		var err error
+		for fp, err = createExclusive(lockfile); errors.Is(err, os.ErrExist); fp, err = createExclusive(lockfile) {
+			// will stop when err is nil or a different kind of error
+		}
+		if err != nil {
+			// file does not exist, but a different kind of error occurred
+			return nil, err
+		}
+		defer fp.Close()
 	}
-	defer fp.Close()
-	return &cacheLock{path: lockfile, exclusive: true}, nil
+	return &cacheLock{path: lockfile}, nil
 }
 
 // Remove the lock file.  Returns error if the file removal fails.  If the lock
@@ -147,7 +169,7 @@ func (cl *cacheLock) unlock() error {
 }
 
 func (r *rpmCache) shrink() error {
-	lock, err := r.lock()
+	lock, err := r.wlock()
 	if err != nil {
 		return err
 	}
@@ -212,9 +234,13 @@ func (r *rpmCache) touchRepo(repoID string, t time.Time) error {
 	return nil
 }
 
-// the path to the global cache lockfile.
-func (r *rpmCache) lockfile() string {
-	return filepath.Join(r.root, ".composer.lock")
+// Create the cache lock directory and return the path.
+func (r *rpmCache) lockdir() string {
+	d := filepath.Join(r.root, ".composer.lock")
+	if err := os.MkdirAll(d, 0770); err != nil {
+		panic(fmt.Sprintf("cache lock directory creation failed: %s", err))
+	}
+	return d
 }
 
 // A collection of directory paths, their total size, and their most recent

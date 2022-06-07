@@ -282,7 +282,7 @@ func TestCacheLock(t *testing.T) {
 	assert := assert.New(t)
 
 	// lock
-	l, err := cache.lock()
+	l, err := cache.wlock()
 	assert.NoError(err)
 
 	// run shrink in a separate routine and let it block
@@ -316,13 +316,14 @@ func TestCacheUnlockError(t *testing.T) {
 	assert := assert.New(t)
 
 	// lock the cache
-	l, err := cache.lock()
+	l, err := cache.wlock()
 	assert.NoError(err)
 
-	// mark cache directory read-only
-	assert.NoError(os.Chmod(tmpdir, 0500))
+	// mark cache lock directory read-only
+	ldir := cache.lockdir()
+	assert.NoError(os.Chmod(ldir, 0500))
 	// fix permissions for tmpdir cleanup
-	defer os.Chmod(tmpdir, 0770)
+	defer os.Chmod(ldir, 0770)
 
 	// unlock should error
 	assert.Error(l.unlock())
