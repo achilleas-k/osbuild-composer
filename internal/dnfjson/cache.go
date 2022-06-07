@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gobwas/glob"
-	"github.com/google/uuid"
 )
 
 type rpmCache struct {
@@ -28,9 +27,6 @@ type rpmCache struct {
 
 	// max cache size
 	maxSize uint64
-
-	// cache ID, used for locking
-	id uuid.UUID
 }
 
 func newRPMCache(path string, maxSize uint64) *rpmCache {
@@ -42,7 +38,6 @@ func newRPMCache(path string, maxSize uint64) *rpmCache {
 	}
 	// collect existing cache paths and timestamps
 	r.updateInfo()
-	r.id = uuid.New()
 	return r
 }
 
@@ -116,12 +111,17 @@ func createExclusive(path string) (*os.File, error) {
 	return os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
 }
 
+type cacheLock struct {
+	path      string
+	exclusive bool
+}
+
 // Create a lock file in the rpmCache to prevent concurrent access to the
 // global cache directory.  This is not required when depsolving since dnf
 // takes care of locking individual repository cache directories.  The primary
 // purpose of this lock is to prevent multiple concurrent cache deletions and
 // to prevent reading or updating the caches while they are being deleted.
-func (r *rpmCache) lock() error {
+func (r *rpmCache) lock() (*cacheLock, error) {
 	lockfile := r.lockfile()
 	var fp *os.File
 	var err error
@@ -130,36 +130,29 @@ func (r *rpmCache) lock() error {
 	}
 	if err != nil {
 		// file does not exist, but a different kind of error occurred
-		return err
+		return nil, err
 	}
-	fp.WriteString(r.id.String())
-	return fp.Close()
+	defer fp.Close()
+	return &cacheLock{path: lockfile, exclusive: true}, nil
 }
 
 // Remove the lock file.  Returns error if the file removal fails.  If the lock
 // file does not exist, this is a no-op and returns nil.
-func (r *rpmCache) unlock() error {
-	lockfile := r.lockfile()
+func (cl *cacheLock) unlock() error {
+	lockfile := cl.path
 	if _, err := os.Stat(lockfile); errors.Is(err, os.ErrNotExist) {
 		return nil
-	}
-	// do not remove locks owned by other instances using the same cache
-	data, err := os.ReadFile(lockfile)
-	if err != nil {
-		return err
-	}
-	if string(data) != r.id.String() {
-		return fmt.Errorf("cannot unlock cache: foreign lock found")
 	}
 	return os.Remove(lockfile)
 }
 
 func (r *rpmCache) shrink() error {
-	if err := r.lock(); err != nil {
+	lock, err := r.lock()
+	if err != nil {
 		return err
 	}
 	defer func() {
-		if err := r.unlock(); err != nil {
+		if err := lock.unlock(); err != nil {
 			// the unlock function only returns with an error if the cache is
 			// actually locked and it fails to remove the lockfile.
 			// panic if we failed to unlock, otherwise we'd stay locked forever
