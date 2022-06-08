@@ -115,6 +115,18 @@ func (s *Solver) Depsolve(pkgSets []rpmmd.PackageSet) ([]rpmmd.PackageSpec, erro
 		return nil, err
 	}
 
+	// get read lock
+	rl, err := s.cache.rlock()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		// catch error in defer and panic if unlocking failed
+		err := rl.unlock()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	output, err := run(s.dnfJsonCmd, req)
 	if err != nil {
 		return nil, err
@@ -142,6 +154,18 @@ func (s *Solver) FetchMetadata(repos []rpmmd.RepoConfig) (rpmmd.PackageList, err
 	if err != nil {
 		return nil, err
 	}
+	// get read lock
+	rl, err := s.cache.rlock()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		// catch error in defer and panic if unlocking failed
+		err := rl.unlock()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	result, err := run(s.dnfJsonCmd, req)
 	if err != nil {
 		return nil, err
