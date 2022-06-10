@@ -30,7 +30,7 @@ func qcow2Pipelines(t *imageType, customizations *blueprint.Customizations, opti
 	}
 	pipelines = append(pipelines, *treePipeline)
 
-	diskfile := "disk.img"
+	diskfile := "disk-1.img"
 	kernelVer := rpmmd.GetVerStrFromPackageSpecListPanic(packageSetSpecs[osPkgsKey], customizations.GetKernel().Name)
 	imagePipeline := liveImagePipeline(treePipeline.Name, diskfile, partitionTable, t.arch, kernelVer)
 	pipelines = append(pipelines, *imagePipeline)
