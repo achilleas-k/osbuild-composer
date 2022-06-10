@@ -30,13 +30,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Generate manifests (PR HEAD)
-        run: go run ./cmd/gen-manifests --output /manifests/PR
+        run: go run ./cmd/gen-manifests --output /manifests/PR --workers 120
 
       - name: Checkout main
         run: git checkout main
 
       - name: Generate manifests (main)
-        run: go run ./cmd/gen-manifests --output /manifests/main
+        run: go run ./cmd/gen-manifests --output /manifests/main --workers 120
 
       - name: diff
         run: diff -r /manifests/main /manifests/PR
