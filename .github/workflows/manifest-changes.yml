@@ -41,4 +41,18 @@ jobs:
         run: go run ./cmd/gen-manifests --output /manifests/main --workers 120
 
       - name: diff
-        run: diff -r /manifests/main /manifests/PR
+        id: mdiff
+        run: changes=$(diff -qr /manifests/main /manifests/PR)
+
+      - name: Manifest changes detected
+        env:
+          URL: ${{ github.event.pull_request.comments_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ failure() && steps.mdiff.conclusion == 'failure' }}
+        run: |
+          curl \
+            -X POST \
+            $URL \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            --data '{ "body": "Manifest changes detected" }'
