@@ -107,7 +107,7 @@ func (wq *workerQueue) startMessagePrinter() {
 			default:
 				msglen, _ = fmt.Printf(" == Jobs == Queue: %4d  Active: %4d  Total: %4d\r", len(wq.jobQueue), wq.activeWorkers, wq.njobs)
 				// sleep a bit when printing progress to avoid constantly pushing out the same progress message
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(30 * time.Second)
 			}
 		}
 	}()
