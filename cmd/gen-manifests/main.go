@@ -326,6 +326,11 @@ func main() {
 
 	fmt.Println("Collecting jobs")
 	for _, distroName := range distros.List() {
+		if strings.Contains(distroName, "rhel") {
+			// skip for now; requires vpn and we're testing in github actions
+			fmt.Printf("skipping distro %s: requires vpn\n", distroName)
+			continue
+		}
 		distribution := distros.GetDistro(distroName)
 		for _, archName := range distribution.ListArches() {
 			arch, err := distribution.GetArch(archName)
