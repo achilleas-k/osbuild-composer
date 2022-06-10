@@ -24,7 +24,7 @@ jobs:
       - name: Install build dependencies
         run: dnf -y install krb5-devel gcc git-core go
 
-      - name: Check out code into the Go module directory
+      - name: Check out PR HEAD
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha }}
@@ -32,8 +32,10 @@ jobs:
       - name: Generate manifests (PR HEAD)
         run: go run ./cmd/gen-manifests --output /manifests/PR --workers 120
 
-      - name: Checkout main
-        run: git checkout main
+      - name: Check out main
+        uses: actions/checkout@v3
+        with:
+          ref: main
 
       - name: Generate manifests (main)
         run: go run ./cmd/gen-manifests --output /manifests/main --workers 120
