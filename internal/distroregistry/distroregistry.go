@@ -1,7 +1,11 @@
 package distroregistry
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -15,6 +19,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/distro/rhel86"
 	"github.com/osbuild/osbuild-composer/internal/distro/rhel90"
 	"github.com/osbuild/osbuild-composer/internal/distro/rhel90beta"
+	"golang.org/x/sys/unix"
 )
 
 // When adding support for a new distribution, add it here.
@@ -61,6 +66,44 @@ func New(hostDistro distro.Distro, distros ...distro.Distro) (*Registry, error) 
 	return reg, nil
 }
 
+func readExternalDistros() []distro.Distro {
+	extPath := "/etc/osbuild-composer/distributions/"
+
+	if _, err := os.Stat(extPath); errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+
+	distros := make([]distro.Distro, 0)
+
+	// discover executable files and initialise distros
+	binFinder := func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			// don't do anything with dirs
+			return nil
+		}
+
+		// check if executable
+		if unix.Access(path, unix.X_OK) == nil {
+			distro, err := distro.NewExternal(path)
+			if err != nil {
+				return err
+			}
+			distros = append(distros, distro)
+		}
+		return nil
+	}
+
+	err := filepath.Walk(extPath, binFinder)
+	if err != nil {
+		panic(err)
+	}
+
+	return distros
+}
+
 // NewDefault creates a Registry with all distributions supported by
 // osbuild-composer. If you need to add a distribution here, see the
 // supportedDistros variable.
@@ -87,6 +130,9 @@ func NewDefault() *Registry {
 
 		distros = append(distros, distro)
 	}
+
+	externalDistros := readExternalDistros()
+	distros = append(distros, externalDistros...)
 
 	registry, err := New(hostDistro, distros...)
 	if err != nil {
