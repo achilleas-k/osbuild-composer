@@ -309,7 +309,7 @@ func (t *imageType) PackageSets(bp blueprint.Blueprint, repos []rpmmd.RepoConfig
 	// add bp kernel to main OS package set to avoid duplicate kernels
 	mergedSets[osPkgsKey] = mergedSets[osPkgsKey].Append(rpmmd.PackageSet{Include: []string{kernel}})
 
-	return distro.MakePackageSetChains(t, mergedSets, repos)
+	return distro.MakePackageSetChains(t.packageSetChains, mergedSets, repos)
 }
 
 func (t *imageType) BuildPipelines() []string {
@@ -322,10 +322,6 @@ func (t *imageType) PayloadPipelines() []string {
 
 func (t *imageType) PayloadPackageSets() []string {
 	return []string{blueprintPkgsKey}
-}
-
-func (t *imageType) PackageSetsChains() map[string][]string {
-	return t.packageSetChains
 }
 
 func (t *imageType) Exports() []string {

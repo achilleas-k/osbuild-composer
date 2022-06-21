@@ -110,9 +110,6 @@ type ImageType interface {
 	// Returns the package set names safe to install custom packages via custom repositories.
 	PayloadPackageSets() []string
 
-	// Returns named arrays of package set names which should be depsolved in a chain.
-	PackageSetsChains() map[string][]string
-
 	// Returns the names of the stages that will produce the build output.
 	Exports() []string
 
@@ -202,7 +199,7 @@ func PayloadPackageSets() []string {
 	return []string{}
 }
 
-func MakePackageSetChains(t ImageType, packageSets map[string]rpmmd.PackageSet, repos []rpmmd.RepoConfig) map[string][]rpmmd.PackageSet {
+func MakePackageSetChains(chains map[string][]string, packageSets map[string]rpmmd.PackageSet, repos []rpmmd.RepoConfig) map[string][]rpmmd.PackageSet {
 	allSetNames := make([]string, len(packageSets))
 	idx := 0
 	for setName := range packageSets {
@@ -228,14 +225,14 @@ func MakePackageSetChains(t ImageType, packageSets map[string]rpmmd.PackageSet, 
 	chainedSets := make(map[string][]rpmmd.PackageSet)
 	addedSets := make(map[string]bool)
 	// first collect package sets that are part of a chain
-	for specName, setNames := range t.PackageSetsChains() {
+	for specName, setNames := range chains {
 		pkgSets := make([]rpmmd.PackageSet, len(setNames))
 
 		// add package-set-specific repositories to each set if one is defined
 		for idx, pkgSetName := range setNames {
 			pkgSet, ok := packageSets[pkgSetName]
 			if !ok {
-				panic(fmt.Sprintf("image type %q specifies chained package set %q but no package set with that name exists", t.Name(), pkgSetName))
+				panic(fmt.Sprintf("image type specifies chained package set %q but no package set with that name exists", pkgSetName))
 			}
 			pkgSet.Repositories = packageSetsRepos[pkgSetName]
 			pkgSets[idx] = pkgSet
