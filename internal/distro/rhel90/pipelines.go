@@ -1032,11 +1032,17 @@ func anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec
 	p.AddStage(osbuild.NewLoraxScriptStage(loraxScriptStageOptions(arch)))
 	p.AddStage(osbuild.NewDracutStage(dracutStageOptions(kernelVer, arch, []string{
 		"anaconda",
+		"cuse",
 		"fcoe",
 		"fcoe-uefi",
+		"ipmi_devintf",
+		"ipmi_msghandler",
 		"iscsi",
 		"lunmask",
+		"mlx_wdt",
 		"multipath",
+		"nd_e820",
+		"nfit",
 		"nfs",
 		"rdma",
 		"rngd",

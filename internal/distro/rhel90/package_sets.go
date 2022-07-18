@@ -1195,6 +1195,7 @@ func anacondaPackageSet(t *imageType) rpmmd.PackageSet {
 			"kbd-misc",
 			"kdump-anaconda-addon",
 			"kernel",
+			"kernel-modules-extra", // for cuse
 			"khmeros-base-fonts",
 			"less",
 			"libblockdev-lvm-dbus",
