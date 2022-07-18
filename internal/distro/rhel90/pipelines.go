@@ -1032,14 +1032,14 @@ func anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec
 	p.AddStage(osbuild.NewLoraxScriptStage(loraxScriptStageOptions(arch)))
 	p.AddStage(osbuild.NewDracutStage(dracutStageOptions(kernelVer, arch, []string{
 		"anaconda",
-		"rdma",
-		"rngd",
-		"multipath",
 		"fcoe",
 		"fcoe-uefi",
 		"iscsi",
 		"lunmask",
+		"multipath",
 		"nfs",
+		"rdma",
+		"rngd",
 	})))
 	p.AddStage(osbuild.NewSELinuxConfigStage(&osbuild.SELinuxConfigStageOptions{State: osbuild.SELinuxStatePermissive}))
 
