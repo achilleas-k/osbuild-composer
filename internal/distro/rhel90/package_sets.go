@@ -1195,7 +1195,8 @@ func anacondaPackageSet(t *imageType) rpmmd.PackageSet {
 			"kbd-misc",
 			"kdump-anaconda-addon",
 			"kernel",
-			"kernel-modules-extra", // for cuse
+			"kernel-core",
+			"kernel-modules-extra",
 			"khmeros-base-fonts",
 			"less",
 			"libblockdev-lvm-dbus",
@@ -1224,6 +1225,7 @@ func anacondaPackageSet(t *imageType) rpmmd.PackageSet {
 			"nmap-ncat",
 			"nm-connection-editor",
 			"nss-tools",
+			"nvme-cli", // for nvmf dracut module
 			"openssh-clients",
 			"openssh-server",
 			"oscap-anaconda-addon",

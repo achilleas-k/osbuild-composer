@@ -1032,18 +1032,14 @@ func anacondaTreePipeline(repos []rpmmd.RepoConfig, packages []rpmmd.PackageSpec
 	p.AddStage(osbuild.NewLoraxScriptStage(loraxScriptStageOptions(arch)))
 	p.AddStage(osbuild.NewDracutStage(dracutStageOptions(kernelVer, arch, []string{
 		"anaconda",
-		"cuse",
-		"fcoe",
+		"fcoe", // Fibre Channel over Ethernet
 		"fcoe-uefi",
-		"ipmi_devintf",
-		"ipmi_msghandler",
 		"iscsi",
 		"lunmask",
-		"mlx_wdt",
 		"multipath",
-		"nd_e820",
-		"nfit",
 		"nfs",
+		"nvdimm", // non-volatile DIMM firmware (provides nfit, cuse, and nd_e820)
+		"nvmf",
 		"rdma",
 		"rngd",
 	})))
