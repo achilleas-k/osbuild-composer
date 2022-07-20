@@ -39,14 +39,14 @@ require (
 	github.com/oracle/oci-go-sdk/v54 v54.0.0
 	github.com/prometheus/client_golang v1.12.1
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.4.0
 	github.com/stretchr/testify v1.7.1
 	github.com/ubccr/kerby v0.0.0-20170626144437-201a958fc453
 	github.com/vmware/govmomi v0.28.0
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
 	google.golang.org/api v0.75.0
 	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3
 	gopkg.in/ini.v1 v1.66.6
