@@ -712,94 +712,6 @@
                     }
                   },
                   {
-                    "id": "sha256:96258199d3fbb06b95f6140a14af0858d37a2ba7148afb5c6753a92bd6f7d81e",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:3fa4a73aa1795ec4eacd930c6e3ffdeaf5e73f50071f69bc5f7c0c8100f70d2d",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:0cc4533e700a5ebe6b3ea7b4ab897a39364ab421aabdc8708c929b7d1de3c0b7",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:14680d9542d0257264d52fc8c9e7da700abbd4568ed66a7fcb930dc3abb9420c",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:ed93826c3b2b1f82e8e08ac5d94ab707b30d0c19177dc82038756e6d2eb8b010",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:c12f0f8464df6c57a0f855ce8312fe1f0e9f4493c33a0a5386a0397959089374",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:5d6711854a817baef73689558e982b4f1997eba8d4ac58837903eb2d53189b5c",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:750cc6158e20041c825da49235ae60ee4498dab4964212ee831dee485d3d73ef",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:7384943e170ed7e76ff30767f014f3cf918a733de681265daaf6843a0dd00b20",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:ae711e8ee7a8fb2faf2702a6a882a5dec5516250c4bc2bb7cafeea7655d084c7",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:c94ba13c8565695e2bedaab513a2df30cddb98ebacd515370eb957e78923c4f1",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:c63e2ad394b69e31da35ddb4578c8b0c45b7d1bbf6015c92434627ad4b243263",
                     "options": {
                       "metadata": {
@@ -1464,14 +1376,6 @@
                     }
                   },
                   {
-                    "id": "sha256:53fc9455342bc67abe2b4800cc083e39c3c5688fc274b70b360627b2b77f324f",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:ffbcf2d3558dec17023a930d8e278756ffec150d943b66239085043e06fbce59",
                     "options": {
                       "metadata": {
@@ -1489,14 +1393,6 @@
                   },
                   {
                     "id": "sha256:ecdef96acbb30ce62236fad1a55f6a87c0cf9f39ce73fa3c2b4c1ce021f7080f",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:31bd04e8057c75765d669724041fe9b0c0476f6dbdbd8fbc00f9ef7647269aa3",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -2541,9 +2437,6 @@
           "sha256:0c5934456b7dfbc862bae2700f840fb91773f89f7c668ed26b5e9b4c19e383e8": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/g/grubby-8.40-64.fc37.x86_64.rpm"
           },
-          "sha256:0cc4533e700a5ebe6b3ea7b4ab897a39364ab421aabdc8708c929b7d1de3c0b7": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl105-firmware-18.168.6.1-137.fc37.noarch.rpm"
-          },
           "sha256:0de55e331087a0c931dbff4ff4973dfd54b190b2ba112e6c22ea8f13dd0329d2": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libsecret-0.20.5-2.fc37.x86_64.rpm"
           },
@@ -2561,9 +2454,6 @@
           },
           "sha256:1291bf573b9a91c1fc7481518a9204e6e090c11b2f553f0652b216d9c36f338b": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/s/systemd-libs-251.4-51.fc37.x86_64.rpm"
-          },
-          "sha256:14680d9542d0257264d52fc8c9e7da700abbd4568ed66a7fcb930dc3abb9420c": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl135-firmware-18.168.6.1-137.fc37.noarch.rpm"
           },
           "sha256:15224cb92199b8011fe47dc12e0bbcdbee0c93e0f29553b3b07ae41768b48ce3": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libacl-2.3.1-4.fc37.x86_64.rpm"
@@ -2667,9 +2557,6 @@
           "sha256:31af27f44c4a8d06068389731d3a5adc0fd45b1c8ce4d28163f938e68fa58cbf": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/c/coreutils-common-9.1-6.fc37.x86_64.rpm"
           },
-          "sha256:31bd04e8057c75765d669724041fe9b0c0476f6dbdbd8fbc00f9ef7647269aa3": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/m/microcode_ctl-2.1-53.fc37.x86_64.rpm"
-          },
           "sha256:31c439058714931736b9a7e4bc5b2c70d47ed188721c40cb8b8839bb3c5ee732": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/g/gnutls-3.7.7-1.fc37.x86_64.rpm"
           },
@@ -2711,9 +2598,6 @@
           },
           "sha256:3f75a19cde7c830450d72c75d4abefadc9e379584a322c5e2a7e56177d47e875": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/p/python-unversioned-command-3.11.0~rc1-1.fc37.noarch.rpm"
-          },
-          "sha256:3fa4a73aa1795ec4eacd930c6e3ffdeaf5e73f50071f69bc5f7c0c8100f70d2d": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl1000-firmware-39.31.5.1-137.fc37.noarch.rpm"
           },
           "sha256:4160875ff128ce85418761b7567bdf6a26495ec2cd20d26211ac74c091859671": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/s/systemd-udev-251.4-51.fc37.x86_64.rpm"
@@ -2790,9 +2674,6 @@
           "sha256:539f9b54e9f497f0d40374f3d863a62c6fcc4e54a7336ac54445344612fc151c": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libxml2-2.9.14-3.fc37.x86_64.rpm"
           },
-          "sha256:53fc9455342bc67abe2b4800cc083e39c3c5688fc274b70b360627b2b77f324f": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/linux-firmware-whence-20220708-137.fc37.noarch.rpm"
-          },
           "sha256:54ebc02523f7b85a9b790aec6be0b6ef01e377216bd76fc0ada4354fa0f0d8e3": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libyaml-0.2.5-8.fc37.x86_64.rpm"
           },
@@ -2819,9 +2700,6 @@
           },
           "sha256:5a9c2a69949d1bd9293d3fd34719e4d01c8e65d80957d8534ebc23b1deb756c2": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/p/python-setuptools-wheel-62.6.0-2.fc37.noarch.rpm"
-          },
-          "sha256:5d6711854a817baef73689558e982b4f1997eba8d4ac58837903eb2d53189b5c": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl3160-firmware-25.30.13.0-137.fc37.noarch.rpm"
           },
           "sha256:5d76121803ffc0b045bea90e4ef992151d5fca8bc0fe295b1caa88425235244d": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/d/dbus-1.14.0-3.fc37.x86_64.rpm"
@@ -2886,17 +2764,11 @@
           "sha256:6e74a8ed5b472cf811f9bf429a999ed3f362e2c88566a461517a12c058abd401": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/b/bzip2-libs-1.0.8-12.fc37.x86_64.rpm"
           },
-          "sha256:7384943e170ed7e76ff30767f014f3cf918a733de681265daaf6843a0dd00b20": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl5150-firmware-8.24.2.2-137.fc37.noarch.rpm"
-          },
           "sha256:73a1a0f041819c1d50501a699945f0121a3b6e1f54df40cd0bf8f94b1b261ef5": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/k/kmod-libs-30-2.fc37.x86_64.rpm"
           },
           "sha256:74ee0b4664d9300b0538372064e74e1609f5bf89a4cef76c7849d774af7295cf": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/a/authselect-1.4.0-3.fc37.x86_64.rpm"
-          },
-          "sha256:750cc6158e20041c825da49235ae60ee4498dab4964212ee831dee485d3d73ef": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl5000-firmware-8.83.5.1_1-137.fc37.noarch.rpm"
           },
           "sha256:763343a0a0c30885b064b920ceaee7b4846298d07c8975ca5e2a0ce72e0982a2": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/n/nftables-1.0.4-3.fc37.x86_64.rpm"
@@ -2985,9 +2857,6 @@
           "sha256:9546058ef3561af0a5e24d50469fc2317afb6aa760363c9348bd2374a31cb5e1": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libtasn1-4.18.0-3.fc37.x86_64.rpm"
           },
-          "sha256:96258199d3fbb06b95f6140a14af0858d37a2ba7148afb5c6753a92bd6f7d81e": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl100-firmware-39.31.5.1-137.fc37.noarch.rpm"
-          },
           "sha256:9798da3a74c080a972f72ccbc93b733e588efc5563d5318b7521af394d524f74": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/t/tar-1.34-3.fc36.x86_64.rpm"
           },
@@ -3048,9 +2917,6 @@
           "sha256:ae4f8f8c8fc4ecd99b386be151ef63aa2da9b4363bd7032d404e61091a769536": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/f/fedora-release-identity-basic-37-0.11.noarch.rpm"
           },
-          "sha256:ae711e8ee7a8fb2faf2702a6a882a5dec5516250c4bc2bb7cafeea7655d084c7": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl6000-firmware-9.221.4.1-137.fc37.noarch.rpm"
-          },
           "sha256:b0388d1a529bf6b54ca648e91529b1e7790e6aaa42e0ac2b7be6640e4f24a21d": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libblkid-2.38.1-1.fc37.x86_64.rpm"
           },
@@ -3099,9 +2965,6 @@
           "sha256:c105f54738fba9793dad9b6ab2e88b4ae05cc47b9ea062cd7215b69d11ce0e1c": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/libzstd-1.5.2-3.fc37.x86_64.rpm"
           },
-          "sha256:c12f0f8464df6c57a0f855ce8312fe1f0e9f4493c33a0a5386a0397959089374": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl2030-firmware-18.168.6.1-137.fc37.noarch.rpm"
-          },
           "sha256:c1374e3372d0d246ecb0e04b36743e23c68ab307c7603c5a267fce654bf05cdd": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/d/diffutils-3.8-3.fc37.x86_64.rpm"
           },
@@ -3119,9 +2982,6 @@
           },
           "sha256:c84d46c1df7de7f3574733ca5cacca81619fcc296bf566b218dc116929bbbc4a": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/f/file-5.42-4.fc37.x86_64.rpm"
-          },
-          "sha256:c94ba13c8565695e2bedaab513a2df30cddb98ebacd515370eb957e78923c4f1": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl6050-firmware-41.28.5.1-137.fc37.noarch.rpm"
           },
           "sha256:c999e49255db5e95b6b5a9ef3dcbc07e828e0718cf8dbe147bac62ac8dc82409": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/a/aardvark-dns-1.1.0-1.fc37.x86_64.rpm"
@@ -3248,9 +3108,6 @@
           },
           "sha256:ed6c8cd71a52822a69c6dd28d2a112a0f772983a20e037884c7821d9eddef6ba": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/r/readline-8.1-7.fc37.x86_64.rpm"
-          },
-          "sha256:ed93826c3b2b1f82e8e08ac5d94ab707b30d0c19177dc82038756e6d2eb8b010": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl2000-firmware-18.168.6.1-137.fc37.noarch.rpm"
           },
           "sha256:ee34422adc6451da744bd16a8cd66c9912a822c4e55227c23ff56960c32980f5": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/p/pam-libs-1.5.2-14.fc37.x86_64.rpm"
@@ -4150,116 +4007,6 @@
         "check_gpg": true
       },
       {
-        "name": "iwl100-firmware",
-        "epoch": 0,
-        "version": "39.31.5.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl100-firmware-39.31.5.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:96258199d3fbb06b95f6140a14af0858d37a2ba7148afb5c6753a92bd6f7d81e",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl1000-firmware",
-        "epoch": 1,
-        "version": "39.31.5.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl1000-firmware-39.31.5.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:3fa4a73aa1795ec4eacd930c6e3ffdeaf5e73f50071f69bc5f7c0c8100f70d2d",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl105-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl105-firmware-18.168.6.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:0cc4533e700a5ebe6b3ea7b4ab897a39364ab421aabdc8708c929b7d1de3c0b7",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl135-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl135-firmware-18.168.6.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:14680d9542d0257264d52fc8c9e7da700abbd4568ed66a7fcb930dc3abb9420c",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl2000-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl2000-firmware-18.168.6.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:ed93826c3b2b1f82e8e08ac5d94ab707b30d0c19177dc82038756e6d2eb8b010",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl2030-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl2030-firmware-18.168.6.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:c12f0f8464df6c57a0f855ce8312fe1f0e9f4493c33a0a5386a0397959089374",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl3160-firmware",
-        "epoch": 1,
-        "version": "25.30.13.0",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl3160-firmware-25.30.13.0-137.fc37.noarch.rpm",
-        "checksum": "sha256:5d6711854a817baef73689558e982b4f1997eba8d4ac58837903eb2d53189b5c",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl5000-firmware",
-        "epoch": 0,
-        "version": "8.83.5.1_1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl5000-firmware-8.83.5.1_1-137.fc37.noarch.rpm",
-        "checksum": "sha256:750cc6158e20041c825da49235ae60ee4498dab4964212ee831dee485d3d73ef",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl5150-firmware",
-        "epoch": 0,
-        "version": "8.24.2.2",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl5150-firmware-8.24.2.2-137.fc37.noarch.rpm",
-        "checksum": "sha256:7384943e170ed7e76ff30767f014f3cf918a733de681265daaf6843a0dd00b20",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl6000-firmware",
-        "epoch": 0,
-        "version": "9.221.4.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl6000-firmware-9.221.4.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:ae711e8ee7a8fb2faf2702a6a882a5dec5516250c4bc2bb7cafeea7655d084c7",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl6050-firmware",
-        "epoch": 0,
-        "version": "41.28.5.1",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/i/iwl6050-firmware-41.28.5.1-137.fc37.noarch.rpm",
-        "checksum": "sha256:c94ba13c8565695e2bedaab513a2df30cddb98ebacd515370eb957e78923c4f1",
-        "check_gpg": true
-      },
-      {
         "name": "jansson",
         "epoch": 0,
         "version": "2.13.1",
@@ -5090,16 +4837,6 @@
         "check_gpg": true
       },
       {
-        "name": "linux-firmware-whence",
-        "epoch": 0,
-        "version": "20220708",
-        "release": "137.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/l/linux-firmware-whence-20220708-137.fc37.noarch.rpm",
-        "checksum": "sha256:53fc9455342bc67abe2b4800cc083e39c3c5688fc274b70b360627b2b77f324f",
-        "check_gpg": true
-      },
-      {
         "name": "lua-libs",
         "epoch": 0,
         "version": "5.4.4",
@@ -5127,16 +4864,6 @@
         "arch": "x86_64",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/m/memstrack-0.2.4-3.fc37.x86_64.rpm",
         "checksum": "sha256:ecdef96acbb30ce62236fad1a55f6a87c0cf9f39ce73fa3c2b4c1ce021f7080f",
-        "check_gpg": true
-      },
-      {
-        "name": "microcode_ctl",
-        "epoch": 2,
-        "version": "2.1",
-        "release": "53.fc37",
-        "arch": "x86_64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20220817/Packages/m/microcode_ctl-2.1-53.fc37.x86_64.rpm",
-        "checksum": "sha256:31bd04e8057c75765d669724041fe9b0c0476f6dbdbd8fbc00f9ef7647269aa3",
         "check_gpg": true
       },
       {

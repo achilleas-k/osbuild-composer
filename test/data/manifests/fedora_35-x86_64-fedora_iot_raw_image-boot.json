@@ -862,14 +862,6 @@
                     }
                   },
                   {
-                    "id": "sha256:81cb05caba1040c9d838b35015ce3d262af02de1142026f42eef36fe7af6b995",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:75c38e7b22434dcf427a6c7a59d5267f6fffb932fa1a3bd3f105f686b41a3831",
                     "options": {
                       "metadata": {
@@ -1438,94 +1430,6 @@
                     }
                   },
                   {
-                    "id": "sha256:d27af662fc8b5d565fe06482df565ddc2e34859103c72c9e106dbfea799a7cec",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:f000e42567fe7a68ea58e17ce73a5365e8f29a034837442cda2e78990c4d60c1",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:d6dbaa3ec335b2bc54e220e647c69a410ed06f6875b207620e298f33dd39025e",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:ac73a374709c827a94b99229a07660c38854c3c820eac44030c00369f40066f3",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:5716adfadb97a15f2b9dc5cfd109562f31a0cfc8000e40cac1017e6b12093fd0",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:bebc23cec7d1bc45348dcedbd19681285d878347d451d74339f79105872b0ec6",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:6eb5ee13ec103ee920f65108afbcd215482d8d42fab374ee3c4103b09e4bf37c",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:92cfd037d04010a5e7fafd5aea5e066663bc106af3ec695d01293b14083ab582",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:198d10cc517260856680a4578ab766d06e96487e61b0f46d7da51d0bebdc8be4",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:ddc0fc599dd8423d9d871a2128470bf94abaefa1dfbb22500a3a247bbba56738",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:22c9000da103a9e9c86320f5ab4696871341c815e4e519566d9d0d5e3b9250e0",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:05c3d47d0276b2ad318fa6810dc040e33e065c2400f3ff506393d514b6a2e6c5",
                     "options": {
                       "metadata": {
@@ -1639,14 +1543,6 @@
                   },
                   {
                     "id": "sha256:42fd0c03cc04e16f5c35ac4863807630cfc5c00be20242b3f333580e5497bbc7",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:e04e8b9bece95a86b61ae3af34c5b50a4b342f59d4a61a55a7e8b720762af938",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -2335,9 +2231,6 @@
           "sha256:16ccfc043e3e964acea39e7858b23fe6e1719738c10596f97f03ef9c48db2503": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/l/libgpg-error-1.43-1.fc35.x86_64.rpm"
           },
-          "sha256:198d10cc517260856680a4578ab766d06e96487e61b0f46d7da51d0bebdc8be4": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl5150-firmware-8.24.2.2-127.fc35.noarch.rpm"
-          },
           "sha256:1a9a9f23373cac85fc2085dc604de39cb73f6c4a32ee5b9ef13d6aff088652b6": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/l/libsemanage-3.3-1.fc35.x86_64.rpm"
           },
@@ -2370,9 +2263,6 @@
           },
           "sha256:22ac0f33e4dac3a8a2407a4337b440c5d90c3b38b2b7dd9296d62001f67c8018": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/r/rpm-ostree-2022.1-2.fc35.x86_64.rpm"
-          },
-          "sha256:22c9000da103a9e9c86320f5ab4696871341c815e4e519566d9d0d5e3b9250e0": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl6050-firmware-41.28.5.1-127.fc35.noarch.rpm"
           },
           "sha256:24197bbef00869336592ca4a672c99e31c1ba589b4c6f32f7c329d1430ac16f0": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/l/libffi-3.1-29.fc35.x86_64.rpm"
@@ -2518,9 +2408,6 @@
           "sha256:52598fdd27be8d3ca7587b81ce86f03d1f17c66c0c8fd81ca3274cb7712a400e": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/d/diffutils-3.8-1.fc35.x86_64.rpm"
           },
-          "sha256:5716adfadb97a15f2b9dc5cfd109562f31a0cfc8000e40cac1017e6b12093fd0": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl2000-firmware-18.168.6.1-127.fc35.noarch.rpm"
-          },
           "sha256:571ad1c79fa5dc94318169a18b5b395458580c74d7492215b5b0efc5aa07d29d": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/d/dracut-config-generic-055-6.fc35.x86_64.rpm"
           },
@@ -2578,9 +2465,6 @@
           "sha256:6da5e8b8b6075e4b057ec0ceefc3e55a3b6c8fb28d07d0bdf16f51ab013f165f": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/r/rpm-ostree-libs-2022.1-2.fc35.x86_64.rpm"
           },
-          "sha256:6eb5ee13ec103ee920f65108afbcd215482d8d42fab374ee3c4103b09e4bf37c": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl3160-firmware-25.30.13.0-127.fc35.noarch.rpm"
-          },
           "sha256:6ed74e42fbcfbf516467251fd4601f1a98e1456a14eb801610fb08655aa844dd": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/l/libsolv-0.7.19-3.fc35.x86_64.rpm"
           },
@@ -2620,9 +2504,6 @@
           "sha256:810fc2ef18bb7756608363bdbbb1d8bbc4eb39b898c4fc69c8edc737aaa960ae": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/u/util-linux-core-2.37.2-1.fc35.x86_64.rpm"
           },
-          "sha256:81cb05caba1040c9d838b35015ce3d262af02de1142026f42eef36fe7af6b995": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/m/microcode_ctl-2.1-47.fc35.x86_64.rpm"
-          },
           "sha256:834213c4c6cfaba97cd605a0d70c0758ea90f463ee1399843d7094a91423b22d": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/g/gettext-0.21-8.fc35.x86_64.rpm"
           },
@@ -2649,9 +2530,6 @@
           },
           "sha256:9135cd5877d3d03432834e747adf4833a189d1e691ee991569e063d069a890ad": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/c/curl-7.79.1-1.fc35.x86_64.rpm"
-          },
-          "sha256:92cfd037d04010a5e7fafd5aea5e066663bc106af3ec695d01293b14083ab582": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl5000-firmware-8.83.5.1_1-127.fc35.noarch.rpm"
           },
           "sha256:94104f196a74be27358ac696a3f6063d45f7c33df2785a42454b988141760564": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/g/grub2-tools-2.06-10.fc35.x86_64.rpm"
@@ -2713,9 +2591,6 @@
           "sha256:ac4b769464ccbbfed9c887287b0410c0517f1d3b918fa1d4324067b94ed2ccb5": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/f/fedora-release-common-35-36.noarch.rpm"
           },
-          "sha256:ac73a374709c827a94b99229a07660c38854c3c820eac44030c00369f40066f3": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl135-firmware-18.168.6.1-127.fc35.noarch.rpm"
-          },
           "sha256:aca3c419c09018bc287cd054490fbc600d1d59ac48f247f9c63744bdf8ef5e3a": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/c/crypto-policies-20210819-1.gitd0fdcfb.fc35.noarch.rpm"
           },
@@ -2767,9 +2642,6 @@
           "sha256:bd422838b08aee333b919798924814148118cd1d2ec7051a3d01f0161eec4184": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/g/grub2-pc-2.06-10.fc35.x86_64.rpm"
           },
-          "sha256:bebc23cec7d1bc45348dcedbd19681285d878347d451d74339f79105872b0ec6": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl2030-firmware-18.168.6.1-127.fc35.noarch.rpm"
-          },
           "sha256:c1447e6ba83c7ea1faad6370f831c9b0adaa85d912727d165dfec32735f6fff7": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/g/grubby-8.40-55.fc35.x86_64.rpm"
           },
@@ -2800,9 +2672,6 @@
           "sha256:d18f3db063991e9de1c63c6680bab248757906b008b0bdfcfc0b07624bb8867a": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/p/polkit-libs-0.120-1.fc35.x86_64.rpm"
           },
-          "sha256:d27af662fc8b5d565fe06482df565ddc2e34859103c72c9e106dbfea799a7cec": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl100-firmware-39.31.5.1-127.fc35.noarch.rpm"
-          },
           "sha256:d36c8398c78beb70f91b08774d309645e658e91caa8a425c4aa28b58919a2414": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/l/libcom_err-1.46.3-1.fc35.x86_64.rpm"
           },
@@ -2824,9 +2693,6 @@
           "sha256:d6c8bcc95fe6b1795ae5b819b9ffe4c2a5b3bb83d043831964fafd184b9f5b9e": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/s/shadow-utils-4.9-8.fc35.x86_64.rpm"
           },
-          "sha256:d6dbaa3ec335b2bc54e220e647c69a410ed06f6875b207620e298f33dd39025e": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl105-firmware-18.168.6.1-127.fc35.noarch.rpm"
-          },
           "sha256:d9b157ac7acc9749a3f1aa084ef90a37d914b1360ecaba7f7f976fe326400513": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/p/python3-libs-3.10.1-2.fc35.x86_64.rpm"
           },
@@ -2836,9 +2702,6 @@
           "sha256:db4f152d636472476f3d6134e595c15e52e3cd107e5b362b4a85a4660825db70": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/s/selinux-policy-35.8-1.fc35.noarch.rpm"
           },
-          "sha256:ddc0fc599dd8423d9d871a2128470bf94abaefa1dfbb22500a3a247bbba56738": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl6000-firmware-9.221.4.1-127.fc35.noarch.rpm"
-          },
           "sha256:de07042241f195b815f8a32b0244eb9a43f7ac8fa5ef936ab28b10af18ebede2": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/t/tzdata-2021e-1.fc35.noarch.rpm"
           },
@@ -2847,9 +2710,6 @@
           },
           "sha256:df829e7ce9de4183cf1750e3d305d901daa1b39975fbf797699b58bcd7c46824": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/g/grep-3.6-4.fc35.x86_64.rpm"
-          },
-          "sha256:e04e8b9bece95a86b61ae3af34c5b50a4b342f59d4a61a55a7e8b720762af938": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/l/linux-firmware-whence-20211216-127.fc35.noarch.rpm"
           },
           "sha256:e04fd1384f900dfc5e8422348e590c57cf18fef0e8339b22312826f8014bb3db": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/g/gawk-all-langpacks-5.1.0-4.fc35.x86_64.rpm"
@@ -2916,9 +2776,6 @@
           },
           "sha256:ef802ac453e7b4d969d2e68c3344a101e4156201c4181221adc1618264da72b2": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/p/pcre2-syntax-10.37-4.fc35.noarch.rpm"
-          },
-          "sha256:f000e42567fe7a68ea58e17ce73a5365e8f29a034837442cda2e78990c4d60c1": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl1000-firmware-39.31.5.1-127.fc35.noarch.rpm"
           },
           "sha256:f18f95bb02e8c23e1d2bf16b377c44171f46d0418501ad07d90d0457a2090655": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/l/libarchive-3.5.2-2.fc35.x86_64.rpm"
@@ -3973,16 +3830,6 @@
         "check_gpg": true
       },
       {
-        "name": "microcode_ctl",
-        "epoch": 2,
-        "version": "2.1",
-        "release": "47.fc35",
-        "arch": "x86_64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-fedora-20220106/Packages/m/microcode_ctl-2.1-47.fc35.x86_64.rpm",
-        "checksum": "sha256:81cb05caba1040c9d838b35015ce3d262af02de1142026f42eef36fe7af6b995",
-        "check_gpg": true
-      },
-      {
         "name": "mkpasswd",
         "epoch": 0,
         "version": "5.5.10",
@@ -4693,116 +4540,6 @@
         "check_gpg": true
       },
       {
-        "name": "iwl100-firmware",
-        "epoch": 0,
-        "version": "39.31.5.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl100-firmware-39.31.5.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:d27af662fc8b5d565fe06482df565ddc2e34859103c72c9e106dbfea799a7cec",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl1000-firmware",
-        "epoch": 1,
-        "version": "39.31.5.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl1000-firmware-39.31.5.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:f000e42567fe7a68ea58e17ce73a5365e8f29a034837442cda2e78990c4d60c1",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl105-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl105-firmware-18.168.6.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:d6dbaa3ec335b2bc54e220e647c69a410ed06f6875b207620e298f33dd39025e",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl135-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl135-firmware-18.168.6.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:ac73a374709c827a94b99229a07660c38854c3c820eac44030c00369f40066f3",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl2000-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl2000-firmware-18.168.6.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:5716adfadb97a15f2b9dc5cfd109562f31a0cfc8000e40cac1017e6b12093fd0",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl2030-firmware",
-        "epoch": 0,
-        "version": "18.168.6.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl2030-firmware-18.168.6.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:bebc23cec7d1bc45348dcedbd19681285d878347d451d74339f79105872b0ec6",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl3160-firmware",
-        "epoch": 1,
-        "version": "25.30.13.0",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl3160-firmware-25.30.13.0-127.fc35.noarch.rpm",
-        "checksum": "sha256:6eb5ee13ec103ee920f65108afbcd215482d8d42fab374ee3c4103b09e4bf37c",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl5000-firmware",
-        "epoch": 0,
-        "version": "8.83.5.1_1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl5000-firmware-8.83.5.1_1-127.fc35.noarch.rpm",
-        "checksum": "sha256:92cfd037d04010a5e7fafd5aea5e066663bc106af3ec695d01293b14083ab582",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl5150-firmware",
-        "epoch": 0,
-        "version": "8.24.2.2",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl5150-firmware-8.24.2.2-127.fc35.noarch.rpm",
-        "checksum": "sha256:198d10cc517260856680a4578ab766d06e96487e61b0f46d7da51d0bebdc8be4",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl6000-firmware",
-        "epoch": 0,
-        "version": "9.221.4.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl6000-firmware-9.221.4.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:ddc0fc599dd8423d9d871a2128470bf94abaefa1dfbb22500a3a247bbba56738",
-        "check_gpg": true
-      },
-      {
-        "name": "iwl6050-firmware",
-        "epoch": 0,
-        "version": "41.28.5.1",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/i/iwl6050-firmware-41.28.5.1-127.fc35.noarch.rpm",
-        "checksum": "sha256:22c9000da103a9e9c86320f5ab4696871341c815e4e519566d9d0d5e3b9250e0",
-        "check_gpg": true
-      },
-      {
         "name": "libcap-ng",
         "epoch": 0,
         "version": "0.8.2",
@@ -4950,16 +4687,6 @@
         "arch": "x86_64",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/l/libzstd-1.5.1-4.fc35.x86_64.rpm",
         "checksum": "sha256:42fd0c03cc04e16f5c35ac4863807630cfc5c00be20242b3f333580e5497bbc7",
-        "check_gpg": true
-      },
-      {
-        "name": "linux-firmware-whence",
-        "epoch": 0,
-        "version": "20211216",
-        "release": "127.fc35",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-x86_64-updates-released-20220113/Packages/l/linux-firmware-whence-20211216-127.fc35.noarch.rpm",
-        "checksum": "sha256:e04e8b9bece95a86b61ae3af34c5b50a4b342f59d4a61a55a7e8b720762af938",
         "check_gpg": true
       },
       {

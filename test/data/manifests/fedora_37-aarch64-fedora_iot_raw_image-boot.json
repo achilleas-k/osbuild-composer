@@ -56,14 +56,6 @@
                     }
                   },
                   {
-                    "id": "sha256:654c9483ad6958d8f30215cc5e341c661cbb6437d9d1c219be9655681396da6c",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:85154a1e7fdaf984f266807efe73bf220e6203a3d91df40c0dcc3f4c9d2b1fbc",
                     "options": {
                       "metadata": {
@@ -97,46 +89,6 @@
                   },
                   {
                     "id": "sha256:3c8b0b0867c9cc919821ab4ec571fb01f4abeadd76e35c6de4e8382ff2b7bf74",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:68cbc47b2cb76fb567d3a6c78ca8c4d20b845c1e809e1a8704ac9f80dc7f5b63",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:9090982491199e7a05a634e766968251a55117f6df4639e7f5b95b9c71d5999f",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:235f3e777eb7738c0ab9a17e3abad74efb65dcfbd7ef85e6a3a4b819dad04c82",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:c16ae5bd5432fe0d14226205047ea11ea2cb85f25bd27a6ccfad0d03240d4785",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:c51977419c9512d19ac89fb8a9efd3486057eb4e25c5c069be5ffa4515300847",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -729,14 +681,6 @@
                   },
                   {
                     "id": "sha256:c15b41f9ed53a146a40746505f0b340aa3ffab1b377c8bc3522a13bc22a4e2b7",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:34e078e9be9cbe997458a72e35718feaff49a1cbaf8a8582b30fd0c744b03105",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -1424,14 +1368,6 @@
                     }
                   },
                   {
-                    "id": "sha256:bc24165d6c1287184984e0570da5da6353db53c0f3f07b8aedd917b0b218378b",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:2a4871abac524999f0a81cbfd87286871de5a6c067d9467ff2b51613cf787def",
                     "options": {
                       "metadata": {
@@ -1473,22 +1409,6 @@
                   },
                   {
                     "id": "sha256:ff038de7f7a3e3ccadde1d9e9a37667813e3f7ad22baef23432f831b4ce78def",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:a89bdeff8ea373ce88d147a5f017e7f342c1c79fdf615a88f2396e980638feda",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:18b46fafae10d86249df30a025faf411cb1369ddd2d2ade738f9cc4b45ab6f8c",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -1617,14 +1537,6 @@
                   },
                   {
                     "id": "sha256:18eba0ba7d33f38f79b127e1fd39ba0c4ce4ebfd5ff6a41067f015e49e9f2dd0",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:f23bbbb8abeccfae1758e2eef3a676c956f2df47ab4ab559eaff52afa1f809b9",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -1928,22 +1840,6 @@
                     }
                   },
                   {
-                    "id": "sha256:388def347af7b9811dc79872bbb55f1ae433bde1cc4b28e8b3ccc03eeab80a1e",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:8c8c5a7d8a7bde6cd7413c745ea8f81f728169d2e4e96327a86f41019b8390de",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:b4bde2397a6cbd8ac2b507716941c5583f8123f75ee4f05ed1402a4be7fcfad1",
                     "options": {
                       "metadata": {
@@ -2016,22 +1912,6 @@
                     }
                   },
                   {
-                    "id": "sha256:4d05426023a3534371f8f1034710aabc27b8b74ef0d104a3cd6150ac69e15ab7",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:8e85f2257c7cb41df273ffdea56daef73e44bb7bfe79befa296f700e60c49548",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
                     "id": "sha256:fd094e9e45ac07963427305e35e27bf6917176886406ee81595d9f54621b5a57",
                     "options": {
                       "metadata": {
@@ -2057,14 +1937,6 @@
                   },
                   {
                     "id": "sha256:d3f0b501380df634585b5ab534244c01a654627f448cd3d8d1a6460a65bae6b7",
-                    "options": {
-                      "metadata": {
-                        "rpm.check_gpg": true
-                      }
-                    }
-                  },
-                  {
-                    "id": "sha256:788976a6dfe6796fa08ba5f52c17af923044473b481a75be9bb695e8fa7d5a16",
                     "options": {
                       "metadata": {
                         "rpm.check_gpg": true
@@ -2560,9 +2432,6 @@
           "sha256:178c233d007c00f14ec0c0a5083907f3cf2889b998c8e7eefe25c8b04ebe1aef": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/a/authselect-1.4.0-3.fc37.aarch64.rpm"
           },
-          "sha256:18b46fafae10d86249df30a025faf411cb1369ddd2d2ade738f9cc4b45ab6f8c": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/n/nano-default-editor-6.4-1.fc37.noarch.rpm"
-          },
           "sha256:18eba0ba7d33f38f79b127e1fd39ba0c4ce4ebfd5ff6a41067f015e49e9f2dd0": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/pam-libs-1.5.2-14.fc37.aarch64.rpm"
           },
@@ -2589,9 +2458,6 @@
           },
           "sha256:2355de5ccfff7c08ea41c921f35fb1fe67670b2f3f40e25cb799e90424fc3de3": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/f/fedora-gpg-keys-37-0.5.noarch.rpm"
-          },
-          "sha256:235f3e777eb7738c0ab9a17e3abad74efb65dcfbd7ef85e6a3a4b819dad04c82": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm283x-firmware-20220809-1.915a708.fc37.aarch64.rpm"
           },
           "sha256:254c1bfd7f0dc1345601bd4df973833273c291b007efd8b34227260fc3774517": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libfido2-1.11.0-3.fc37.aarch64.rpm"
@@ -2638,17 +2504,11 @@
           "sha256:34565f7a706cf4111bb3c1c11f1b2f229a0d202ecf2daad8f98eb60cbc5214a9": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/e/elfutils-libs-0.187-6.fc37.aarch64.rpm"
           },
-          "sha256:34e078e9be9cbe997458a72e35718feaff49a1cbaf8a8582b30fd0c744b03105": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/i/inih-56-2.fc37.aarch64.rpm"
-          },
           "sha256:37ccd2182f8ca4f3843cd79dffd129efe19691b963f80d06cc990d74284e7674": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libusb1-1.0.25-9.fc37.aarch64.rpm"
           },
           "sha256:3832bcd3ee816a9503ad9738136138c6537fd5beaa61c803a481c081f917780b": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libstdc++-12.1.1-3.fc37.1.aarch64.rpm"
-          },
-          "sha256:388def347af7b9811dc79872bbb55f1ae433bde1cc4b28e8b3ccc03eeab80a1e": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/s/sudo-1.9.11-4.p3.fc37.aarch64.rpm"
           },
           "sha256:38b9035b2449e7d152bf03e6e3b46243550ee29c2fae8730bfa11646fb04f6cb": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/librepo-1.14.3-3.fc37.aarch64.rpm"
@@ -2706,9 +2566,6 @@
           },
           "sha256:4cc7e6a19b5627e3e3bf941d5bef3ded55458eb226ed6e523e9a0d6a836b249f": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libtasn1-4.18.0-3.fc37.aarch64.rpm"
-          },
-          "sha256:4d05426023a3534371f8f1034710aabc27b8b74ef0d104a3cd6150ac69e15ab7": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/u/uboot-images-armv8-2022.10-0.1.rc1.fc37.noarch.rpm"
           },
           "sha256:4e3e650c572ead2ea7ec32d15365684ae5e7bb03a7e1af5b7d0e0b4305786b66": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/f/fedora-release-common-37-0.11.noarch.rpm"
@@ -2776,9 +2633,6 @@
           "sha256:64a7dd77389ef15d39b87388aa8c1b51186accd702fb91989ddbe729060adb55": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/n/npth-1.6-9.fc37.aarch64.rpm"
           },
-          "sha256:654c9483ad6958d8f30215cc5e341c661cbb6437d9d1c219be9655681396da6c": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/a/arm-image-installer-3.6-2.fc37.noarch.rpm"
-          },
           "sha256:65b90711945117ae85bd363a3426f6a850c31200ffb77f15ddfc1181c961f80b": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/e/efi-filesystem-5-6.fc37.noarch.rpm"
           },
@@ -2793,9 +2647,6 @@
           },
           "sha256:66f0cb20aae801f5810d2bdd27f0d6b9a70935a231e04269611113f96989132e": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/publicsuffix-list-dafsa-20210518-5.fc37.noarch.rpm"
-          },
-          "sha256:68cbc47b2cb76fb567d3a6c78ca8c4d20b845c1e809e1a8704ac9f80dc7f5b63": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm2711-firmware-20220809-1.915a708.fc37.aarch64.rpm"
           },
           "sha256:6a16500df314e37275aaab3de6fff5f4211d65b44fa9c6ee9ba74e718101a10e": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libpcap-1.10.1-4.fc37.aarch64.rpm"
@@ -2832,9 +2683,6 @@
           },
           "sha256:774d5475480f02c9cef3a319d3f9b5f086e8b6e5273a2c4e6dbf1cee07d45c97": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/u/util-linux-core-2.38.1-1.fc37.aarch64.rpm"
-          },
-          "sha256:788976a6dfe6796fa08ba5f52c17af923044473b481a75be9bb695e8fa7d5a16": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/x/xfsprogs-5.18.0-3.fc37.aarch64.rpm"
           },
           "sha256:7a78e507d71c85c273d3aa7e0d7f151b342a508fbfe85717cf760ee172ef9d37": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libibverbs-41.0-1.fc37.aarch64.rpm"
@@ -2887,17 +2735,11 @@
           "sha256:8b96394a0a90e311f7043c7d504e4637e0a073a70f7aac6ed4fcfcc5b98280ed": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/g/grep-3.7-4.fc37.aarch64.rpm"
           },
-          "sha256:8c8c5a7d8a7bde6cd7413c745ea8f81f728169d2e4e96327a86f41019b8390de": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/s/sudo-python-plugin-1.9.11-4.p3.fc37.aarch64.rpm"
-          },
           "sha256:8d77fe0cdaa209b0179965f3cd741fc11a2e220b04ab64ecc1d3fb46d0bea269": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libevent-2.1.12-7.fc37.aarch64.rpm"
           },
           "sha256:8ddb89f6a3955b0dc46c015025e5a2956d0c06bc93fbc0a3b3f087fbc6b0873a": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/popt-1.19~rc1-3.fc37.aarch64.rpm"
-          },
-          "sha256:8e85f2257c7cb41df273ffdea56daef73e44bb7bfe79befa296f700e60c49548": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/u/userspace-rcu-0.13.0-5.fc37.aarch64.rpm"
           },
           "sha256:8eaa5255d8f5cd3a8f854c4de6082158fd6294bf779b654d5bc270906a425ebe": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/r/readline-8.1-7.fc37.aarch64.rpm"
@@ -2907,9 +2749,6 @@
           },
           "sha256:9013b873082bac2dd7e6ee0e87091ef71c03caeb4bc6068250f44f09c1ca5a3c": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/d/dracut-057-1.fc37.1.aarch64.rpm"
-          },
-          "sha256:9090982491199e7a05a634e766968251a55117f6df4639e7f5b95b9c71d5999f": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm2835-firmware-20220809-1.915a708.fc37.aarch64.rpm"
           },
           "sha256:932f1548d9ca07579d56cf1ce527b34786cfebe8e07fc86106ac9d7a803ccfbb": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libnetfilter_conntrack-1.0.8-5.fc37.aarch64.rpm"
@@ -2998,9 +2837,6 @@
           "sha256:a6aaae0fb24af1e41f043b5f782f0bd02bc88eb6d8de53c849d628bb03671b6c": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libsepol-3.4-3.fc37.aarch64.rpm"
           },
-          "sha256:a89bdeff8ea373ce88d147a5f017e7f342c1c79fdf615a88f2396e980638feda": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/n/nano-6.4-1.fc37.aarch64.rpm"
-          },
           "sha256:a9352de1264288edbec9f6d415c925de2fe7f7c5aca221e7a9867f8f76d86696": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/k/kmod-30-2.fc37.aarch64.rpm"
           },
@@ -3052,9 +2888,6 @@
           "sha256:bab57f8945eae4fa8a7728c5dec7f0a12a1b9532a64878a5b3fd39435653be99": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libdb-5.3.28-53.fc37.aarch64.rpm"
           },
-          "sha256:bc24165d6c1287184984e0570da5da6353db53c0f3f07b8aedd917b0b218378b": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/lzo-2.10-7.fc37.aarch64.rpm"
-          },
           "sha256:be9a015662acc23d54474a01f81a8f321359006b22850edcb41fdddc6f01b1cf": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/g/gnupg2-2.3.7-3.fc37.aarch64.rpm"
           },
@@ -3070,17 +2903,11 @@
           "sha256:c15b41f9ed53a146a40746505f0b340aa3ffab1b377c8bc3522a13bc22a4e2b7": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/g/gzip-1.12-2.fc37.aarch64.rpm"
           },
-          "sha256:c16ae5bd5432fe0d14226205047ea11ea2cb85f25bd27a6ccfad0d03240d4785": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm283x-overlays-20220809-1.915a708.fc37.aarch64.rpm"
-          },
           "sha256:c2e72f5c760db66c861e2f6e95741dd329b051038a14a8c38895414c729f0f8c": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/pcre-8.45-1.fc37.2.aarch64.rpm"
           },
           "sha256:c30cf3c3745e0240c1cb4db3906ab71abb555cc648bc67d2e106911b06ba19af": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libkcapi-hmaccalc-1.4.0-2.fc37.aarch64.rpm"
-          },
-          "sha256:c51977419c9512d19ac89fb8a9efd3486057eb4e25c5c069be5ffa4515300847": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/btrfs-progs-5.18-3.fc37.aarch64.rpm"
           },
           "sha256:c5c484c04bbcb4c26ab7c5aed20cf1b472cda8c662865ca1f8060a21f6fc6593": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/o/ostree-2022.5-2.fc37.aarch64.rpm"
@@ -3196,9 +3023,6 @@
           "sha256:f1d551839fa2f7956be9dd3084d518f9f4dbabe7af19d27342c8cbaf9e72f7ca": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/libkcapi-1.4.0-2.fc37.aarch64.rpm"
           },
-          "sha256:f23bbbb8abeccfae1758e2eef3a676c956f2df47ab4ab559eaff52afa1f809b9": {
-            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/parted-3.5-6.fc37.aarch64.rpm"
-          },
           "sha256:f2883fa5857316ca804ab5293cdc0c3bb7d620da84d844852ee8ed983b98e3bf": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/s/skopeo-1.9.2-1.fc37.aarch64.rpm"
           },
@@ -3310,16 +3134,6 @@
         "check_gpg": true
       },
       {
-        "name": "arm-image-installer",
-        "epoch": 0,
-        "version": "3.6",
-        "release": "2.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/a/arm-image-installer-3.6-2.fc37.noarch.rpm",
-        "checksum": "sha256:654c9483ad6958d8f30215cc5e341c661cbb6437d9d1c219be9655681396da6c",
-        "check_gpg": true
-      },
-      {
         "name": "audit-libs",
         "epoch": 0,
         "version": "3.0.8",
@@ -3367,56 +3181,6 @@
         "arch": "aarch64",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bash-5.1.16-3.fc37.aarch64.rpm",
         "checksum": "sha256:3c8b0b0867c9cc919821ab4ec571fb01f4abeadd76e35c6de4e8382ff2b7bf74",
-        "check_gpg": true
-      },
-      {
-        "name": "bcm2711-firmware",
-        "epoch": 0,
-        "version": "20220809",
-        "release": "1.915a708.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm2711-firmware-20220809-1.915a708.fc37.aarch64.rpm",
-        "checksum": "sha256:68cbc47b2cb76fb567d3a6c78ca8c4d20b845c1e809e1a8704ac9f80dc7f5b63",
-        "check_gpg": true
-      },
-      {
-        "name": "bcm2835-firmware",
-        "epoch": 0,
-        "version": "20220809",
-        "release": "1.915a708.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm2835-firmware-20220809-1.915a708.fc37.aarch64.rpm",
-        "checksum": "sha256:9090982491199e7a05a634e766968251a55117f6df4639e7f5b95b9c71d5999f",
-        "check_gpg": true
-      },
-      {
-        "name": "bcm283x-firmware",
-        "epoch": 0,
-        "version": "20220809",
-        "release": "1.915a708.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm283x-firmware-20220809-1.915a708.fc37.aarch64.rpm",
-        "checksum": "sha256:235f3e777eb7738c0ab9a17e3abad74efb65dcfbd7ef85e6a3a4b819dad04c82",
-        "check_gpg": true
-      },
-      {
-        "name": "bcm283x-overlays",
-        "epoch": 0,
-        "version": "20220809",
-        "release": "1.915a708.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/bcm283x-overlays-20220809-1.915a708.fc37.aarch64.rpm",
-        "checksum": "sha256:c16ae5bd5432fe0d14226205047ea11ea2cb85f25bd27a6ccfad0d03240d4785",
-        "check_gpg": true
-      },
-      {
-        "name": "btrfs-progs",
-        "epoch": 0,
-        "version": "5.18",
-        "release": "3.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/b/btrfs-progs-5.18-3.fc37.aarch64.rpm",
-        "checksum": "sha256:c51977419c9512d19ac89fb8a9efd3486057eb4e25c5c069be5ffa4515300847",
         "check_gpg": true
       },
       {
@@ -4157,16 +3921,6 @@
         "arch": "aarch64",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/g/gzip-1.12-2.fc37.aarch64.rpm",
         "checksum": "sha256:c15b41f9ed53a146a40746505f0b340aa3ffab1b377c8bc3522a13bc22a4e2b7",
-        "check_gpg": true
-      },
-      {
-        "name": "inih",
-        "epoch": 0,
-        "version": "56",
-        "release": "2.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/i/inih-56-2.fc37.aarch64.rpm",
-        "checksum": "sha256:34e078e9be9cbe997458a72e35718feaff49a1cbaf8a8582b30fd0c744b03105",
         "check_gpg": true
       },
       {
@@ -5020,16 +4774,6 @@
         "check_gpg": true
       },
       {
-        "name": "lzo",
-        "epoch": 0,
-        "version": "2.10",
-        "release": "7.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/l/lzo-2.10-7.fc37.aarch64.rpm",
-        "checksum": "sha256:bc24165d6c1287184984e0570da5da6353db53c0f3f07b8aedd917b0b218378b",
-        "check_gpg": true
-      },
-      {
         "name": "memstrack",
         "epoch": 0,
         "version": "0.2.4",
@@ -5087,26 +4831,6 @@
         "arch": "aarch64",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/m/mpfr-4.1.0-10.fc37.aarch64.rpm",
         "checksum": "sha256:ff038de7f7a3e3ccadde1d9e9a37667813e3f7ad22baef23432f831b4ce78def",
-        "check_gpg": true
-      },
-      {
-        "name": "nano",
-        "epoch": 0,
-        "version": "6.4",
-        "release": "1.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/n/nano-6.4-1.fc37.aarch64.rpm",
-        "checksum": "sha256:a89bdeff8ea373ce88d147a5f017e7f342c1c79fdf615a88f2396e980638feda",
-        "check_gpg": true
-      },
-      {
-        "name": "nano-default-editor",
-        "epoch": 0,
-        "version": "6.4",
-        "release": "1.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/n/nano-default-editor-6.4-1.fc37.noarch.rpm",
-        "checksum": "sha256:18b46fafae10d86249df30a025faf411cb1369ddd2d2ade738f9cc4b45ab6f8c",
         "check_gpg": true
       },
       {
@@ -5267,16 +4991,6 @@
         "arch": "aarch64",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/pam-libs-1.5.2-14.fc37.aarch64.rpm",
         "checksum": "sha256:18eba0ba7d33f38f79b127e1fd39ba0c4ce4ebfd5ff6a41067f015e49e9f2dd0",
-        "check_gpg": true
-      },
-      {
-        "name": "parted",
-        "epoch": 0,
-        "version": "3.5",
-        "release": "6.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/p/parted-3.5-6.fc37.aarch64.rpm",
-        "checksum": "sha256:f23bbbb8abeccfae1758e2eef3a676c956f2df47ab4ab559eaff52afa1f809b9",
         "check_gpg": true
       },
       {
@@ -5650,26 +5364,6 @@
         "check_gpg": true
       },
       {
-        "name": "sudo",
-        "epoch": 0,
-        "version": "1.9.11",
-        "release": "4.p3.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/s/sudo-1.9.11-4.p3.fc37.aarch64.rpm",
-        "checksum": "sha256:388def347af7b9811dc79872bbb55f1ae433bde1cc4b28e8b3ccc03eeab80a1e",
-        "check_gpg": true
-      },
-      {
-        "name": "sudo-python-plugin",
-        "epoch": 0,
-        "version": "1.9.11",
-        "release": "4.p3.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/s/sudo-python-plugin-1.9.11-4.p3.fc37.aarch64.rpm",
-        "checksum": "sha256:8c8c5a7d8a7bde6cd7413c745ea8f81f728169d2e4e96327a86f41019b8390de",
-        "check_gpg": true
-      },
-      {
         "name": "systemd",
         "epoch": 0,
         "version": "251.4",
@@ -5760,26 +5454,6 @@
         "check_gpg": true
       },
       {
-        "name": "uboot-images-armv8",
-        "epoch": 0,
-        "version": "2022.10",
-        "release": "0.1.rc1.fc37",
-        "arch": "noarch",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/u/uboot-images-armv8-2022.10-0.1.rc1.fc37.noarch.rpm",
-        "checksum": "sha256:4d05426023a3534371f8f1034710aabc27b8b74ef0d104a3cd6150ac69e15ab7",
-        "check_gpg": true
-      },
-      {
-        "name": "userspace-rcu",
-        "epoch": 0,
-        "version": "0.13.0",
-        "release": "5.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/u/userspace-rcu-0.13.0-5.fc37.aarch64.rpm",
-        "checksum": "sha256:8e85f2257c7cb41df273ffdea56daef73e44bb7bfe79befa296f700e60c49548",
-        "check_gpg": true
-      },
-      {
         "name": "util-linux",
         "epoch": 0,
         "version": "2.38.1",
@@ -5817,16 +5491,6 @@
         "arch": "noarch",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/w/whois-nls-5.5.13-2.fc37.noarch.rpm",
         "checksum": "sha256:d3f0b501380df634585b5ab534244c01a654627f448cd3d8d1a6460a65bae6b7",
-        "check_gpg": true
-      },
-      {
-        "name": "xfsprogs",
-        "epoch": 0,
-        "version": "5.18.0",
-        "release": "3.fc37",
-        "arch": "aarch64",
-        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-aarch64-fedora-development-20220817/Packages/x/xfsprogs-5.18.0-3.fc37.aarch64.rpm",
-        "checksum": "sha256:788976a6dfe6796fa08ba5f52c17af923044473b481a75be9bb695e8fa7d5a16",
         "check_gpg": true
       },
       {

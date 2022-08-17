@@ -853,6 +853,15 @@ func newDistro(version int) distro.Distro {
 		iotOCIImgType,
 		iotCommitImgType,
 		iotInstallerImgType,
+	)
+	x86_64.addImageTypes(
+		&platform.X86{
+			BasePlatform: platform.BasePlatform{
+				ImageFormat: platform.FORMAT_RAW,
+			},
+			BIOS:       true,
+			UEFIVendor: "fedora",
+		},
 		iotRawImgType,
 	)
 	aarch64.addImageTypes(
@@ -902,6 +911,14 @@ func newDistro(version int) distro.Distro {
 		iotCommitImgType,
 		iotOCIImgType,
 		iotInstallerImgType,
+	)
+	aarch64.addImageTypes(
+		&platform.Aarch64{
+			BasePlatform: platform.BasePlatform{
+				ImageFormat: platform.FORMAT_RAW,
+			},
+			UEFIVendor: "fedora",
+		},
 		iotRawImgType,
 	)
 
