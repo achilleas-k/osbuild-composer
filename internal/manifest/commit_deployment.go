@@ -163,6 +163,7 @@ func (p *OSTreeDeployment) serialize() osbuild.Pipeline {
 			},
 		}
 		keymapStage := osbuild.NewKeymapStage(options)
+		keymapStage.MountOSTree(p.osName, p.osTreeRef, 0)
 		pipeline.AddStage(keymapStage)
 	}
 
@@ -171,6 +172,7 @@ func (p *OSTreeDeployment) serialize() osbuild.Pipeline {
 			Language: p.Locale,
 		}
 		localeStage := osbuild.NewLocaleStage(options)
+		localeStage.MountOSTree(p.osName, p.osTreeRef, 0)
 		pipeline.AddStage(localeStage)
 	}
 
