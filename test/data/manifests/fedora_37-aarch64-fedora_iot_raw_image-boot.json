@@ -2091,7 +2091,11 @@
               "remotes": [
                 {
                   "name": "fedora-iot",
-                  "url": "http://fedora.example.com/repo"
+                  "url": "https://ostree.fedoraproject.org/iot",
+                  "contenturl": "mirrorlist=https://ostree.fedoraproject.org/iot/mirrorlist",
+                  "gpgkeypaths": [
+                    "/etc/pki/rpm-gpg/"
+                  ]
                 }
               ]
             }
@@ -2150,13 +2154,39 @@
                   "us"
                 ]
               }
-            }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/fedora/iot",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "fedora-iot",
+                    "ref": "test/fedora/iot",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
           },
           {
             "type": "org.osbuild.locale",
             "options": {
               "language": "C.UTF-8"
-            }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/fedora/iot",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "fedora-iot",
+                    "ref": "test/fedora/iot",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
           },
           {
             "type": "org.osbuild.grub2",
