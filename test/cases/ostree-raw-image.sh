@@ -4,23 +4,12 @@ set -euo pipefail
 # Provision the software under test.
 /usr/libexec/osbuild-composer-test/provision.sh none
 
+source /usr/libexec/tests/osbuild-composer/shared_lib.sh
+
 # Get OS data.
 source /etc/os-release
 ARCH=$(uname -m)
 
-# Colorful output.
-function greenprint {
-    echo -e "\033[1;32m[$(date -Isecond)] ${1}\033[0m"
-}
-
-function get_build_info() {
-    key="$1"
-    fname="$2"
-    if rpm -q --quiet weldr-client; then
-        key=".body${key}"
-    fi
-    jq -r "${key}" "${fname}"
-}
 
 # Start libvirtd and test it.
 greenprint "🚀 Starting libvirt daemon"
@@ -79,8 +68,8 @@ STAGE_REPO_URL="http://${STAGE_REPO_ADDRESS}:8080/repo/"
 ARTIFACTS="${ARTIFACTS:-/tmp/artifacts}"
 CONTAINER_TYPE=edge-container
 CONTAINER_FILENAME=container.tar
-INSTALLER_TYPE=edge-raw-image
-INSTALLER_FILENAME=image.raw.xz
+RAW_IMAGE_TYPE=edge-raw-image
+RAW_IMAGE_FILENAME=image.raw.xz
 
 # Set up temporary files.
 TEMPDIR=$(mktemp -d)
@@ -110,6 +99,12 @@ case "${ID}-${VERSION_ID}" in
     "centos-9")
         OSTREE_REF="centos/9/${ARCH}/edge"
         OS_VARIANT="centos-stream9"
+        ;;
+    "fedora-"*)
+        CONTAINER_TYPE=fedora-iot-container
+        RAW_IMAGE_TYPE=fedora-iot-raw-image
+        OSTREE_REF="fedora/${VERSION_ID}/${ARCH}/iot"
+        OS_VARIANT="fedora-unknown"
         ;;
     *)
         echo "unsupported distro: ${ID}-${VERSION_ID}"
@@ -290,18 +285,15 @@ version = "*"
 [[packages]]
 name = "sssd"
 version = "*"
+EOF
 
+# No RT kernel in Fedora
+if [[ "$ID" != "fedora" ]]; then
+    tee -a "$BLUEPRINT_FILE" > /dev/null << EOF
 [customizations.kernel]
 name = "kernel-rt"
-
-[[customizations.user]]
-name = "admin"
-description = "Administrator account"
-password = "\$6\$GRmb7S0p8vsYmXzH\$o0E020S.9JQGaHkszoog4ha4AQVs3sk8q0DvLjSMxoxHBKnB2FBXGQ/OkwZQfW/76ktHd0NX5nls2LPxPuUdl."
-key = "${SSH_KEY_PUB}"
-home = "/home/admin/"
-groups = ["wheel"]
 EOF
+fi
 
 greenprint "📄 container blueprint"
 cat "$BLUEPRINT_FILE"
@@ -343,8 +335,8 @@ until [ "$(sudo podman inspect -f '{{.State.Running}}' rhel-edge)" == "true" ]; 
     sleep 1;
 done;
 
-# Sync installer edge content
-greenprint "📡 Sync installer content from stage repo"
+# Sync edge content
+greenprint "📡 Sync content from stage repo"
 sudo ostree --repo="$PROD_REPO" pull --mirror edge-stage "$OSTREE_REF"
 
 # Clean compose and blueprints.
@@ -358,13 +350,21 @@ sudo composer-cli blueprints delete container > /dev/null
 ##
 ############################################################
 
-# Write a blueprint for installer image.
+# Write a blueprint for raw image.
 tee "$BLUEPRINT_FILE" > /dev/null << EOF
-name = "installer"
+name = "raw-image"
 description = "A rhel-edge raw image"
 version = "0.0.1"
 modules = []
 groups = []
+
+[[customizations.user]]
+name = "admin"
+description = "Administrator account"
+password = "\$6\$GRmb7S0p8vsYmXzH\$o0E020S.9JQGaHkszoog4ha4AQVs3sk8q0DvLjSMxoxHBKnB2FBXGQ/OkwZQfW/76ktHd0NX5nls2LPxPuUdl."
+key = "${SSH_KEY_PUB}"
+home = "/home/admin/"
+groups = ["wheel"]
 EOF
 
 greenprint "📄 raw image blueprint"
@@ -373,25 +373,25 @@ cat "$BLUEPRINT_FILE"
 # Prepare the blueprint for the compose.
 greenprint "📋 Preparing raw image blueprint"
 sudo composer-cli blueprints push "$BLUEPRINT_FILE"
-sudo composer-cli blueprints depsolve installer
+sudo composer-cli blueprints depsolve raw-image
 
-# Build installer image.
+# Build raw image.
 # Test --url arg following by URL with tailling slash for bz#1942029
-build_image installer "${INSTALLER_TYPE}" "${PROD_REPO_URL}/"
+build_image raw-image "${RAW_IMAGE_TYPE}" "${PROD_REPO_URL}/"
 
 # Download the image
 greenprint "📥 Downloading the raw image"
 sudo composer-cli compose image "${COMPOSE_ID}" > /dev/null
-ISO_FILENAME="${COMPOSE_ID}-${INSTALLER_FILENAME}"
+ISO_FILENAME="${COMPOSE_ID}-${RAW_IMAGE_FILENAME}"
 
 greenprint "Extracting and converting the raw image to a qcow2 file"
 sudo xz -d "${ISO_FILENAME}"
 sudo qemu-img convert -f raw "${COMPOSE_ID}-image.raw" -O qcow2 "${IMAGE_KEY}.qcow2"
 
 # Clean compose and blueprints.
-greenprint "🧹 Clean up installer blueprint and compose"
+greenprint "🧹 Clean up raw-image blueprint and compose"
 sudo composer-cli compose delete "${COMPOSE_ID}" > /dev/null
-sudo composer-cli blueprints delete installer > /dev/null
+sudo composer-cli blueprints delete raw-image > /dev/null
 
 ##################################################################
 ##
@@ -451,7 +451,7 @@ ansible_python_interpreter=/usr/bin/python3
 ansible_user=admin
 ansible_private_key_file=${SSH_KEY}
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ansible_become=yes 
+ansible_become=yes
 ansible_become_method=sudo
 ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
@@ -524,7 +524,7 @@ ansible_python_interpreter=/usr/bin/python3
 ansible_user=admin
 ansible_private_key_file=${SSH_KEY}
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ansible_become=yes 
+ansible_become=yes
 ansible_become_method=sudo
 ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
@@ -559,17 +559,15 @@ version = "*"
 [[packages]]
 name = "wget"
 version = "*"
+EOF
 
+# No RT kernel in Fedora
+if [[ "$ID" != "fedora" ]]; then
+    tee -a "$BLUEPRINT_FILE" > /dev/null << EOF
 [customizations.kernel]
 name = "kernel-rt"
-
-[[customizations.user]]
-name = "admin"
-description = "Administrator account"
-password = "\$6\$GRmb7S0p8vsYmXzH\$o0E020S.9JQGaHkszoog4ha4AQVs3sk8q0DvLjSMxoxHBKnB2FBXGQ/OkwZQfW/76ktHd0NX5nls2LPxPuUdl."
-home = "/home/admin/"
-groups = ["wheel"]
 EOF
+fi
 
 greenprint "📄 upgrade blueprint"
 cat "$BLUEPRINT_FILE"
@@ -659,7 +657,7 @@ ansible_python_interpreter=/usr/bin/python3
 ansible_user=admin
 ansible_private_key_file=${SSH_KEY}
 ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-ansible_become=yes 
+ansible_become=yes
 ansible_become_method=sudo
 ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF

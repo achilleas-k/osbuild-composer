@@ -11,23 +11,11 @@ shopt -s expand_aliases
 set -euo pipefail
 
 source /usr/libexec/osbuild-composer-test/set-env-variables.sh
+source /usr/libexec/tests/osbuild-composer/shared_lib.sh
+
 BRANCH_NAME="${CI_COMMIT_BRANCH:-local}"
 BUILD_ID="${CI_BUILD_ID:-$(uuidgen)}"
 HYPER_V_GEN="${HYPER_V_GEN:-V1}"
-
-# Colorful output.
-function greenprint {
-    echo -e "\033[1;32m[$(date -Isecond)] ${1}\033[0m"
-}
-
-function get_build_info() {
-    key="$1"
-    fname="$2"
-    if rpm -q --quiet weldr-client; then
-        key=".body${key}"
-    fi
-    jq -r "${key}" "${fname}"
-}
 
 # Container image used for cloud provider CLI tools
 CONTAINER_IMAGE_CLOUD_TOOLS="quay.io/osbuild/cloud-tools:latest"
@@ -82,11 +70,16 @@ else
     echo "Test is not running on neither Fedora, RHEL or CentOS, terminating!"
     exit 1
 fi
+
 sudo dnf config-manager --add-repo https://rpm.releases.hashicorp.com/$release/hashicorp.repo
 # set $releasever to 8 when running on RHEL-9 because there is no hashicorp repo for it yet
 if [[ $ID == rhel || $ID == centos ]] && [[ ${VERSION_ID%.*} == 9 ]]; then
     # shellcheck disable=SC2016
     sudo sed -i 's/$releasever/8/g' /etc/yum.repos.d/hashicorp.repo
+# set $releasever to 36 when running on Fedora 37 because there is no hashicorp repo for it yet
+elif [[ $ID == fedora ]] && [[ ${VERSION_ID%.*} == 37 ]]; then
+    # shellcheck disable=SC2016
+    sudo sed -i 's/$releasever/36/g' /etc/yum.repos.d/hashicorp.repo
 fi
 sudo dnf install -y terraform
 
@@ -136,14 +129,6 @@ get_compose_metadata () {
 
     # Move the JSON file into place.
     sudo cat "${COMPOSE_ID}".json | jq -M '.' | tee "$METADATA_FILE" > /dev/null
-}
-
-is_weldr_client_installed () {
-    if rpm --quiet -q weldr-client; then
-        echo true
-    else
-        echo false
-    fi
 }
 
 # Export Azure credentials if running on Jenkins

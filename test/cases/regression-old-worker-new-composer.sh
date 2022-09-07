@@ -7,14 +7,11 @@
 
 set -exuo pipefail
 
-# Colorful timestamped output.
-function greenprint {
-    echo -e "\033[1;32m[$(date -Isecond)] ${1}\033[0m"
-}
 
 ARTIFACTS="${ARTIFACTS:-/tmp/artifacts}"
 
 source /usr/libexec/osbuild-composer-test/set-env-variables.sh
+source /usr/libexec/tests/osbuild-composer/shared_lib.sh
 
 # Only run this on x86 and rhel8 GA
 if [ "$ARCH" != "x86_64" ] || [ "$ID" != rhel ] || ! sudo subscription-manager status; then

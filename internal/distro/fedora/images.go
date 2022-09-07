@@ -8,7 +8,9 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/image"
 	"github.com/osbuild/osbuild-composer/internal/manifest"
 	"github.com/osbuild/osbuild-composer/internal/osbuild"
+	"github.com/osbuild/osbuild-composer/internal/ostree"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+	"github.com/osbuild/osbuild-composer/internal/users"
 	"github.com/osbuild/osbuild-composer/internal/workload"
 )
 
@@ -48,8 +50,8 @@ func osCustomizations(
 	if !t.bootISO {
 		// don't put users and groups in the payload of an installer
 		// add them via kickstart instead
-		osc.Groups = c.GetGroups()
-		osc.Users = c.GetUsers()
+		osc.Groups = users.GroupsFromBP(c.GetGroups())
+		osc.Users = users.UsersFromBP(c.GetUsers())
 	}
 
 	osc.EnabledServices = imageConfig.EnabledServices
@@ -268,6 +270,49 @@ func iotInstallerImage(workload workload.Workload,
 	img.OSTreeURL = options.OSTree.URL
 	img.OSTreeRef = options.OSTree.Ref
 	img.OSTreeCommit = options.OSTree.Parent
+
+	img.Filename = t.Filename()
+
+	return img, nil
+}
+
+func iotRawImage(workload workload.Workload,
+	t *imageType,
+	customizations *blueprint.Customizations,
+	options distro.ImageOptions,
+	packageSets map[string]rpmmd.PackageSet,
+	rng *rand.Rand) (image.ImageKind, error) {
+
+	img := image.NewOSTreeRawImage()
+
+	img.Users = users.UsersFromBP(customizations.GetUsers())
+	img.Groups = users.GroupsFromBP(customizations.GetGroups())
+
+	img.KernelOptionsAppend = []string{"modprobe.blacklist=vc4"}
+	img.Keyboard = "us"
+	img.Locale = "C.UTF-8"
+
+	img.Platform = t.platform
+	img.Workload = workload
+
+	img.Remote = ostree.Remote{
+		Name:        "fedora-iot",
+		URL:         "https://ostree.fedoraproject.org/iot",
+		ContentURL:  "mirrorlist=https://ostree.fedoraproject.org/iot/mirrorlist",
+		GPGKeyPaths: []string{"/etc/pki/rpm-gpg/"},
+	}
+	img.OSName = "fedora-iot"
+
+	img.OSTreeURL = options.OSTree.URL
+	img.OSTreeRef = options.OSTree.Ref
+	img.OSTreeCommit = options.OSTree.Parent
+
+	// TODO: move generation into LiveImage
+	pt, err := t.getPartitionTable(customizations.GetFilesystems(), options, rng)
+	if err != nil {
+		return nil, err
+	}
+	img.PartitionTable = pt
 
 	img.Filename = t.Filename()
 

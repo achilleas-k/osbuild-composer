@@ -227,7 +227,7 @@ func TestDistro_KernelOption(t *testing.T, d distro.Distro) {
 			assert.NoError(t, err)
 			nk := kernelCount(imgType)
 			// No kernel packages in containers
-			if strings.HasSuffix(typeName, "container") {
+			if strings.HasSuffix(typeName, "container") || strings.HasSuffix(typeName, "edge-raw-image") || strings.HasSuffix(typeName, "iot-raw-image") {
 				continue
 			}
 			// at least one kernel for general image types

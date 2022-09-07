@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
@@ -37,10 +38,6 @@ const (
 
 	// blueprint package set name
 	blueprintPkgsKey = "blueprint"
-
-	// Fedora distribution
-	fedora35Distribution = "fedora-35"
-	fedora36Distribution = "fedora-36"
 
 	//Kernel options for ami, qcow2, openstack, vhd and vmdk types
 	defaultKernelOptions = "ro no_timer_check console=ttyS0,115200n8 biosdevname=0 net.ifnames=0"
@@ -132,6 +129,25 @@ var (
 		buildPipelines:   []string{"build"},
 		payloadPipelines: []string{"anaconda-tree", "bootiso-tree", "bootiso"},
 		exports:          []string{"bootiso"},
+	}
+
+	iotRawImgType = imageType{
+		name:        "fedora-iot-raw-image",
+		nameAliases: []string{"iot-raw-image"},
+		filename:    "image.raw.xz",
+		mimeType:    "application/xz",
+		packageSets: map[string]packageSetFunc{},
+		defaultImageConfig: &distro.ImageConfig{
+			Locale: common.StringToPtr("en_US.UTF-8"),
+		},
+		defaultSize:         10 * GigaByte,
+		rpmOstree:           true,
+		bootable:            true,
+		image:               iotRawImage,
+		buildPipelines:      []string{"build"},
+		payloadPipelines:    []string{"image-tree", "image", "xz"},
+		exports:             []string{"xz"},
+		basePartitionTables: iotBasePartitionTables,
 	}
 
 	qcow2ImgType = imageType{
@@ -305,30 +321,18 @@ var defaultDistroImageConfig = &distro.ImageConfig{
 	Locale:   common.StringToPtr("en_US"),
 }
 
-// distribution objects without the arches > image types
-var distroMap = map[string]distribution{
-	fedora35Distribution: {
-		name:               fedora35Distribution,
+func getDistro(version int) distribution {
+	return distribution{
+		name:               fmt.Sprintf("fedora-%d", version),
 		product:            "Fedora",
-		osVersion:          "35",
-		releaseVersion:     "35",
-		modulePlatformID:   "platform:f35",
-		ostreeRefTmpl:      "fedora/35/%s/iot",
-		isolabelTmpl:       "Fedora-35-BaseOS-%s",
-		runner:             &runner.Fedora{Version: 35},
+		osVersion:          strconv.Itoa(version),
+		releaseVersion:     strconv.Itoa(version),
+		modulePlatformID:   fmt.Sprintf("platform:f%d", version),
+		ostreeRefTmpl:      fmt.Sprintf("fedora/%d/%%s/iot", version),
+		isolabelTmpl:       fmt.Sprintf("Fedora-%d-BaseOS-%%s", version),
+		runner:             &runner.Fedora{Version: uint64(version)},
 		defaultImageConfig: defaultDistroImageConfig,
-	},
-	fedora36Distribution: {
-		name:               fedora36Distribution,
-		product:            "Fedora",
-		osVersion:          "36",
-		releaseVersion:     "36",
-		modulePlatformID:   "platform:f36",
-		ostreeRefTmpl:      "fedora/36/%s/iot",
-		isolabelTmpl:       "Fedora-36-BaseOS-%s",
-		runner:             &runner.Fedora{Version: 36},
-		defaultImageConfig: defaultDistroImageConfig,
-	},
+	}
 }
 
 func (d *distribution) Name() string {
@@ -722,20 +726,35 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 }
 
 func NewHostDistro(name, modulePlatformID, ostreeRef string) distro.Distro {
-	return newDistro(name)
+	parts := strings.Split(name, "-")
+	if len(parts) != 2 || parts[0] != "fedora" {
+		panic("invalid distro name: " + name)
+	}
+
+	version, err := strconv.Atoi(parts[1])
+	if err != nil {
+		panic("invalid distro version: " + name + ": " + err.Error())
+	}
+
+	return newDistro(version)
 }
 
 // New creates a new distro object, defining the supported architectures and image types
 func NewF35() distro.Distro {
-	return newDistro(fedora35Distribution)
+	return newDistro(35)
 }
 func NewF36() distro.Distro {
-	return newDistro(fedora36Distribution)
+	return newDistro(36)
+}
+func NewF37() distro.Distro {
+	return newDistro(37)
+}
+func NewF38() distro.Distro {
+	return newDistro(38)
 }
 
-func newDistro(distroName string) distro.Distro {
-
-	rd := distroMap[distroName]
+func newDistro(version int) distro.Distro {
+	rd := getDistro(version)
 
 	// Architecture definitions
 	x86_64 := architecture{
@@ -836,6 +855,16 @@ func newDistro(distroName string) distro.Distro {
 		iotCommitImgType,
 		iotInstallerImgType,
 	)
+	x86_64.addImageTypes(
+		&platform.X86{
+			BasePlatform: platform.BasePlatform{
+				ImageFormat: platform.FORMAT_RAW,
+			},
+			BIOS:       true,
+			UEFIVendor: "fedora",
+		},
+		iotRawImgType,
+	)
 	aarch64.addImageTypes(
 		&platform.Aarch64{
 			UEFIVendor: "fedora",
@@ -883,6 +912,15 @@ func newDistro(distroName string) distro.Distro {
 		iotCommitImgType,
 		iotOCIImgType,
 		iotInstallerImgType,
+	)
+	aarch64.addImageTypes(
+		&platform.Aarch64{
+			BasePlatform: platform.BasePlatform{
+				ImageFormat: platform.FORMAT_RAW,
+			},
+			UEFIVendor: "fedora",
+		},
+		iotRawImgType,
 	)
 
 	s390x.addImageTypes(nil)

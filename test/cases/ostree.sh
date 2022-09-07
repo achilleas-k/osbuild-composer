@@ -3,6 +3,7 @@ set -euo pipefail
 
 # Get OS data.
 source /usr/libexec/osbuild-composer-test/set-env-variables.sh
+source /usr/libexec/tests/osbuild-composer/shared_lib.sh
 
 # Get compose url if it's running on unsubscried RHEL
 if [[ ${ID} == "rhel" ]] && ! sudo subscription-manager status; then
@@ -28,6 +29,14 @@ case "${ID}-${VERSION_ID}" in
         OS_VARIANT="fedora36"
         USER_IN_COMMIT="false"
         BOOT_LOCATION="https://mirrors.rit.edu/fedora/fedora/linux/releases/36/Everything/x86_64/os/"
+        EMBEDED_CONTAINER="false"
+        ;;
+    "fedora-37")
+        IMAGE_TYPE=fedora-iot-commit
+        OSTREE_REF="fedora/37/${ARCH}/iot"
+        OS_VARIANT="fedora-unknown"
+        USER_IN_COMMIT="false"
+        BOOT_LOCATION="https://mirrors.kernel.org/fedora/development/37/Everything/x86_64/os/"
         EMBEDED_CONTAINER="false"
         ;;
     "rhel-8.4")
@@ -101,20 +110,6 @@ case "${ID}-${VERSION_ID}" in
         exit 1;;
 esac
 
-
-# Colorful output.
-function greenprint {
-    echo -e "\033[1;32m[$(date -Isecond)] ${1}\033[0m"
-}
-
-function get_build_info() {
-    key="$1"
-    fname="$2"
-    if rpm -q --quiet weldr-client; then
-        key=".body${key}"
-    fi
-    jq -r "${key}" "${fname}"
-}
 
 # Start libvirtd and test it.
 greenprint "🚀 Starting libvirt daemon"
