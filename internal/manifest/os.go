@@ -45,6 +45,7 @@ type OSCustomizations struct {
 	GPGKeyFiles      []string
 	Language         string
 	Keyboard         *string
+	X11Layouts       []string
 	Hostname         string
 	Timezone         string
 	EnabledServices  []string
@@ -256,7 +257,11 @@ func (p *OS) serialize() osbuild.Pipeline {
 	pipeline.AddStage(osbuild.NewLocaleStage(&osbuild.LocaleStageOptions{Language: p.Language}))
 
 	if p.Keyboard != nil {
-		pipeline.AddStage(osbuild.NewKeymapStage(&osbuild.KeymapStageOptions{Keymap: *p.Keyboard}))
+		keymapOptions := &osbuild.KeymapStageOptions{Keymap: *p.Keyboard}
+		if len(p.X11Layouts) > 0 {
+			keymapOptions.X11Keymap = &osbuild.X11KeymapOptions{Layouts: p.X11Layouts}
+		}
+		pipeline.AddStage(osbuild.NewKeymapStage(keymapOptions))
 	}
 
 	if p.Hostname != "" {

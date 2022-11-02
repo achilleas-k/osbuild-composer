@@ -111,6 +111,9 @@ func osCustomizations(
 			},
 		)
 	}
+	if imageConfig.Keyboard != nil && imageConfig.Keyboard.X11Keymap != nil {
+		osc.X11Layouts = imageConfig.Keyboard.X11Keymap.Layouts
+	}
 
 	osc.Grub2Config = imageConfig.Grub2Config
 	osc.Sysconfig = imageConfig.Sysconfig
