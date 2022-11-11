@@ -10744,8 +10744,8 @@
               "path": "/ostree.ks",
               "ostree": {
                 "osname": "fedora",
-                "url": "test/iot",
-                "ref": "file:///run/install/repo/ostree/repo",
+                "url": "file:///run/install/repo/ostree/repo",
+                "ref": "test/iot",
                 "gpg": false
               }
             }

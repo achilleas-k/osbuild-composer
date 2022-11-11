@@ -7125,6 +7125,14 @@
                     }
                   },
                   {
+                    "id": "sha256:082a4653df11d434b8646916895d1942a52f2631666f478b6119c0f915c1423e",
+                    "options": {
+                      "metadata": {
+                        "rpm.check_gpg": true
+                      }
+                    }
+                  },
+                  {
                     "id": "sha256:bfdf0b12dcea6e4cdfe967535d08cfaac4e133f65173d2afe59c5023b5fbde66",
                     "options": {
                       "metadata": {
@@ -10303,8 +10311,8 @@
               "path": "/ostree.ks",
               "ostree": {
                 "osname": "fedora",
-                "url": "test/iot",
-                "ref": "file:///run/install/repo/ostree/repo",
+                "url": "file:///run/install/repo/ostree/repo",
+                "ref": "test/iot",
                 "gpg": false
               },
               "users": {
@@ -10469,6 +10477,9 @@
           },
           "sha256:07fd0548f64b358ffd9ce32e885b7b91dc7e6208171d7efb9874923aead0fa5c": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-aarch64-fedora-20220106/Packages/p/plymouth-0.9.5-3.20210331git1ea1020.fc35.aarch64.rpm"
+          },
+          "sha256:082a4653df11d434b8646916895d1942a52f2631666f478b6119c0f915c1423e": {
+            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-aarch64-fedora-20220106/Packages/s/sil-scheherazade-fonts-2.100-13.fc35.noarch.rpm"
           },
           "sha256:088d9309247eb763379bd9851485ed670a6b139fa10972a7a51363770160c766": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-aarch64-updates-released-20220113/Packages/l/libubsan-11.2.1-7.fc35.aarch64.rpm"
@@ -19271,6 +19282,16 @@
         "arch": "noarch",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-aarch64-fedora-20220106/Packages/s/sil-padauk-fonts-3.003-8.fc35.noarch.rpm",
         "checksum": "sha256:e3685f0d773b6f6559adacf0294fee161f2dd7209d89a57cea2f0e8f71cdbf9d",
+        "check_gpg": true
+      },
+      {
+        "name": "sil-scheherazade-fonts",
+        "epoch": 0,
+        "version": "2.100",
+        "release": "13.fc35",
+        "arch": "noarch",
+        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f35/f35-aarch64-fedora-20220106/Packages/s/sil-scheherazade-fonts-2.100-13.fc35.noarch.rpm",
+        "checksum": "sha256:082a4653df11d434b8646916895d1942a52f2631666f478b6119c0f915c1423e",
         "check_gpg": true
       },
       {

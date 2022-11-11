@@ -199,7 +199,7 @@ func (p *ISOTree) serialize() osbuild.Pipeline {
 			osbuild.NewOstreePullStageInputs("org.osbuild.source", p.OSTree.Checksum, p.OSTree.Ref),
 		))
 
-		kickstartOptions, err := osbuild.NewKickstartStageOptions(p.KSPath, "", p.Users, p.Groups, p.OSTree.Ref, makeISORootPath(ostreeRepoPath), p.OSName)
+		kickstartOptions, err := osbuild.NewKickstartStageOptions(p.KSPath, "", p.Users, p.Groups, makeISORootPath(ostreeRepoPath), p.OSTree.Ref, p.OSName)
 
 		if err != nil {
 			panic("failed to create kickstartstage options")
