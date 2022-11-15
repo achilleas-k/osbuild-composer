@@ -2025,7 +2025,7 @@
           {
             "type": "org.osbuild.truncate",
             "options": {
-              "filename": "disk.img",
+              "filename": "disk.raw",
               "size": "21474836480"
             }
           },
@@ -2066,7 +2066,7 @@
               "device": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "lock": true
                 }
               }
@@ -2081,7 +2081,7 @@
               "device": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "start": 4096,
                   "size": 409600,
                   "lock": true
@@ -2099,7 +2099,7 @@
               "device": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "start": 413696,
                   "size": 1024000,
                   "lock": true
@@ -2117,7 +2117,7 @@
               "device": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "start": 1437696,
                   "size": 40505311,
                   "lock": true
@@ -2148,7 +2148,7 @@
               "boot": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "start": 413696,
                   "size": 1024000
                 }
@@ -2156,7 +2156,7 @@
               "boot.efi": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "start": 4096,
                   "size": 409600
                 }
@@ -2164,7 +2164,7 @@
               "root": {
                 "type": "org.osbuild.loopback",
                 "options": {
-                  "filename": "disk.img",
+                  "filename": "disk.raw",
                   "start": 1437696,
                   "size": 40505311
                 }
@@ -2194,7 +2194,7 @@
           {
             "type": "org.osbuild.grub2.inst",
             "options": {
-              "filename": "disk.img",
+              "filename": "disk.raw",
               "platform": "i386-pc",
               "location": 2048,
               "core": {
