@@ -1,9 +1,11 @@
 package image
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/osbuild/osbuild-composer/internal/artifact"
+	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/manifest"
 	"github.com/osbuild/osbuild-composer/internal/ostree"
@@ -28,8 +30,11 @@ type OSTreeSimplifiedInstaller struct {
 
 	SysrootReadOnly bool
 
-	Remote ostree.Remote
-	OSName string
+	ISOLabelTempl string
+	Product       string
+	OSVersion     string
+	Variant       string
+	OSName        string
 
 	KernelOptionsAppend []string
 	Keyboard            string
@@ -55,7 +60,6 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 	// create the raw image
 	osPipeline := manifest.NewOSTreeDeployment(m, buildPipeline, img.Commit, img.OSName, img.Platform)
 	osPipeline.PartitionTable = img.PartitionTable
-	osPipeline.Remote = img.Remote
 	osPipeline.KernelOptionsAppend = img.KernelOptionsAppend
 	osPipeline.Keyboard = img.Keyboard
 	osPipeline.Locale = img.Locale
@@ -68,16 +72,45 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 	xzPipeline := manifest.NewXZ(m, buildPipeline, imagePipeline)
 	xzPipeline.Filename = img.Filename
 
-	// create boot ISO with raw image
-	installerPipeline := manifest.SimplifiedInstaller(
-		m,
+	coiPipeline := manifest.NewCOI(m,
 		buildPipeline,
 		img.Platform,
 		repos,
+		"kernel",
 		img.Product,
-		img.OSVersion,
-	)
-	installerPipeline.Checkpoint()
+		img.OSVersion)
+
+	// create boot ISO with raw image
+	rootfsImagePipeline := manifest.NewISORootfsImg(m, buildPipeline, coiPipeline)
+	rootfsImagePipeline.Size = 4 * common.GibiByte
+
+	bootTreePipeline := manifest.NewEFIBootTree(m, buildPipeline, img.Product, img.OSVersion)
+	bootTreePipeline.Platform = img.Platform
+	bootTreePipeline.UEFIVendor = img.Platform.GetUEFIVendor()
+	bootTreePipeline.ISOLabel = "" // TODO
+
+	isoLabel := fmt.Sprintf(img.ISOLabelTempl, img.Platform.GetArch())
+	isoTreePipeline := manifest.NewISOTree(m,
+		buildPipeline,
+		coiPipeline,
+		rootfsImagePipeline,
+		bootTreePipeline,
+		isoLabel)
+	isoTreePipeline.PartitionTable = rootfsPartitionTable
+	isoTreePipeline.Release = img.Release
+	isoTreePipeline.OSName = img.OSName
+	isoTreePipeline.Users = img.Users
+	isoTreePipeline.Groups = img.Groups
+	isoTreePipeline.PayloadPath = tarPath
+
+	isoTreePipeline.SquashfsCompression = img.SquashfsCompression
+
+	isoTreePipeline.OSPipeline = osPipeline
+	isoTreePipeline.KernelOpts = img.AdditionalKernelOpts
+
+	isoPipeline := manifest.NewISO(m, buildPipeline, isoTreePipeline)
+	isoPipeline.Filename = img.Filename
+	isoPipeline.ISOLinux = true
 
 	return art, nil
 }
