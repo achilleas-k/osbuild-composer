@@ -112,7 +112,7 @@ func (img *OSTreeInstaller) InstantiateManifest(m *manifest.Manifest,
 
 	isoTreePipeline.OSTree = &img.Commit
 
-	isoPipeline := manifest.NewISO(m, buildPipeline, isoTreePipeline)
+	isoPipeline := manifest.NewISO(m, buildPipeline, isoTreePipeline, isoLabel)
 	isoPipeline.Filename = img.Filename
 	isoPipeline.ISOLinux = true
 	artifact := isoPipeline.Export()
