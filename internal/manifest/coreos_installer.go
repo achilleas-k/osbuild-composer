@@ -43,7 +43,8 @@ func NewCOI(m *Manifest,
 	repos []rpmmd.RepoConfig,
 	kernelName,
 	product,
-	version string) *CoreOSInstaller {
+	version,
+	variant string) *CoreOSInstaller {
 	p := &CoreOSInstaller{
 		Base:       NewBase(m, "coi-tree", buildPipeline),
 		platform:   platform,
@@ -51,6 +52,7 @@ func NewCOI(m *Manifest,
 		kernelName: kernelName,
 		product:    product,
 		version:    version,
+		variant:    variant,
 	}
 	buildPipeline.addDependent(p)
 	m.addPipeline(p)

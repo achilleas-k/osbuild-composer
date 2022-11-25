@@ -7,46 +7,52 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/artifact"
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/disk"
+	"github.com/osbuild/osbuild-composer/internal/environment"
 	"github.com/osbuild/osbuild-composer/internal/manifest"
-	"github.com/osbuild/osbuild-composer/internal/ostree"
 	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/runner"
-	"github.com/osbuild/osbuild-composer/internal/users"
 	"github.com/osbuild/osbuild-composer/internal/workload"
 )
 
 type OSTreeSimplifiedInstaller struct {
 	Base
 
-	Platform       platform.Platform
-	Workload       workload.Workload
-	PartitionTable *disk.PartitionTable
+	// Raw image that will be created and embedded
+	rawImage *OSTreeRawImage
 
-	Users  []users.User
-	Groups []users.Group
+	Platform         platform.Platform
+	OSCustomizations manifest.OSCustomizations
+	Environment      environment.Environment
+	Workload         workload.Workload
 
-	Commit ostree.CommitSpec
+	ExtraBasePackages rpmmd.PackageSet
 
-	SysrootReadOnly bool
-
+	// ISO label template (architecture-free)
 	ISOLabelTempl string
-	Product       string
-	OSVersion     string
-	Variant       string
-	OSName        string
 
-	KernelOptionsAppend []string
-	Keyboard            string
-	Locale              string
+	// Product string for ISO buildstamp
+	Product string
+
+	// OSVersion string for ISO buildstamp
+	OSVersion string
+
+	// Variant string for ISO buildstamp
+	Variant string
+
+	// OSName for ostree deployment
+	OSName string
+
+	installDevice string
 
 	Filename string
 }
 
-func NewOSTreeSimplifiedInstaller(commit ostree.CommitSpec) *OSTreeSimplifiedInstaller {
+func NewOSTreeSimplifiedInstaller(rawImage *OSTreeRawImage, installDevice string) *OSTreeSimplifiedInstaller {
 	return &OSTreeSimplifiedInstaller{
-		Base:   NewBase("ostree-simplified-installer"),
-		Commit: commit,
+		Base:          NewBase("ostree-simplified-installer"),
+		rawImage:      rawImage,
+		installDevice: installDevice,
 	}
 }
 
@@ -58,19 +64,19 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 	buildPipeline.Checkpoint()
 
 	// create the raw image
-	osPipeline := manifest.NewOSTreeDeployment(m, buildPipeline, img.Commit, img.OSName, img.Platform)
-	osPipeline.PartitionTable = img.PartitionTable
-	osPipeline.KernelOptionsAppend = img.KernelOptionsAppend
-	osPipeline.Keyboard = img.Keyboard
-	osPipeline.Locale = img.Locale
-	osPipeline.Users = img.Users
-	osPipeline.Groups = img.Groups
-	osPipeline.SysrootReadOnly = img.SysrootReadOnly
+	// osPipeline := manifest.NewOSTreeDeployment(m, buildPipeline, img.rawImage.Commit, img.OSName, img.Platform)
+	// osPipeline.PartitionTable = img.rawImage.PartitionTable
+	// osPipeline.KernelOptionsAppend = img.rawImage.KernelOptionsAppend
+	// osPipeline.Keyboard = img.rawImage.Keyboard
+	// osPipeline.Locale = img.rawImage.Locale
+	// osPipeline.SysrootReadOnly = img.rawImage.SysrootReadOnly
+	// osPipeline.Users = img.rawImage.Users
+	// osPipeline.Groups = img.rawImage.Groups
 
-	imagePipeline := manifest.NewRawOStreeImage(m, buildPipeline, img.Platform, osPipeline)
+	// imagePipeline := manifest.NewRawOStreeImage(m, buildPipeline, img.Platform, osPipeline)
 
-	xzPipeline := manifest.NewXZ(m, buildPipeline, imagePipeline)
-	xzPipeline.Filename = img.Filename
+	// xzPipeline := manifest.NewXZ(m, buildPipeline, imagePipeline)
+	// xzPipeline.Filename = img.Filename
 
 	coiPipeline := manifest.NewCOI(m,
 		buildPipeline,
@@ -78,39 +84,56 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 		repos,
 		"kernel",
 		img.Product,
-		img.OSVersion)
+		img.OSVersion,
+		img.Variant)
+	coiPipeline.ExtraPackages = img.ExtraBasePackages.Include
+	coiPipeline.ExtraRepos = img.ExtraBasePackages.Repositories
+
+	isoLabel := fmt.Sprintf(img.ISOLabelTempl, img.Platform.GetArch())
 
 	// create boot ISO with raw image
-	rootfsImagePipeline := manifest.NewISORootfsImg(m, buildPipeline, coiPipeline)
-	rootfsImagePipeline.Size = 4 * common.GibiByte
+	// rootfsImagePipeline := manifest.NewISORootfsImg(m, buildPipeline, coiPipeline)
+	// rootfsImagePipeline.Size = 4 * common.GibiByte
+	kernelOpts := []string{"rd.neednet=1",
+		"coreos.inst.crypt_root=1",
+		"coreos.inst.isoroot=" + isoLabel,
+		"coreos.inst.install_dev=" + img.installDevice,
+		"coreos.inst.image_file=/run/media/iso/disk.img.xz",
+		"coreos.inst.insecure"}
 
 	bootTreePipeline := manifest.NewEFIBootTree(m, buildPipeline, img.Product, img.OSVersion)
 	bootTreePipeline.Platform = img.Platform
 	bootTreePipeline.UEFIVendor = img.Platform.GetUEFIVendor()
-	bootTreePipeline.ISOLabel = "" // TODO
+	bootTreePipeline.ISOLabel = isoLabel
+	bootTreePipeline.KernelOpts = kernelOpts
 
-	isoLabel := fmt.Sprintf(img.ISOLabelTempl, img.Platform.GetArch())
-	isoTreePipeline := manifest.NewISOTree(m,
+	rootfsPartitionTable := &disk.PartitionTable{
+		Size: 20 * common.MebiByte,
+		Partitions: []disk.Partition{
+			{
+				Start: 0,
+				Size:  20 * common.MebiByte,
+				Payload: &disk.Filesystem{
+					Type:       "vfat",
+					Mountpoint: "/",
+					UUID:       disk.NewVolIDFromRand(rng),
+				},
+			},
+		},
+	}
+
+	isoTreePipeline := manifest.NewCOIISOTree(m,
 		buildPipeline,
 		coiPipeline,
-		rootfsImagePipeline,
 		bootTreePipeline,
 		isoLabel)
 	isoTreePipeline.PartitionTable = rootfsPartitionTable
-	isoTreePipeline.Release = img.Release
 	isoTreePipeline.OSName = img.OSName
-	isoTreePipeline.Users = img.Users
-	isoTreePipeline.Groups = img.Groups
-	isoTreePipeline.PayloadPath = tarPath
 
-	isoTreePipeline.SquashfsCompression = img.SquashfsCompression
-
-	isoTreePipeline.OSPipeline = osPipeline
-	isoTreePipeline.KernelOpts = img.AdditionalKernelOpts
-
-	isoPipeline := manifest.NewISO(m, buildPipeline, isoTreePipeline)
+	isoPipeline := manifest.NewISO(m, buildPipeline, isoTreePipeline, isoLabel)
 	isoPipeline.Filename = img.Filename
 	isoPipeline.ISOLinux = true
 
-	return art, nil
+	artifact := isoPipeline.Export()
+	return artifact, nil
 }

@@ -332,6 +332,63 @@ func edgeRawImage(workload workload.Workload,
 	return img, nil
 }
 
+func edgeSimplifiedInstallerImage(workload workload.Workload,
+	t *imageType,
+	customizations *blueprint.Customizations,
+	options distro.ImageOptions,
+	packageSets map[string]rpmmd.PackageSet,
+	containers []container.Spec,
+	rng *rand.Rand) (image.ImageKind, error) {
+
+	commit := ostree.CommitSpec{
+		Ref:        options.OSTree.ImageRef,
+		URL:        options.OSTree.URL,
+		ContentURL: options.OSTree.ContentURL,
+		Checksum:   options.OSTree.FetchChecksum,
+	}
+	rawImg := image.NewOSTreeRawImage(commit)
+
+	rawImg.Users = users.UsersFromBP(customizations.GetUsers())
+	rawImg.Groups = users.GroupsFromBP(customizations.GetGroups())
+
+	rawImg.KernelOptionsAppend = []string{"modprobe.blacklist=vc4"}
+	rawImg.Keyboard = "us"
+	rawImg.Locale = "C.UTF-8"
+
+	rawImg.Platform = t.platform
+	rawImg.Workload = workload
+	rawImg.Remote = ostree.Remote{
+		Name:       "rhel-edge",
+		URL:        options.OSTree.URL,
+		ContentURL: options.OSTree.ContentURL,
+	}
+	rawImg.OSName = "redhat"
+
+	// TODO: move generation into LiveImage
+	pt, err := t.getPartitionTable(customizations.GetFilesystems(), options, rng)
+	if err != nil {
+		return nil, err
+	}
+	rawImg.PartitionTable = pt
+
+	rawImg.Filename = t.Filename()
+
+	img := image.NewOSTreeSimplifiedInstaller(rawImg, customizations.InstallationDevice)
+	img.ExtraBasePackages = packageSets[installerPkgsKey]
+	// img.Workload = workload
+	img.Platform = t.platform
+	img.Filename = t.Filename()
+
+	d := t.arch.distro
+	img.ISOLabelTempl = d.isolabelTmpl
+	img.Product = d.product
+	img.Variant = "edge"
+	img.OSName = "redhat"
+	img.OSVersion = d.osVersion
+
+	return img, nil
+}
+
 func imageInstallerImage(workload workload.Workload,
 	t *imageType,
 	customizations *blueprint.Customizations,
