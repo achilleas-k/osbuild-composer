@@ -19,6 +19,7 @@ type COIISOTree struct {
 
 	PartitionTable *disk.PartitionTable
 
+	payloadPipeline  *XZ
 	coiPipeline      *CoreOSInstaller
 	bootTreePipeline *EFIBootTree
 
@@ -32,12 +33,14 @@ type COIISOTree struct {
 
 func NewCOIISOTree(m *Manifest,
 	buildPipeline *Build,
+	payloadPipeline *XZ,
 	coiPipeline *CoreOSInstaller,
 	bootTreePipeline *EFIBootTree,
 	isoLabel string) *COIISOTree {
 
 	p := &COIISOTree{
 		Base:             NewBase(m, "bootiso-tree", buildPipeline),
+		payloadPipeline:  payloadPipeline,
 		coiPipeline:      coiPipeline,
 		bootTreePipeline: bootTreePipeline,
 		isoLabel:         isoLabel,
@@ -59,6 +62,18 @@ func (p *COIISOTree) serialize() osbuild.Pipeline {
 		kernelOpts = append(kernelOpts, p.KernelOpts...)
 	}
 
+	pipeline.AddStage(osbuild.NewCopyStageSimple(
+		&osbuild.CopyStageOptions{
+			Paths: []osbuild.CopyStagePath{
+				{
+					From: fmt.Sprintf("input://file/%s", p.payloadPipeline.Filename),
+					To:   fmt.Sprintf("tree://%s", p.PayloadPath),
+				},
+			},
+		},
+		osbuild.NewFilesInputs(osbuild.NewFilesInputReferencesPipeline(p.payloadPipeline.Name(), p.payloadPipeline.Filename)),
+	))
+
 	pipeline.AddStage(osbuild.NewMkdirStage(&osbuild.MkdirStageOptions{
 		Paths: []osbuild.Path{
 			{
@@ -70,7 +85,23 @@ func (p *COIISOTree) serialize() osbuild.Pipeline {
 		},
 	}))
 
-	inputName := "tree"
+	filename := "images/efiboot.img"
+	pipeline.AddStage(osbuild.NewTruncateStage(&osbuild.TruncateStageOptions{
+		Filename: filename,
+		Size:     fmt.Sprintf("%d", p.PartitionTable.Size),
+	}))
+
+	efibootDevice := osbuild.NewLoopbackDevice(&osbuild.LoopbackDeviceOptions{Filename: filename})
+	for _, stage := range osbuild.GenMkfsStages(p.PartitionTable, efibootDevice) {
+		pipeline.AddStage(stage)
+	}
+
+	inputName := "root-tree"
+	copyInputs := osbuild.NewPipelineTreeInputs(inputName, p.bootTreePipeline.Name())
+	copyOptions, copyDevices, copyMounts := osbuild.GenCopyFSTreeOptions(inputName, p.bootTreePipeline.Name(), filename, p.PartitionTable)
+	pipeline.AddStage(osbuild.NewCopyStage(copyOptions, copyInputs, copyDevices, copyMounts))
+
+	inputName = "tree"
 	copyStageOptions := &osbuild.CopyStageOptions{
 		Paths: []osbuild.CopyStagePath{
 			{
@@ -86,35 +117,6 @@ func (p *COIISOTree) serialize() osbuild.Pipeline {
 	copyStageInputs := osbuild.NewPipelineTreeInputs(inputName, p.coiPipeline.Name())
 	copyStage := osbuild.NewCopyStageSimple(copyStageOptions, copyStageInputs)
 	pipeline.AddStage(copyStage)
-
-	isoLinuxOptions := &osbuild.ISOLinuxStageOptions{
-		Product: osbuild.ISOLinuxProduct{
-			Name:    p.coiPipeline.product,
-			Version: p.coiPipeline.version,
-		},
-		Kernel: osbuild.ISOLinuxKernel{
-			Dir:  "/images/pxeboot",
-			Opts: kernelOpts,
-		},
-	}
-	isoLinuxStage := osbuild.NewISOLinuxStage(isoLinuxOptions, p.coiPipeline.Name())
-	pipeline.AddStage(isoLinuxStage)
-
-	filename := "images/efiboot.img"
-	pipeline.AddStage(osbuild.NewTruncateStage(&osbuild.TruncateStageOptions{
-		Filename: filename,
-		Size:     fmt.Sprintf("%d", p.PartitionTable.Size),
-	}))
-
-	efibootDevice := osbuild.NewLoopbackDevice(&osbuild.LoopbackDeviceOptions{Filename: filename})
-	for _, stage := range osbuild.GenMkfsStages(p.PartitionTable, efibootDevice) {
-		pipeline.AddStage(stage)
-	}
-
-	inputName = "root-tree"
-	copyInputs := osbuild.NewPipelineTreeInputs(inputName, p.bootTreePipeline.Name())
-	copyOptions, copyDevices, copyMounts := osbuild.GenCopyFSTreeOptions(inputName, p.bootTreePipeline.Name(), filename, p.PartitionTable)
-	pipeline.AddStage(osbuild.NewCopyStage(copyOptions, copyInputs, copyDevices, copyMounts))
 
 	copyInputs = osbuild.NewPipelineTreeInputs(inputName, p.bootTreePipeline.Name())
 	pipeline.AddStage(osbuild.NewCopyStageSimple(

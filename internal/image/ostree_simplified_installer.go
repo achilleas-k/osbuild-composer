@@ -63,20 +63,11 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 	buildPipeline := manifest.NewBuild(m, runner, repos)
 	buildPipeline.Checkpoint()
 
+	imageFilename := "image.raw.xz"
+
 	// create the raw image
-	// osPipeline := manifest.NewOSTreeDeployment(m, buildPipeline, img.rawImage.Commit, img.OSName, img.Platform)
-	// osPipeline.PartitionTable = img.rawImage.PartitionTable
-	// osPipeline.KernelOptionsAppend = img.rawImage.KernelOptionsAppend
-	// osPipeline.Keyboard = img.rawImage.Keyboard
-	// osPipeline.Locale = img.rawImage.Locale
-	// osPipeline.SysrootReadOnly = img.rawImage.SysrootReadOnly
-	// osPipeline.Users = img.rawImage.Users
-	// osPipeline.Groups = img.rawImage.Groups
-
-	// imagePipeline := manifest.NewRawOStreeImage(m, buildPipeline, img.Platform, osPipeline)
-
-	// xzPipeline := manifest.NewXZ(m, buildPipeline, imagePipeline)
-	// xzPipeline.Filename = img.Filename
+	img.rawImage.Filename = imageFilename
+	rr := rawImagePipelines(img.rawImage, m, buildPipeline)
 
 	coiPipeline := manifest.NewCOI(m,
 		buildPipeline,
@@ -124,6 +115,7 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 
 	isoTreePipeline := manifest.NewCOIISOTree(m,
 		buildPipeline,
+		rr,
 		coiPipeline,
 		bootTreePipeline,
 		isoLabel)

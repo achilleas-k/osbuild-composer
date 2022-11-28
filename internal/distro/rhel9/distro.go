@@ -331,18 +331,8 @@ func newDistro(name string, major, minor int) distro.Distro {
 		edgeCommitImgType,
 		edgeInstallerImgType,
 		edgeRawImgType,
-		imageInstaller,
-	)
-
-	x86_64.addImageTypes(
-		&platform.X86{
-			BasePlatform: platform.BasePlatform{
-				ImageFormat: platform.FORMAT_RAW,
-			},
-			BIOS:       false,
-			UEFIVendor: rd.vendor,
-		},
 		edgeSimplifiedInstallerImgType,
+		imageInstaller,
 	)
 
 	x86_64.addImageTypes(
