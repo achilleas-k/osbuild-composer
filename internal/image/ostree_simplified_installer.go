@@ -63,10 +63,10 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 	buildPipeline := manifest.NewBuild(m, runner, repos)
 	buildPipeline.Checkpoint()
 
-	imageFilename := "image.raw.xz"
+	rawImageFilename := "image.raw.xz"
 
 	// create the raw image
-	img.rawImage.Filename = imageFilename
+	img.rawImage.Filename = rawImageFilename
 	rr := rawImagePipelines(img.rawImage, m, buildPipeline)
 
 	coiPipeline := manifest.NewCOI(m,
@@ -89,7 +89,7 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 		"coreos.inst.crypt_root=1",
 		"coreos.inst.isoroot=" + isoLabel,
 		"coreos.inst.install_dev=" + img.installDevice,
-		"coreos.inst.image_file=/run/media/iso/disk.img.xz",
+		fmt.Sprintf("coreos.inst.image_file=/run/media/iso/%s", rawImageFilename),
 		"coreos.inst.insecure"}
 
 	bootTreePipeline := manifest.NewEFIBootTree(m, buildPipeline, img.Product, img.OSVersion)
@@ -121,10 +121,11 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 		isoLabel)
 	isoTreePipeline.PartitionTable = rootfsPartitionTable
 	isoTreePipeline.OSName = img.OSName
+	isoTreePipeline.PayloadPath = fmt.Sprintf("/%s", rawImageFilename)
 
 	isoPipeline := manifest.NewISO(m, buildPipeline, isoTreePipeline, isoLabel)
 	isoPipeline.Filename = img.Filename
-	isoPipeline.ISOLinux = true
+	isoPipeline.ISOLinux = false
 
 	artifact := isoPipeline.Export()
 	return artifact, nil
