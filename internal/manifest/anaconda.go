@@ -251,6 +251,8 @@ func dracutStageOptions(kernelVer string, biosdevname bool, additionalModules []
 		"url-lib",
 		"drm",
 		"plymouth",
+		"prefixdevname",
+		"prefixdevname-tools",
 		"crypt",
 		"dm",
 		"dmsquash-live",
