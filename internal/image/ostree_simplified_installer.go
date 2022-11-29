@@ -8,6 +8,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/environment"
+	"github.com/osbuild/osbuild-composer/internal/fdo"
 	"github.com/osbuild/osbuild-composer/internal/manifest"
 	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
@@ -46,6 +47,8 @@ type OSTreeSimplifiedInstaller struct {
 	installDevice string
 
 	Filename string
+
+	FDO *fdo.Options
 }
 
 func NewOSTreeSimplifiedInstaller(rawImage *OSTreeRawImage, installDevice string) *OSTreeSimplifiedInstaller {
@@ -79,23 +82,39 @@ func (img *OSTreeSimplifiedInstaller) InstantiateManifest(m *manifest.Manifest,
 		img.Variant)
 	coiPipeline.ExtraPackages = img.ExtraBasePackages.Include
 	coiPipeline.ExtraRepos = img.ExtraBasePackages.Repositories
+	coiPipeline.FDO = img.FDO
+	coiPipeline.Biosdevname = (img.Platform.GetArch() == platform.ARCH_X86_64)
 
 	isoLabel := fmt.Sprintf(img.ISOLabelTempl, img.Platform.GetArch())
-
-	// create boot ISO with raw image
-	// rootfsImagePipeline := manifest.NewISORootfsImg(m, buildPipeline, coiPipeline)
-	// rootfsImagePipeline.Size = 4 * common.GibiByte
-	kernelOpts := []string{"rd.neednet=1",
-		"coreos.inst.crypt_root=1",
-		"coreos.inst.isoroot=" + isoLabel,
-		"coreos.inst.install_dev=" + img.installDevice,
-		fmt.Sprintf("coreos.inst.image_file=/run/media/iso/%s", rawImageFilename),
-		"coreos.inst.insecure"}
 
 	bootTreePipeline := manifest.NewEFIBootTree(m, buildPipeline, img.Product, img.OSVersion)
 	bootTreePipeline.Platform = img.Platform
 	bootTreePipeline.UEFIVendor = img.Platform.GetUEFIVendor()
 	bootTreePipeline.ISOLabel = isoLabel
+
+	// kernel options for EFI boot tree grub stage
+	kernelOpts := []string{
+		"rd.neednet=1",
+		"coreos.inst.crypt_root=1",
+		"coreos.inst.isoroot=" + isoLabel,
+		"coreos.inst.install_dev=" + img.installDevice,
+		fmt.Sprintf("coreos.inst.image_file=/run/media/iso/%s", rawImageFilename),
+		"coreos.inst.insecure",
+	}
+
+	// extra FDO options for EFI boot tree grub stage
+	if img.FDO != nil {
+		kernelOpts = append(kernelOpts, "fdo.manufacturing_server_url="+img.FDO.ManufacturingServerURL)
+		if img.FDO.DiunPubKeyInsecure != "" {
+			kernelOpts = append(kernelOpts, "fdo.diun_pub_key_insecure="+img.FDO.DiunPubKeyInsecure)
+		}
+		if img.FDO.DiunPubKeyHash != "" {
+			kernelOpts = append(kernelOpts, "fdo.diun_pub_key_hash="+img.FDO.DiunPubKeyHash)
+		}
+		if img.FDO.DiunPubKeyRootCerts != "" {
+			kernelOpts = append(kernelOpts, "fdo.diun_pub_key_root_certs=/fdo_diun_pub_key_root_certs.pem")
+		}
+	}
 	bootTreePipeline.KernelOpts = kernelOpts
 
 	rootfsPartitionTable := &disk.PartitionTable{
