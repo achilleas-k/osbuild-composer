@@ -21,7 +21,7 @@ import (
 // HELPERS
 
 func osCustomizations(
-	t *imageType,
+	t *ImageType,
 	osPackageSet rpmmd.PackageSet,
 	containers []container.Spec,
 	c *blueprint.Customizations) manifest.OSCustomizations {
@@ -153,7 +153,7 @@ func osCustomizations(
 // IMAGES
 
 func liveImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,
@@ -178,7 +178,7 @@ func liveImage(workload workload.Workload,
 }
 
 func containerImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	c *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,
@@ -197,7 +197,7 @@ func containerImage(workload workload.Workload,
 }
 
 func imageInstallerImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,
@@ -241,7 +241,7 @@ func imageInstallerImage(workload workload.Workload,
 }
 
 func iotCommitImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,
@@ -271,7 +271,7 @@ func iotCommitImage(workload workload.Workload,
 }
 
 func iotContainerImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,
@@ -304,7 +304,7 @@ func iotContainerImage(workload workload.Workload,
 }
 
 func iotInstallerImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,
@@ -346,7 +346,7 @@ func iotInstallerImage(workload workload.Workload,
 }
 
 func iotRawImage(workload workload.Workload,
-	t *imageType,
+	t *ImageType,
 	customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	packageSets map[string]rpmmd.PackageSet,

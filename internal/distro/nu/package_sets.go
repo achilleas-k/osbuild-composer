@@ -11,7 +11,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
-func ec2CommonPackageSet(t *imageType) rpmmd.PackageSet {
+func ec2CommonPackageSet(t *ImageType) rpmmd.PackageSet {
 	return rpmmd.PackageSet{
 		Include: []string{
 			"@core",
@@ -30,7 +30,7 @@ func ec2CommonPackageSet(t *imageType) rpmmd.PackageSet {
 	}
 }
 
-func qcow2CommonPackageSet(t *imageType) rpmmd.PackageSet {
+func qcow2CommonPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"@Fedora Cloud Server",
@@ -55,7 +55,7 @@ func qcow2CommonPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func vhdCommonPackageSet(t *imageType) rpmmd.PackageSet {
+func vhdCommonPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"@core",
@@ -78,7 +78,7 @@ func vhdCommonPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func vmdkCommonPackageSet(t *imageType) rpmmd.PackageSet {
+func vmdkCommonPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"@Fedora Cloud Server",
@@ -103,7 +103,7 @@ func vmdkCommonPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func openstackCommonPackageSet(t *imageType) rpmmd.PackageSet {
+func openstackCommonPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"@core",
@@ -127,7 +127,7 @@ func openstackCommonPackageSet(t *imageType) rpmmd.PackageSet {
 }
 
 // fedora iot commit OS package set
-func iotCommitPackageSet(t *imageType) rpmmd.PackageSet {
+func iotCommitPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"fedora-release-iot",
@@ -243,7 +243,7 @@ func iotCommitPackageSet(t *imageType) rpmmd.PackageSet {
 
 // INSTALLER PACKAGE SET
 
-func installerPackageSet(t *imageType) rpmmd.PackageSet {
+func installerPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"anaconda-dracut",
@@ -281,7 +281,7 @@ func installerPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func anacondaPackageSet(t *imageType) rpmmd.PackageSet {
+func anacondaPackageSet(t *ImageType) rpmmd.PackageSet {
 
 	// common installer packages
 	ps := installerPackageSet(t)
@@ -485,11 +485,11 @@ func anacondaPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func iotInstallerPackageSet(t *imageType) rpmmd.PackageSet {
+func iotInstallerPackageSet(t *ImageType) rpmmd.PackageSet {
 	return anacondaPackageSet(t)
 }
 
-func imageInstallerPackageSet(t *imageType) rpmmd.PackageSet {
+func imageInstallerPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := anacondaPackageSet(t)
 
 	releasever := t.Arch().Distro().Releasever()
@@ -510,7 +510,7 @@ func imageInstallerPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func containerPackageSet(t *imageType) rpmmd.PackageSet {
+func containerPackageSet(t *ImageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{
 		Include: []string{
 			"bash",
@@ -564,7 +564,7 @@ func containerPackageSet(t *imageType) rpmmd.PackageSet {
 	return ps
 }
 
-func bareMetalPackageSet(t *imageType) rpmmd.PackageSet {
+func bareMetalPackageSet(t *ImageType) rpmmd.PackageSet {
 	return rpmmd.PackageSet{
 		Include: []string{
 			"@core",
@@ -572,7 +572,7 @@ func bareMetalPackageSet(t *imageType) rpmmd.PackageSet {
 	}
 }
 
-func minimalrpmPackageSet(t *imageType) rpmmd.PackageSet {
+func minimalrpmPackageSet(t *ImageType) rpmmd.PackageSet {
 	return rpmmd.PackageSet{
 		Include: []string{
 			"@core",

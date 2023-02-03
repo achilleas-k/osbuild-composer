@@ -18,7 +18,7 @@ func check(err error) {
 }
 
 func main() {
-	d := nu.NewF36()
+	d := nu.New()
 	x86, err := d.GetArch("x86_64")
 	check(err)
 	qcow2, err := x86.GetImageType("qcow2")
@@ -31,7 +31,7 @@ func main() {
 	fmt.Println(string(mj))
 }
 
-func nuManifest(it distro.ImageType) (distro.Manifest, error) {
+func nuManifest(it *nu.ImageType) (distro.Manifest, error) {
 	var customizations *blueprint.Customizations
 	var options distro.ImageOptions
 	var repos []rpmmd.RepoConfig

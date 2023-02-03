@@ -72,7 +72,7 @@ var (
 	}
 
 	// Image Definitions
-	imageInstallerImgType = imageType{
+	imageInstallerImgType = ImageType{
 		name:        "image-installer",
 		nameAliases: []string{"fedora-image-installer"},
 		filename:    "installer.iso",
@@ -90,7 +90,7 @@ var (
 		exports:          []string{"bootiso"},
 	}
 
-	iotCommitImgType = imageType{
+	iotCommitImgType = ImageType{
 		name:        "iot-commit",
 		nameAliases: []string{"fedora-iot-commit"},
 		filename:    "commit.tar",
@@ -108,14 +108,14 @@ var (
 		exports:          []string{"commit-archive"},
 	}
 
-	iotOCIImgType = imageType{
+	iotOCIImgType = ImageType{
 		name:        "iot-container",
 		nameAliases: []string{"fedora-iot-container"},
 		filename:    "container.tar",
 		mimeType:    "application/x-tar",
 		packageSets: map[string]packageSetFunc{
 			osPkgsKey: iotCommitPackageSet,
-			containerPkgsKey: func(t *imageType) rpmmd.PackageSet {
+			containerPkgsKey: func(t *ImageType) rpmmd.PackageSet {
 				return rpmmd.PackageSet{}
 			},
 		},
@@ -130,7 +130,7 @@ var (
 		exports:          []string{"container"},
 	}
 
-	iotInstallerImgType = imageType{
+	iotInstallerImgType = ImageType{
 		name:        "iot-installer",
 		nameAliases: []string{"fedora-iot-installer"},
 		filename:    "installer.iso",
@@ -150,7 +150,7 @@ var (
 		exports:          []string{"bootiso"},
 	}
 
-	iotRawImgType = imageType{
+	iotRawImgType = ImageType{
 		name:        "iot-raw-image",
 		nameAliases: []string{"fedora-iot-raw-image"},
 		filename:    "image.raw.xz",
@@ -169,7 +169,7 @@ var (
 		basePartitionTables: iotBasePartitionTables,
 	}
 
-	qcow2ImgType = imageType{
+	qcow2ImgType = ImageType{
 		name:     "qcow2",
 		filename: "disk.qcow2",
 		mimeType: "application/x-qemu-disk",
@@ -195,7 +195,7 @@ var (
 		basePartitionTables: defaultBasePartitionTables,
 	}
 
-	vhdImgType = imageType{
+	vhdImgType = ImageType{
 		name:     "vhd",
 		filename: "disk.vhd",
 		mimeType: "application/x-vhd",
@@ -224,7 +224,7 @@ var (
 		environment:         &environment.Azure{},
 	}
 
-	vmdkImgType = imageType{
+	vmdkImgType = ImageType{
 		name:     "vmdk",
 		filename: "disk.vmdk",
 		mimeType: "application/x-vmdk",
@@ -250,7 +250,7 @@ var (
 		basePartitionTables: defaultBasePartitionTables,
 	}
 
-	openstackImgType = imageType{
+	openstackImgType = ImageType{
 		name:     "openstack",
 		filename: "disk.qcow2",
 		mimeType: "application/x-qemu-disk",
@@ -281,7 +281,7 @@ var (
 		DefaultTarget: common.ToPtr("multi-user.target"),
 	}
 
-	amiImgType = imageType{
+	amiImgType = ImageType{
 		name:     "ami",
 		filename: "image.raw",
 		mimeType: "application/octet-stream",
@@ -300,7 +300,7 @@ var (
 		environment:         &environment.EC2{},
 	}
 
-	containerImgType = imageType{
+	containerImgType = ImageType{
 		name:     "container",
 		filename: "container.tar",
 		mimeType: "application/x-tar",
@@ -320,7 +320,7 @@ var (
 		exports:          []string{"container"},
 	}
 
-	minimalrawImgType = imageType{
+	minimalrawImgType = ImageType{
 		name:     "minimal-raw",
 		filename: "raw.img",
 		mimeType: "application/disk",
@@ -339,7 +339,7 @@ var (
 	}
 )
 
-type distribution struct {
+type Distro struct {
 	name               string
 	product            string
 	osVersion          string
@@ -348,7 +348,7 @@ type distribution struct {
 	ostreeRefTmpl      string
 	isolabelTmpl       string
 	runner             runner.Runner
-	arches             map[string]distro.Arch
+	arches             map[string]Arch
 	defaultImageConfig *distro.ImageConfig
 }
 
@@ -358,8 +358,8 @@ var defaultDistroImageConfig = &distro.ImageConfig{
 	Locale:   common.ToPtr("en_US"),
 }
 
-func getDistro(version int) distribution {
-	return distribution{
+func getDistro(version int) Distro {
+	return Distro{
 		name:               fmt.Sprintf("fedora-%d", version),
 		product:            "Fedora",
 		osVersion:          strconv.Itoa(version),
@@ -372,23 +372,23 @@ func getDistro(version int) distribution {
 	}
 }
 
-func (d *distribution) Name() string {
+func (d *Distro) Name() string {
 	return d.name
 }
 
-func (d *distribution) Releasever() string {
+func (d *Distro) Releasever() string {
 	return d.releaseVersion
 }
 
-func (d *distribution) ModulePlatformID() string {
+func (d *Distro) ModulePlatformID() string {
 	return d.modulePlatformID
 }
 
-func (d *distribution) OSTreeRef() string {
+func (d *Distro) OSTreeRef() string {
 	return d.ostreeRefTmpl
 }
 
-func (d *distribution) ListArches() []string {
+func (d *Distro) ListArches() []string {
 	archNames := make([]string, 0, len(d.arches))
 	for name := range d.arches {
 		archNames = append(archNames, name)
@@ -397,43 +397,43 @@ func (d *distribution) ListArches() []string {
 	return archNames
 }
 
-func (d *distribution) GetArch(name string) (distro.Arch, error) {
+func (d *Distro) GetArch(name string) (Arch, error) {
 	arch, exists := d.arches[name]
 	if !exists {
-		return nil, errors.New("invalid architecture: " + name)
+		return Arch{}, errors.New("invalid architecture: " + name)
 	}
 	return arch, nil
 }
 
-func (d *distribution) addArches(arches ...architecture) {
+func (d *Distro) addArches(arches ...Arch) {
 	if d.arches == nil {
-		d.arches = map[string]distro.Arch{}
+		d.arches = map[string]Arch{}
 	}
 
 	// Do not make copies of architectures, as opposed to image types,
 	// because architecture definitions are not used by more than a single
 	// distro definition.
 	for idx := range arches {
-		d.arches[arches[idx].name] = &arches[idx]
+		d.arches[arches[idx].name] = arches[idx]
 	}
 }
 
-func (d *distribution) getDefaultImageConfig() *distro.ImageConfig {
+func (d *Distro) getDefaultImageConfig() *distro.ImageConfig {
 	return d.defaultImageConfig
 }
 
-type architecture struct {
-	distro           *distribution
+type Arch struct {
+	distro           *Distro
 	name             string
-	imageTypes       map[string]distro.ImageType
+	imageTypes       map[string]ImageType
 	imageTypeAliases map[string]string
 }
 
-func (a *architecture) Name() string {
+func (a *Arch) Name() string {
 	return a.name
 }
 
-func (a *architecture) ListImageTypes() []string {
+func (a *Arch) ListImageTypes() []string {
 	itNames := make([]string, 0, len(a.imageTypes))
 	for name := range a.imageTypes {
 		itNames = append(itNames, name)
@@ -442,7 +442,7 @@ func (a *architecture) ListImageTypes() []string {
 	return itNames
 }
 
-func (a *architecture) GetImageType(name string) (distro.ImageType, error) {
+func (a *Arch) GetImageType(name string) (*ImageType, error) {
 	t, exists := a.imageTypes[name]
 	if !exists {
 		aliasForName, exists := a.imageTypeAliases[name]
@@ -454,18 +454,18 @@ func (a *architecture) GetImageType(name string) (distro.ImageType, error) {
 			panic(fmt.Sprintf("image type '%s' is an alias to a non-existing image type '%s'", name, aliasForName))
 		}
 	}
-	return t, nil
+	return &t, nil
 }
 
-func (a *architecture) addImageTypes(platform platform.Platform, imageTypes ...imageType) {
+func (a *Arch) addImageTypes(platform platform.Platform, imageTypes ...ImageType) {
 	if a.imageTypes == nil {
-		a.imageTypes = map[string]distro.ImageType{}
+		a.imageTypes = map[string]ImageType{}
 	}
 	for idx := range imageTypes {
 		it := imageTypes[idx]
 		it.arch = a
 		it.platform = platform
-		a.imageTypes[it.name] = &it
+		a.imageTypes[it.name] = it
 		for _, alias := range it.nameAliases {
 			if a.imageTypeAliases == nil {
 				a.imageTypeAliases = map[string]string{}
@@ -478,16 +478,16 @@ func (a *architecture) addImageTypes(platform platform.Platform, imageTypes ...i
 	}
 }
 
-func (a *architecture) Distro() distro.Distro {
+func (a *Arch) Distro() *Distro {
 	return a.distro
 }
 
-type imageFunc func(workload workload.Workload, t *imageType, customizations *blueprint.Customizations, options distro.ImageOptions, packageSets map[string]rpmmd.PackageSet, containers []container.Spec, rng *rand.Rand) (image.ImageKind, error)
+type imageFunc func(workload workload.Workload, t *ImageType, customizations *blueprint.Customizations, options distro.ImageOptions, packageSets map[string]rpmmd.PackageSet, containers []container.Spec, rng *rand.Rand) (image.ImageKind, error)
 
-type packageSetFunc func(t *imageType) rpmmd.PackageSet
+type packageSetFunc func(t *ImageType) rpmmd.PackageSet
 
-type imageType struct {
-	arch               *architecture
+type ImageType struct {
+	arch               *Arch
 	platform           platform.Platform
 	environment        environment.Environment
 	name               string
@@ -513,23 +513,23 @@ type imageType struct {
 	basePartitionTables distro.BasePartitionTableMap
 }
 
-func (t *imageType) Name() string {
+func (t *ImageType) Name() string {
 	return t.name
 }
 
-func (t *imageType) Arch() distro.Arch {
+func (t *ImageType) Arch() *Arch {
 	return t.arch
 }
 
-func (t *imageType) Filename() string {
+func (t *ImageType) Filename() string {
 	return t.filename
 }
 
-func (t *imageType) MIMEType() string {
+func (t *ImageType) MIMEType() string {
 	return t.mimeType
 }
 
-func (t *imageType) OSTreeRef() string {
+func (t *ImageType) OSTreeRef() string {
 	d := t.arch.distro
 	if t.rpmOstree {
 		return fmt.Sprintf(d.ostreeRefTmpl, t.arch.Name())
@@ -537,7 +537,7 @@ func (t *imageType) OSTreeRef() string {
 	return ""
 }
 
-func (t *imageType) Size(size uint64) uint64 {
+func (t *ImageType) Size(size uint64) uint64 {
 	// Microsoft Azure requires vhd images to be rounded up to the nearest MB
 	if t.name == "vhd" && size%common.MebiByte != 0 {
 		size = (size/common.MebiByte + 1) * common.MebiByte
@@ -548,7 +548,7 @@ func (t *imageType) Size(size uint64) uint64 {
 	return size
 }
 
-func (t *imageType) PackageSets(bp blueprint.Blueprint, options distro.ImageOptions, repos []rpmmd.RepoConfig) map[string][]rpmmd.PackageSet {
+func (t *ImageType) PackageSets(bp blueprint.Blueprint, options distro.ImageOptions, repos []rpmmd.RepoConfig) map[string][]rpmmd.PackageSet {
 	// merge package sets that appear in the image type with the package sets
 	// of the same name from the distro and arch
 	packageSets := make(map[string]rpmmd.PackageSet)
@@ -620,30 +620,30 @@ func (t *imageType) PackageSets(bp blueprint.Blueprint, options distro.ImageOpti
 	return manifest.GetPackageSetChains()
 }
 
-func (t *imageType) BuildPipelines() []string {
+func (t *ImageType) BuildPipelines() []string {
 	return t.buildPipelines
 }
 
-func (t *imageType) PayloadPipelines() []string {
+func (t *ImageType) PayloadPipelines() []string {
 	return t.payloadPipelines
 }
 
-func (t *imageType) PayloadPackageSets() []string {
+func (t *ImageType) PayloadPackageSets() []string {
 	return []string{blueprintPkgsKey}
 }
 
-func (t *imageType) PackageSetsChains() map[string][]string {
+func (t *ImageType) PackageSetsChains() map[string][]string {
 	return make(map[string][]string)
 }
 
-func (t *imageType) Exports() []string {
+func (t *ImageType) Exports() []string {
 	if len(t.exports) > 0 {
 		return t.exports
 	}
 	return []string{"assembler"}
 }
 
-func (t *imageType) getPartitionTable(
+func (t *ImageType) getPartitionTable(
 	mountpoints []blueprint.FilesystemCustomization,
 	options distro.ImageOptions,
 	rng *rand.Rand,
@@ -660,7 +660,7 @@ func (t *imageType) getPartitionTable(
 	return disk.NewPartitionTable(&basePartitionTable, mountpoints, imageSize, lvmify, rng)
 }
 
-func (t *imageType) getDefaultImageConfig() *distro.ImageConfig {
+func (t *ImageType) getDefaultImageConfig() *distro.ImageConfig {
 	// ensure that image always returns non-nil default config
 	imageConfig := t.defaultImageConfig
 	if imageConfig == nil {
@@ -670,7 +670,7 @@ func (t *imageType) getDefaultImageConfig() *distro.ImageConfig {
 
 }
 
-func (t *imageType) PartitionType() string {
+func (t *ImageType) PartitionType() string {
 	basePartitionTable, exists := t.basePartitionTables[t.arch.Name()]
 	if !exists {
 		return ""
@@ -679,7 +679,7 @@ func (t *imageType) PartitionType() string {
 	return basePartitionTable.Type
 }
 
-func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
+func (t *ImageType) initializeManifest(bp *blueprint.Blueprint,
 	options distro.ImageOptions,
 	repos []rpmmd.RepoConfig,
 	packageSets map[string]rpmmd.PackageSet,
@@ -720,7 +720,7 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 	return &manifest, err
 }
 
-func (t *imageType) Manifest(customizations *blueprint.Customizations,
+func (t *ImageType) Manifest(customizations *blueprint.Customizations,
 	options distro.ImageOptions,
 	repos []rpmmd.RepoConfig,
 	packageSets map[string][]rpmmd.PackageSpec,
@@ -736,14 +736,14 @@ func (t *imageType) Manifest(customizations *blueprint.Customizations,
 
 	manifest, err := t.initializeManifest(bp, options, repos, nil, containers, seed)
 	if err != nil {
-		return distro.Manifest{}, err
+		return nil, err
 	}
 
 	return manifest.Serialize(packageSets)
 }
 
 // checkOptions checks the validity and compatibility of options and customizations for the image type.
-func (t *imageType) checkOptions(customizations *blueprint.Customizations, options distro.ImageOptions, containers []container.Spec) error {
+func (t *ImageType) checkOptions(customizations *blueprint.Customizations, options distro.ImageOptions, containers []container.Spec) error {
 
 	// we do not support embedding containers on ostree-derived images, only on commits themselves
 	if len(containers) > 0 && t.rpmOstree && (t.name != "iot-commit" && t.name != "iot-container") {
@@ -803,31 +803,24 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 }
 
 // New creates a new distro object, defining the supported architectures and image types
-func NewF36() distro.Distro {
-	return newDistro(36)
-}
-func NewF37() distro.Distro {
+func New() *Distro {
 	return newDistro(37)
 }
-func NewF38() distro.Distro {
-	return newDistro(38)
-}
-
-func newDistro(version int) distro.Distro {
+func newDistro(version int) *Distro {
 	rd := getDistro(version)
 
 	// Architecture definitions
-	x86_64 := architecture{
+	x86_64 := Arch{
 		name:   distro.X86_64ArchName,
 		distro: &rd,
 	}
 
-	aarch64 := architecture{
+	aarch64 := Arch{
 		name:   distro.Aarch64ArchName,
 		distro: &rd,
 	}
 
-	s390x := architecture{
+	s390x := Arch{
 		distro: &rd,
 		name:   distro.S390xArchName,
 	}
