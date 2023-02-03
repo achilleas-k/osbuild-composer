@@ -260,7 +260,11 @@ func (p *OS) serializeStart(packages []rpmmd.PackageSpec) {
 	}
 	p.packageSpecs = packages
 	if p.KernelName != "" {
-		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.KernelName)
+		kv, err := rpmmd.GetVerStrFromPackageSpecList(p.packageSpecs, p.KernelName)
+		if err != nil {
+			kv = "0.0.0"
+		}
+		p.kernelVer = kv
 	}
 }
 

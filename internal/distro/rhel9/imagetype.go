@@ -236,7 +236,18 @@ func (t *imageType) Manifest(customizations *blueprint.Customizations,
 	}
 	bp.Customizations = customizations
 
-	manifest, err := t.initializeManifest(bp, options, repos, nil, containers, seed)
+	pp := make(map[string]rpmmd.PackageSet)
+	for name, sets := range packageSets {
+		pkgs := make([]string, 0)
+		for idx := range sets {
+			pkgs = append(pkgs, sets[idx].Name)
+		}
+		pp[name] = rpmmd.PackageSet{
+			Include: pkgs,
+		}
+	}
+
+	manifest, err := t.initializeManifest(bp, options, repos, pp, containers, seed)
 	if err != nil {
 		return distro.Manifest{}, err
 	}
