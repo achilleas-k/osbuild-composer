@@ -482,7 +482,7 @@ func (a *Arch) Distro() *Distro {
 	return a.distro
 }
 
-type imageFunc func(workload workload.Workload, t *ImageType, customizations *blueprint.Customizations, options distro.ImageOptions, packageSets map[string]rpmmd.PackageSet, containers []container.Spec, rng *rand.Rand) (image.ImageKind, error)
+type imageFunc func(workload workload.Workload, t *ImageType, customizations *blueprint.Customizations, options distro.ImageOptions, packageSets map[string]rpmmd.PackageSet, containers []blueprint.Container, rng *rand.Rand) (image.ImageKind, error)
 
 type packageSetFunc func(t *ImageType) rpmmd.PackageSet
 
@@ -679,19 +679,17 @@ func (t *ImageType) PartitionType() string {
 	return basePartitionTable.Type
 }
 
-func (t *ImageType) initializeManifest(bp *blueprint.Blueprint,
-	options distro.ImageOptions,
-	repos []rpmmd.RepoConfig,
-	packageSets map[string]rpmmd.PackageSet,
-	containers []container.Spec,
-	seed int64) (*manifest.Manifest, error) {
+func (t *ImageType) Manifest(bp blueprint.Blueprint, options distro.ImageOptions, repos []rpmmd.RepoConfig, seed int64) (distro.Manifest, error) {
 
-	if err := t.checkOptions(bp.Customizations, options, containers); err != nil {
-		return nil, err
+	packageSets := make(map[string]rpmmd.PackageSet)
+
+	for name, getter := range t.packageSets {
+		packageSets[name] = getter(t)
 	}
-
 	// TODO: let image types specify valid workloads, rather than
 	// always assume Custom.
+
+	// TODO: move workload configuration into a function that takes a blueprint
 	w := &workload.Custom{
 		BaseWorkload: workload.BaseWorkload{
 			Repos: packageSets[blueprintPkgsKey].Repositories,
@@ -702,6 +700,8 @@ func (t *ImageType) initializeManifest(bp *blueprint.Blueprint,
 		w.Services = services.Enabled
 		w.DisabledServices = services.Disabled
 	}
+
+	containers := bp.Containers
 
 	source := rand.NewSource(seed)
 	// math/rand is good enough in this case
@@ -717,28 +717,6 @@ func (t *ImageType) initializeManifest(bp *blueprint.Blueprint,
 	if err != nil {
 		return nil, err
 	}
-	return &manifest, err
-}
-
-func (t *ImageType) Manifest(customizations *blueprint.Customizations,
-	options distro.ImageOptions,
-	repos []rpmmd.RepoConfig,
-	packageSets map[string][]rpmmd.PackageSpec,
-	containers []container.Spec,
-	seed int64) (distro.Manifest, error) {
-
-	bp := &blueprint.Blueprint{Name: "empty blueprint"}
-	err := bp.Initialize()
-	if err != nil {
-		panic("could not initialize empty blueprint: " + err.Error())
-	}
-	bp.Customizations = customizations
-
-	manifest, err := t.initializeManifest(bp, options, repos, nil, containers, seed)
-	if err != nil {
-		return nil, err
-	}
-
 	return manifest.Serialize(packageSets)
 }
 
