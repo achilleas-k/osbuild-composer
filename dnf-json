@@ -13,47 +13,28 @@ import sys
 import tempfile
 from datetime import datetime
 
-import dnf
-import hawkey
+import libdnf5 as dnf
 
 
 class Solver():
 
     # pylint: disable=too-many-arguments
     def __init__(self, repos, module_platform_id, persistdir, cachedir, arch):
-        self.base = dnf.Base()
-
-        # Enable fastestmirror to ensure we choose the fastest mirrors for
-        # downloading metadata (when depsolving) and downloading packages.
-        self.base.conf.fastestmirror = True
-
-        # We use the same cachedir for multiple architectures. Unfortunately,
-        # this is something that doesn't work well in certain situations
-        # with zchunk:
-        # Imagine that we already have cache for arch1. Then, we use dnf-json
-        # to depsolve for arch2. If ZChunk is enabled and available (that's
-        # the case for Fedora), dnf will try to download only differences
-        # between arch1 and arch2 metadata. But, as these are completely
-        # different, dnf must basically redownload everything.
-        # For downloding deltas, zchunk uses HTTP range requests. Unfortunately,
-        # if the mirror doesn't support multi range requests, then zchunk will
-        # download one small segment per a request. Because we need to update
-        # the whole metadata (10s of MB), this can be extremely slow in some cases.
-        # I think that we can come up with a better fix but let's just disable
-        # zchunk for now. As we are already downloading a lot of data when
-        # building images, I don't care if we download even more.
-        self.base.conf.zchunk = False
+        self.base = dnf.base.Base()
 
         # Set the rest of the dnf configuration.
-        self.base.conf.module_platform_id = module_platform_id
-        self.base.conf.config_file_path = "/dev/null"
-        self.base.conf.persistdir = persistdir
-        self.base.conf.cachedir = cachedir
-        self.base.conf.substitutions['arch'] = arch
-        self.base.conf.substitutions['basearch'] = dnf.rpm.basearch(arch)
+        # self.base.conf.module_platform_id = module_platform_id
+        # self.base.conf.config_file_path = "/dev/null"
+        # self.base.conf.persistdir = persistdir
+        # self.base.conf.cachedir = cachedir
+        # self.base.conf.substitutions['arch'] = arch
+        # self.base.conf.substitutions['basearch'] = dnf.rpm.basearch(arch)
+
+        repo_sack = self.base.get_repo_sack()
 
         for repo in repos:
             self.base.repos.add(self._dnfrepo(repo, self.base.conf))
+
         self.base.fill_sack(load_system_repo=False)
 
     # pylint: disable=too-many-branches
@@ -263,57 +244,46 @@ def setup_cachedir(request):
     return cache_dir, None
 
 
+def make_base(repos):
+    print(dnf.__file__)
+    base = dnf.base.Base()
+    base.load_config_from_file()
+    base_config = base.get_config()
+    base_config.installroot().set("/tmp/p")
+    base.setup()
+
+    repo_sack = base.get_repo_sack()
+    for repo in repos:
+        print(f"Repo {repo['name']}")
+        r = repo_sack.create_repo(repo["name"])
+        cfg = r.get_config()
+        cfg.baseurl().set(repo["baseurl"])
+        repo_sack.update_and_load_enabled_repos(False)
+
+    return base
+
+
 def solve(request, cache_dir):
     command = request["command"]
-    arch = request["arch"]
-    module_platform_id = request["module_platform_id"]
+    # arch = request["arch"]
+    # module_platform_id = request["module_platform_id"]
     arguments = request["arguments"]
 
-    transactions = arguments.get("transactions")
-    with tempfile.TemporaryDirectory() as persistdir:
-        try:
-            solver = Solver(
-                arguments["repos"],
-                module_platform_id,
-                persistdir,
-                cache_dir,
-                arch
-            )
-            if command == "dump":
-                result = solver.dump()
-            elif command == "depsolve":
-                result = solver.depsolve(transactions)
-            elif command == "search":
-                result = solver.search(arguments.get("search", {}))
+    # transactions = arguments.get("transactions")
+    try:
+        base = make_base(arguments["repos"])
+        goal = dnf.base.Goal(base)
+        transaction = arguments["transactions"][0]
+        for pkg in transaction.get("package-specs"):
+            goal.add_rpm_install(pkg)
+        transaction = goal.resolve()
+        print("Resolved transaction:")
+        for tspkg in transaction.get_transaction_packages():
+            print(tspkg.get_package().get_nevra(), ": ",
+                  dnf.base.transaction.transaction_item_action_to_string(tspkg.get_action()))
 
-        except dnf.exceptions.MarkingErrors as e:
-            printe("error install_specs")
-            return None, {
-                "kind": "MarkingErrors",
-                "reason": f"Error occurred when marking packages for installation: {e}"
-            }
-        except dnf.exceptions.DepsolveError as e:
-            printe("error depsolve")
-            # collect list of packages for error
-            pkgs = []
-            for t in transactions:
-                pkgs.extend(t["package-specs"])
-            return None, {
-                "kind": "DepsolveError",
-                "reason": f"There was a problem depsolving {', '.join(pkgs)}: {e}"
-            }
-        except dnf.exceptions.RepoError as e:
-            return None, {
-                "kind": "RepoError",
-                "reason": f"There was a problem reading a repository: {e}"
-            }
-        except dnf.exceptions.Error as e:
-            printe("error repository setup")
-            return None, {
-                "kind": type(e).__name__,
-                "reason": str(e)
-            }
-    return result, None
+    except Exception as e:
+        raise e
 
 
 def printe(*msg):
@@ -375,11 +345,7 @@ def main():
     cachedir, err = setup_cachedir(request)
     if err:
         fail(err)
-    result, err = solve(request, cachedir)
-    if err:
-        fail(err)
-    else:
-        respond(result)
+    solve(request, cachedir)
 
 
 if __name__ == "__main__":
