@@ -778,6 +778,35 @@
               "mountpoint": "/opt",
               "minsize": 1073741824
             }
+          ],
+          "directories": [
+            {
+              "path": "/etc/systemd/system/custom.service.d"
+            },
+            {
+              "path": "/etc/custom_dir",
+              "mode": "0700",
+              "user": 1020,
+              "group": 1050
+            }
+          ],
+          "files": [
+            {
+              "path": "/etc/systemd/system/custom.service.d/override.conf",
+              "data": "[Service]\nExecStart=/usr/bin/true\n"
+            },
+            {
+              "path": "/etc/custom_file.txt",
+              "data": "image builder is the best",
+              "mode": "0644",
+              "user": "user2",
+              "group": "group2"
+            },
+            {
+              "path": "/etc/empty_file.txt",
+              "user": 0,
+              "group": 0
+            }
           ]
         }
       }
@@ -864,6 +893,35 @@
                 "mountpoint": "/opt",
                 "minsize": 1073741824
               }
+            ],
+            "directories": [
+              {
+                "path": "/etc/systemd/system/custom.service.d"
+              },
+              {
+                "path": "/etc/custom_dir",
+                "mode": "0700",
+                "user": 1020,
+                "group": 1050
+              }
+            ],
+            "files": [
+              {
+                "path": "/etc/systemd/system/custom.service.d/override.conf",
+                "data": "[Service]\nExecStart=/usr/bin/true\n"
+              },
+              {
+                "path": "/etc/custom_file.txt",
+                "data": "image builder is the best",
+                "mode": "0644",
+                "user": "user2",
+                "group": "group2"
+              },
+              {
+                "path": "/etc/empty_file.txt",
+                "user": 0,
+                "group": 0
+              }
             ]
           },
           "containers": [
@@ -948,7 +1006,36 @@
               "disabled": [
                 "bluetooth.service"
               ]
-            }
+            },
+            "directories": [
+              {
+                "path": "/etc/systemd/system/custom.service.d"
+              },
+              {
+                "path": "/etc/custom_dir",
+                "mode": "0700",
+                "user": 1020,
+                "group": 1050
+              }
+            ],
+            "files": [
+              {
+                "path": "/etc/systemd/system/custom.service.d/override.conf",
+                "data": "[Service]\nExecStart=/usr/bin/true\n"
+              },
+              {
+                "path": "/etc/custom_file.txt",
+                "data": "image builder is the best",
+                "mode": "0644",
+                "user": "user2",
+                "group": "group2"
+              },
+              {
+                "path": "/etc/empty_file.txt",
+                "user": 0,
+                "group": 0
+              }
+            ]
           }
         }
       },
@@ -1040,6 +1127,35 @@
               {
                 "mountpoint": "/",
                 "minsize": 2147483648
+              }
+            ],
+            "directories": [
+              {
+                "path": "/etc/systemd/system/custom.service.d"
+              },
+              {
+                "path": "/etc/custom_dir",
+                "mode": "0700",
+                "user": 1020,
+                "group": 1050
+              }
+            ],
+            "files": [
+              {
+                "path": "/etc/systemd/system/custom.service.d/override.conf",
+                "data": "[Service]\nExecStart=/usr/bin/true\n"
+              },
+              {
+                "path": "/etc/custom_file.txt",
+                "data": "image builder is the best",
+                "mode": "0644",
+                "user": "user2",
+                "group": "group2"
+              },
+              {
+                "path": "/etc/empty_file.txt",
+                "user": 0,
+                "group": 0
               }
             ]
           }
