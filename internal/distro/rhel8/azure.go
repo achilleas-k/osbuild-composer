@@ -93,6 +93,14 @@ func azureImgType() imageType {
 	}
 }
 
+func azureEAPImgType() imageType {
+	it := azureRhuiImgType()
+	it.name = "azure-eap"
+	it.nameAliases = nil // make sure we don't inherit aliases from the base image type
+	it.workload = eapWorkload()
+	return it
+}
+
 // PACKAGE SETS
 
 // Common Azure image package set

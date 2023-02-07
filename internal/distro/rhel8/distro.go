@@ -433,6 +433,9 @@ func newDistro(name string, minor int) *distribution {
 				edgeSimplifiedInstallerImgType(rd),
 			)
 
+			azureEap := azureEAPImgType()
+			x86_64.addImageTypes(azureX64Platform, azureEap)
+
 			aarch64.addImageTypes(
 				rawAarch64Platform,
 				edgeRawImgType(),
