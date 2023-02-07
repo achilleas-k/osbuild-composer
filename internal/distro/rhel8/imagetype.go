@@ -45,6 +45,7 @@ type imageType struct {
 	arch               *architecture
 	platform           platform.Platform
 	environment        environment.Environment
+	workload           workload.Workload
 	name               string
 	nameAliases        []string
 	filename           string
@@ -192,6 +193,7 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 
 	// TODO: let image types specify valid workloads, rather than
 	// always assume Custom.
+	// For now, if an image type specifies a workload, merge it with the custom one.
 	w := &workload.Custom{
 		BaseWorkload: workload.BaseWorkload{
 			Repos: packageSets[blueprintPkgsKey].Repositories,
@@ -201,6 +203,13 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 	if services := bp.Customizations.GetServices(); services != nil {
 		w.Services = services.Enabled
 		w.DisabledServices = services.Disabled
+	}
+
+	if t.workload != nil {
+		w.Packages = append(w.Packages, t.workload.GetPackages()...)
+		w.Repos = append(w.Repos, t.workload.GetRepos()...)
+		w.Services = append(w.Services, t.workload.GetServices()...)
+		w.DisabledServices = append(w.DisabledServices, t.workload.GetDisabledServices()...)
 	}
 
 	source := rand.NewSource(seed)
