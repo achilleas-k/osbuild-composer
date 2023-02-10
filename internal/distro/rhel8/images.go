@@ -466,6 +466,17 @@ func edgeSimplifiedInstallerImage(workload workload.Workload,
 	rawImg.Groups = users.GroupsFromBP(customizations.GetGroups())
 
 	rawImg.KernelOptionsAppend = []string{"modprobe.blacklist=vc4"}
+
+	var err error
+	rawImg.Directories, err = blueprint.DirectoryCustomizationsToFsNodeDirectories(customizations.GetDirectories())
+	if err != nil {
+		return nil, err
+	}
+	rawImg.Files, err = blueprint.FileCustomizationsToFsNodeFiles(customizations.GetFiles())
+	if err != nil {
+		return nil, err
+	}
+
 	rawImg.Keyboard = "us"
 	rawImg.Locale = "C.UTF-8"
 

@@ -434,6 +434,16 @@ func edgeSimplifiedInstallerImage(workload workload.Workload,
 	rawImg.Users = users.UsersFromBP(customizations.GetUsers())
 	rawImg.Groups = users.GroupsFromBP(customizations.GetGroups())
 
+	var err error
+	rawImg.Directories, err = blueprint.DirectoryCustomizationsToFsNodeDirectories(customizations.GetDirectories())
+	if err != nil {
+		return nil, err
+	}
+	rawImg.Files, err = blueprint.FileCustomizationsToFsNodeFiles(customizations.GetFiles())
+	if err != nil {
+		return nil, err
+	}
+
 	// "rw" kernel option is required when /sysroot is mounted read-only to
 	// keep stateful parts of the filesystem writeable (/var/ and /etc)
 	rawImg.KernelOptionsAppend = []string{"modprobe.blacklist=vc4"}
