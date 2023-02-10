@@ -50,6 +50,11 @@
             "gid": 1050
           }
         ],
+        "services": {
+          "enabled": [
+            "custom.service"
+          ]
+        },
         "directories": [
           {
             "path": "/etc/systemd/system/custom.service.d"
@@ -1391,6 +1396,27 @@
                   "group": 0
                 }
               }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.systemd",
+            "options": {
+              "enabled_services": [
+                "custom.service"
+              ]
             },
             "mounts": [
               {
