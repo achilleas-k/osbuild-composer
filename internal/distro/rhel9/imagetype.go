@@ -332,7 +332,7 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 		}
 
 		if t.name == "edge-simplified-installer" {
-			allowed := []string{"InstallationDevice", "FDO", "Ignition", "Kernel", "Directories", "Files"}
+			allowed := []string{"InstallationDevice", "FDO", "Ignition", "Kernel", "Directories", "Files", "Services"}
 			if err := customizations.CheckAllowed(allowed...); err != nil {
 				return fmt.Errorf("unsupported blueprint customizations found for boot ISO image type %q: (allowed: %s)", t.name, strings.Join(allowed, ", "))
 			}
