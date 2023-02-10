@@ -414,12 +414,16 @@ func TestDistro_ManifestError(t *testing.T) {
 			}
 			testPackageSpecSets := distro_test_common.GetTestingImagePackageSpecSets("kernel", imgType)
 			_, err := imgType.Manifest(bp.Customizations, imgOpts, nil, testPackageSpecSets, nil, 0)
-			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" {
+			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" {
 				assert.EqualError(t, err, "kernel boot parameter customizations are not supported for ostree types")
 			} else if imgTypeName == "iot-installer" {
 				assert.EqualError(t, err, fmt.Sprintf("boot ISO image type \"%s\" requires specifying a URL from which to retrieve the OSTree commit", imgTypeName))
 			} else if imgTypeName == "image-installer" {
 				assert.EqualError(t, err, fmt.Sprintf("unsupported blueprint customizations found for boot ISO image type \"%s\": (allowed: User, Group)", imgTypeName))
+			} else if imgTypeName == "iot-raw-image" {
+				assert.EqualError(t, err, fmt.Sprintf(
+					"unsupported blueprint customizations found for ostree image type %q: (allowed: User, Group, Directories, Files, Services, Filesystem)",
+					imgTypeName))
 			} else {
 				assert.NoError(t, err)
 			}

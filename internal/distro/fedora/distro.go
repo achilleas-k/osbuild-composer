@@ -758,6 +758,14 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 		}
 	}
 
+	if t.name == "iot-raw-image" {
+		allowed := []string{"User", "Group", "Directories", "Files", "Services", "Filesystem"}
+		if err := customizations.CheckAllowed(allowed...); err != nil {
+			return fmt.Errorf("unsupported blueprint customizations found for ostree image type %q: (allowed: %s)", t.name, strings.Join(allowed, ", "))
+		}
+		// TODO: consider additional checks, such as those in "edge-simplified-installer" in RHEL distros
+	}
+
 	// BootISO's have limited support for customizations.
 	// TODO: Support kernel name selection for image-installer
 	if t.bootISO {
