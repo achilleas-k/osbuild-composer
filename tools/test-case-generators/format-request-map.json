@@ -487,7 +487,12 @@
               "user": 0,
               "group": 0
             }
-          ]
+          ],
+          "services": {
+            "enabled": [
+              "custom.service"
+            ]
+          }
         }
       }
     },
