@@ -374,6 +374,12 @@ func (t *imageType) checkOptions(customizations *blueprint.Customizations, optio
 			if err := customizations.CheckAllowed(allowed...); err != nil {
 				return fmt.Errorf("unsupported blueprint customizations found for boot ISO image type %q: (allowed: %s)", t.name, strings.Join(allowed, ", "))
 			}
+		} else if t.name == "edge-raw-image" {
+			allowed := []string{"User", "Group", "Ignition", "Kernel", "Directories", "Files", "Services", "Filesystem"}
+			if err := customizations.CheckAllowed(allowed...); err != nil {
+				return fmt.Errorf("unsupported blueprint customizations found for edge-raw-image type %q: (allowed: %s)", t.name, strings.Join(allowed, ", "))
+			}
+			// TODO: consider additional checks, such as those in "edge-simplified-installer"
 		}
 	}
 
