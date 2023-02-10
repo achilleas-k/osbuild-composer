@@ -410,6 +410,17 @@ func edgeRawImage(workload workload.Workload,
 	img.Groups = users.GroupsFromBP(customizations.GetGroups())
 
 	img.KernelOptionsAppend = []string{"modprobe.blacklist=vc4"}
+
+	var err error
+	img.Directories, err = blueprint.DirectoryCustomizationsToFsNodeDirectories(customizations.GetDirectories())
+	if err != nil {
+		return nil, err
+	}
+	img.Files, err = blueprint.FileCustomizationsToFsNodeFiles(customizations.GetFiles())
+	if err != nil {
+		return nil, err
+	}
+
 	// TODO: move to image config
 	img.Keyboard = "us"
 	img.Locale = "C.UTF-8"
