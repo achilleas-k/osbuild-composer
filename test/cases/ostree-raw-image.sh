@@ -502,6 +502,34 @@ groups = ["wheel"]
 EOF
 fi
 
+# Add directory and files customization, and services customization for testing
+tee -a "$BLUEPRINT_FILE" > /dev/null << EOF
+[[customizations.directories]]
+path = "/etc/custom_dir/dir1"
+user = 1020
+group = 1020
+mode = "0770"
+ensure_parents = true
+
+[[customizations.files]]
+path = "/etc/systemd/system/custom.service"
+data = "[Unit]\nDescription=Custom service\n[Service]\nType=oneshot\nRemainAfterExit=yes\nExecStart=/usr/bin/false\n[Install]\nWantedBy=multi-user.target\n"
+
+[[customizations.files]]
+path = "/etc/custom_file.txt"
+data = "image builder is the best\n"
+
+[[customizations.directories]]
+path = "/etc/systemd/system/custom.service.d"
+
+[[customizations.files]]
+path = "/etc/systemd/system/custom.service.d/override.conf"
+data = "[Service]\nExecStart=/usr/bin/cat /etc/custom_file.txt\n"
+
+[customizations.services]
+enabled = ["custom.service"]
+EOF
+
 greenprint "📄 raw image blueprint"
 cat "$BLUEPRINT_FILE"
 
@@ -601,6 +629,7 @@ EOF
         -e ignition="${HAS_IGNITION}" \
         -e edge_type=edge-raw-image \
         -e ostree_commit="${INSTALL_HASH}" \
+        -e test_custom_dirs_files="true" \
         /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
     check_result
 
@@ -628,6 +657,7 @@ EOF
             -e ignition="${HAS_IGNITION}" \
             -e edge_type=edge-raw-image \
             -e ostree_commit="${INSTALL_HASH}" \
+            -e test_custom_dirs_files="true" \
             /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
         check_result
     fi
@@ -711,6 +741,7 @@ sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
     -e ignition="${HAS_IGNITION}" \
     -e edge_type=edge-raw-image \
     -e ostree_commit="${INSTALL_HASH}" \
+    -e test_custom_dirs_files="true" \
     /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
 check_result
 
@@ -740,6 +771,7 @@ EOF
         -e ignition="${HAS_IGNITION}" \
         -e edge_type=edge-raw-image \
         -e ostree_commit="${INSTALL_HASH}" \
+        -e test_custom_dirs_files="true" \
         /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
     check_result
 fi
@@ -899,6 +931,7 @@ sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
     -e image_type="${OSTREE_OSNAME}" \
     -e edge_type=edge-raw-image \
     -e ostree_commit="${UPGRADE_HASH}" \
+    -e test_custom_dirs_files="true" \
     /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
 check_result
 
@@ -925,6 +958,7 @@ EOF
         -e skip_rollback_test="true" \
         -e edge_type=edge-raw-image \
         -e ostree_commit="${UPGRADE_HASH}" \
+        -e test_custom_dirs_files="true" \
         /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
     check_result
 fi
