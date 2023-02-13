@@ -595,12 +595,19 @@ ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
     # Test IoT/Edge OS
-    sudo ansible-playbook -v -i "${TEMPDIR}"/inventory -e image_type="${OSTREE_OSNAME}" -e skip_rollback_test="true" -e ignition="${HAS_IGNITION}" -e edge_type=edge-raw-image -e ostree_commit="${INSTALL_HASH}" /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
+    sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
+        -e image_type="${OSTREE_OSNAME}" \
+        -e skip_rollback_test="true" \
+        -e ignition="${HAS_IGNITION}" \
+        -e edge_type=edge-raw-image \
+        -e ostree_commit="${INSTALL_HASH}" \
+        /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
     check_result
 
+    # Test the same playbook with the user created by Ignition
     if [[ ${IGNITION} -eq 0 ]]; then
-    # Add instance IP address into /etc/ansible/hosts
-      sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
+        # Add instance IP address into /etc/ansible/hosts
+        sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
 [ostree_guest]
 ${BIOS_GUEST_ADDRESS}
 
@@ -614,9 +621,15 @@ ansible_become_method=sudo
 ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
-      # Test IoT/Edge OS
-      sudo ansible-playbook -v -i "${TEMPDIR}"/inventory -e image_type="${OSTREE_OSNAME}" -e skip_rollback_test="true" -e ignition="${HAS_IGNITION}" -e edge_type=edge-raw-image -e ostree_commit="${INSTALL_HASH}" /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
-      check_result
+        # Test IoT/Edge OS
+        sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
+            -e image_type="${OSTREE_OSNAME}" \
+            -e skip_rollback_test="true" \
+            -e ignition="${HAS_IGNITION}" \
+            -e edge_type=edge-raw-image \
+            -e ostree_commit="${INSTALL_HASH}" \
+            /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
+        check_result
     fi
 
     # Clean up BIOS VM
@@ -692,14 +705,21 @@ ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
 # Test IoT/Edge OS
-sudo ansible-playbook -v -i "${TEMPDIR}"/inventory -e image_type="${OSTREE_OSNAME}" -e skip_rollback_test="true" -e ignition="${HAS_IGNITION}" -e edge_type=edge-raw-image -e ostree_commit="${INSTALL_HASH}" /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
+sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
+    -e image_type="${OSTREE_OSNAME}" \
+    -e skip_rollback_test="true" \
+    -e ignition="${HAS_IGNITION}" \
+    -e edge_type=edge-raw-image \
+    -e ostree_commit="${INSTALL_HASH}" \
+    /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
 check_result
 
 # test with ignition user
 
+# Test the same playbook with the user created by Ignition
 if [[ ${IGNITION} -eq 0 ]]; then
-  # Add instance IP address into /etc/ansible/hosts
-  sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
+    # Add instance IP address into /etc/ansible/hosts
+    sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
 [ostree_guest]
 ${UEFI_GUEST_ADDRESS}
 
@@ -713,9 +733,15 @@ ansible_become_method=sudo
 ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
-  # Test IoT/Edge OS
-  sudo ansible-playbook -v -i "${TEMPDIR}"/inventory -e image_type="${OSTREE_OSNAME}" -e skip_rollback_test="true" -e ignition="${HAS_IGNITION}" -e edge_type=edge-raw-image -e ostree_commit="${INSTALL_HASH}" /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
-  check_result
+    # Test IoT/Edge OS
+    sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
+        -e image_type="${OSTREE_OSNAME}" \
+        -e skip_rollback_test="true" \
+        -e ignition="${HAS_IGNITION}" \
+        -e edge_type=edge-raw-image \
+        -e ostree_commit="${INSTALL_HASH}" \
+        /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
+    check_result
 fi
 
 ##################################################################
@@ -853,27 +879,6 @@ done
 # Check ostree upgrade result
 check_result
 
-if [[ ${IGNITION} -eq 0 ]]; then
-  # Add instance IP address into /etc/ansible/hosts
-  sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
-  [ostree_guest]
-  ${UEFI_GUEST_ADDRESS}
-
-  [ostree_guest:vars]
-  ansible_python_interpreter=/usr/bin/python3
-  ansible_user=core
-  ansible_private_key_file=${SSH_KEY}
-  ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-  ansible_become=yes
-  ansible_become_method=sudo
-  ansible_become_pass=${EDGE_USER_PASSWORD}
-EOF
-
-  # Test IoT/Edge OS
-  sudo ansible-playbook -v -i "${TEMPDIR}"/inventory -e image_type="${OSTREE_OSNAME}" -e skip_rollback_test="true" -e edge_type=edge-raw-image -e ostree_commit="${UPGRADE_HASH}" /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
-  check_result
-fi
-
 # Add instance IP address into /etc/ansible/hosts
 sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
 [ostree_guest]
@@ -890,8 +895,39 @@ ansible_become_pass=${EDGE_USER_PASSWORD}
 EOF
 
 # Test IoT/Edge OS
-sudo ansible-playbook -v -i "${TEMPDIR}"/inventory -e image_type="${OSTREE_OSNAME}" -e edge_type=edge-raw-image -e ostree_commit="${UPGRADE_HASH}" /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
+sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
+    -e image_type="${OSTREE_OSNAME}" \
+    -e edge_type=edge-raw-image \
+    -e ostree_commit="${UPGRADE_HASH}" \
+    /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
 check_result
+
+# Test the same playbook with the user created by Ignition
+if [[ ${IGNITION} -eq 0 ]]; then
+    # Add instance IP address into /etc/ansible/hosts
+    sudo tee "${TEMPDIR}"/inventory > /dev/null << EOF
+[ostree_guest]
+${UEFI_GUEST_ADDRESS}
+
+[ostree_guest:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_user=core
+ansible_private_key_file=${SSH_KEY}
+ansible_ssh_common_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+ansible_become=yes
+ansible_become_method=sudo
+ansible_become_pass=${EDGE_USER_PASSWORD}
+EOF
+
+    # Test IoT/Edge OS
+    sudo ansible-playbook -v -i "${TEMPDIR}"/inventory \
+        -e image_type="${OSTREE_OSNAME}" \
+        -e skip_rollback_test="true" \
+        -e edge_type=edge-raw-image \
+        -e ostree_commit="${UPGRADE_HASH}" \
+        /usr/share/tests/osbuild-composer/ansible/check_ostree.yaml || RESULTS=0
+    check_result
+fi
 
 # Final success clean up
 clean_up
