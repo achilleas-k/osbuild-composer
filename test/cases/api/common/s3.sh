@@ -67,7 +67,7 @@ function createReqFileGuest() {
     "packages": [
       "postgresql",
       "dummy"
-    ]${SUBSCRIPTION_BLOCK},
+    ],
     "users":[
       {
         "name": "user1",
@@ -78,7 +78,7 @@ function createReqFileGuest() {
         "name": "user2",
         "key": "$(cat "${WORKDIR}/usertest.pub")"
       }
-    ]
+    ]${SUBSCRIPTION_BLOCK}${DIR_FILES_CUSTOMIZATION_BLOCK}
   },
   "image_request": {
     "architecture": "$ARCH",
@@ -107,7 +107,7 @@ function createReqFileVSphere() {
     "packages": [
       "postgresql",
       "dummy"
-    ]${SUBSCRIPTION_BLOCK}
+    ]${SUBSCRIPTION_BLOCK}${DIR_FILES_CUSTOMIZATION_BLOCK}
   },
   "image_request": {
     "architecture": "$ARCH",
