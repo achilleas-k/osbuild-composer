@@ -24,11 +24,49 @@
     },
     "blueprint": {
       "customizations": {
+        "services": {
+          "enabled": [
+            "custom.service"
+          ]
+        },
         "installation_device": "/dev/vda",
         "fdo": {
           "manufacturing_server_url": "https;//fdo.example.com",
           "diun_pub_key_insecure": "true"
-        }
+        },
+        "directories": [
+          {
+            "path": "/etc/systemd/system/custom.service.d"
+          },
+          {
+            "path": "/etc/custom_dir",
+            "user": 1020,
+            "group": 1050,
+            "mode": "0700"
+          }
+        ],
+        "files": [
+          {
+            "path": "/etc/systemd/system/custom.service",
+            "data": "[Unit]\nDescription=Custom service\n\n[Service]\nExecStart=/usr/bin/false\n\n[Install]\nWantedBy=multi-user.target\n"
+          },
+          {
+            "path": "/etc/systemd/system/custom.service.d/override.conf",
+            "data": "[Service]\nExecStart=/usr/bin/cat /etc/custom_file.txt\n"
+          },
+          {
+            "path": "/etc/custom_file.txt",
+            "user": "root",
+            "group": "root",
+            "mode": "0644",
+            "data": "image builder is the best"
+          },
+          {
+            "path": "/etc/empty_file.txt",
+            "user": 0,
+            "group": 0
+          }
+        ]
       }
     }
   },
@@ -1184,6 +1222,226 @@
                 ],
                 "timeout": 1
               }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.mkdir",
+            "options": {
+              "paths": [
+                {
+                  "path": "/etc/systemd/system/custom.service.d",
+                  "exist_ok": true
+                },
+                {
+                  "path": "/etc/custom_dir"
+                }
+              ]
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.chmod",
+            "options": {
+              "items": {
+                "/etc/custom_dir": {
+                  "mode": "0700"
+                }
+              }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.chown",
+            "options": {
+              "items": {
+                "/etc/custom_dir": {
+                  "user": 1020,
+                  "group": 1050
+                }
+              }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.copy",
+            "inputs": {
+              "file-246c90eeaabd45d57f9c52ba19ec83577e1ece72cfb262b674dcd444f8f33a8e": {
+                "type": "org.osbuild.files",
+                "origin": "org.osbuild.source",
+                "references": [
+                  {
+                    "id": "sha256:246c90eeaabd45d57f9c52ba19ec83577e1ece72cfb262b674dcd444f8f33a8e"
+                  }
+                ]
+              },
+              "file-5adccce48c4f2bfef0aee062fb3b2839b56182df17abac1e70269bc63ed3d8ae": {
+                "type": "org.osbuild.files",
+                "origin": "org.osbuild.source",
+                "references": [
+                  {
+                    "id": "sha256:5adccce48c4f2bfef0aee062fb3b2839b56182df17abac1e70269bc63ed3d8ae"
+                  }
+                ]
+              },
+              "file-a08a06016ca077755a7948a9631271011f1a1c3ecaa0e701e10ec0bec1923258": {
+                "type": "org.osbuild.files",
+                "origin": "org.osbuild.source",
+                "references": [
+                  {
+                    "id": "sha256:a08a06016ca077755a7948a9631271011f1a1c3ecaa0e701e10ec0bec1923258"
+                  }
+                ]
+              },
+              "file-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
+                "type": "org.osbuild.files",
+                "origin": "org.osbuild.source",
+                "references": [
+                  {
+                    "id": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                  }
+                ]
+              }
+            },
+            "options": {
+              "paths": [
+                {
+                  "from": "input://file-246c90eeaabd45d57f9c52ba19ec83577e1ece72cfb262b674dcd444f8f33a8e/sha256:246c90eeaabd45d57f9c52ba19ec83577e1ece72cfb262b674dcd444f8f33a8e",
+                  "to": "tree:///etc/systemd/system/custom.service"
+                },
+                {
+                  "from": "input://file-5adccce48c4f2bfef0aee062fb3b2839b56182df17abac1e70269bc63ed3d8ae/sha256:5adccce48c4f2bfef0aee062fb3b2839b56182df17abac1e70269bc63ed3d8ae",
+                  "to": "tree:///etc/systemd/system/custom.service.d/override.conf"
+                },
+                {
+                  "from": "input://file-a08a06016ca077755a7948a9631271011f1a1c3ecaa0e701e10ec0bec1923258/sha256:a08a06016ca077755a7948a9631271011f1a1c3ecaa0e701e10ec0bec1923258",
+                  "to": "tree:///etc/custom_file.txt"
+                },
+                {
+                  "from": "input://file-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "to": "tree:///etc/empty_file.txt"
+                }
+              ]
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.chmod",
+            "options": {
+              "items": {
+                "/etc/custom_file.txt": {
+                  "mode": "0644"
+                }
+              }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.chown",
+            "options": {
+              "items": {
+                "/etc/custom_file.txt": {
+                  "user": "root",
+                  "group": "root"
+                },
+                "/etc/empty_file.txt": {
+                  "user": 0,
+                  "group": 0
+                }
+              }
+            },
+            "mounts": [
+              {
+                "name": "ostree-test/edge",
+                "type": "org.osbuild.ostree.deployment",
+                "options": {
+                  "deployment": {
+                    "osname": "redhat",
+                    "ref": "test/edge",
+                    "serial": 0
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "org.osbuild.systemd",
+            "options": {
+              "enabled_services": [
+                "custom.service"
+              ]
             },
             "mounts": [
               {
@@ -4063,6 +4321,26 @@
           },
           "sha256:ff9efe2e9c5dbe41e7e338f7062bf7e3bd5b4225238e99664633191a7b5f2e1d": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/rhvpn/el8/el8-x86_64-baseos-n8.8-20221025/Packages/libibverbs-41.0-1.el8.x86_64.rpm"
+          }
+        }
+      },
+      "org.osbuild.inline": {
+        "items": {
+          "sha256:246c90eeaabd45d57f9c52ba19ec83577e1ece72cfb262b674dcd444f8f33a8e": {
+            "encoding": "base64",
+            "data": "W1VuaXRdCkRlc2NyaXB0aW9uPUN1c3RvbSBzZXJ2aWNlCgpbU2VydmljZV0KRXhlY1N0YXJ0PS91c3IvYmluL2ZhbHNlCgpbSW5zdGFsbF0KV2FudGVkQnk9bXVsdGktdXNlci50YXJnZXQK"
+          },
+          "sha256:5adccce48c4f2bfef0aee062fb3b2839b56182df17abac1e70269bc63ed3d8ae": {
+            "encoding": "base64",
+            "data": "W1NlcnZpY2VdCkV4ZWNTdGFydD0vdXNyL2Jpbi9jYXQgL2V0Yy9jdXN0b21fZmlsZS50eHQK"
+          },
+          "sha256:a08a06016ca077755a7948a9631271011f1a1c3ecaa0e701e10ec0bec1923258": {
+            "encoding": "base64",
+            "data": "aW1hZ2UgYnVpbGRlciBpcyB0aGUgYmVzdA=="
+          },
+          "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855": {
+            "encoding": "base64",
+            "data": ""
           }
         }
       },
