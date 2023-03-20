@@ -236,6 +236,7 @@ func TestDistro_KernelOption(t *testing.T, d distro.Distro) {
 		"edge-installer":            true,
 		"edge-simplified-installer": true,
 		"iot-raw-image":             true,
+		"iot-qcow2-image":           true,
 		"edge-raw-image":            true,
 
 		// the tar image type is a minimal image type which is not expected to

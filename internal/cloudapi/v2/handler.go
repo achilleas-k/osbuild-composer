@@ -763,6 +763,8 @@ func imageTypeFromApiImageType(it ImageTypes, arch distro.Arch) string {
 		return "iot-installer"
 	case ImageTypesIotRawImage:
 		return "iot-raw-image"
+	case ImageTypesIotQcow2Image:
+		return "iot-qcow2-image"
 	}
 	return ""
 }

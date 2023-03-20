@@ -290,6 +290,7 @@ func newDistro(name string, minor int) *distribution {
 	x86_64.addImageTypes(
 		&platform.X86{
 			BasePlatform: platform.BasePlatform{
+				ImageFormat: platform.FORMAT_RAW,
 				FirmwarePackages: []string{
 					"microcode_ctl", // ??
 					"iwl1000-firmware",

@@ -165,6 +165,22 @@ func TestFilenameFromType(t *testing.T) {
 			},
 		},
 		{
+			name: "iot-qcow2-image",
+			args: args{"iot-qcow2-image"},
+			want: wantResult{
+				filename: "image.qcow2",
+				mimeType: "application/x-qemu-disk",
+			},
+		},
+		{ // Alias
+			name: "fedora-iot-qcow2-image",
+			args: args{"fedora-iot-qcow2-image"},
+			want: wantResult{
+				filename: "image.qcow2",
+				mimeType: "application/x-qemu-disk",
+			},
+		},
+		{
 			name: "image-installer",
 			args: args{"image-installer"},
 			want: wantResult{
@@ -290,6 +306,7 @@ func TestImageType_Name(t *testing.T) {
 				"iot-installer",
 				"iot-simplified-installer",
 				"iot-raw-image",
+				"iot-qcow2-image",
 				"oci",
 				"image-installer",
 				"minimal-raw",
@@ -307,6 +324,7 @@ func TestImageType_Name(t *testing.T) {
 				"iot-installer",
 				"iot-simplified-installer",
 				"iot-raw-image",
+				"iot-qcow2-image",
 				"image-installer",
 				"minimal-raw",
 			},
@@ -387,6 +405,16 @@ func TestImageTypeAliases(t *testing.T) {
 				imageTypeName: "iot-simplified-installer",
 			},
 		},
+
+		{
+			name: "iot-qcow2-image aliases",
+			args: args{
+				imageTypeAliases: []string{"fedora-iot-qcow2-image"},
+			},
+			want: wantResult{
+				imageTypeName: "iot-qcow2-image",
+			},
+		},
 	}
 	for _, dist := range fedoraFamilyDistros {
 		t.Run(dist.name, func(t *testing.T) {
@@ -446,7 +474,7 @@ func TestDistro_ManifestError(t *testing.T) {
 			}
 			testPackageSpecSets := distro_test_common.GetTestingImagePackageSpecSets("kernel", imgType)
 			_, _, err := imgType.Manifest(bp.Customizations, imgOpts, nil, testPackageSpecSets, nil, 0)
-			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" {
+			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" || imgTypeName == "iot-qcow2-image" {
 				assert.EqualError(t, err, "kernel boot parameter customizations are not supported for ostree types")
 			} else if imgTypeName == "iot-installer" || imgTypeName == "iot-simplified-installer" {
 				assert.EqualError(t, err, fmt.Sprintf("boot ISO image type \"%s\" requires specifying a URL from which to retrieve the OSTree commit", imgTypeName))
@@ -477,6 +505,7 @@ func TestArchitecture_ListImageTypes(t *testing.T) {
 				"iot-container",
 				"iot-installer",
 				"iot-raw-image",
+				"iot-qcow2-image",
 				"iot-simplified-installer",
 				"oci",
 				"container",
@@ -494,6 +523,7 @@ func TestArchitecture_ListImageTypes(t *testing.T) {
 				"iot-container",
 				"iot-installer",
 				"iot-raw-image",
+				"iot-qcow2-image",
 				"iot-simplified-installer",
 				"oci",
 				"container",
@@ -590,7 +620,7 @@ func TestDistro_CustomFileSystemManifestError(t *testing.T) {
 		for _, imgTypeName := range arch.ListImageTypes() {
 			imgType, _ := arch.GetImageType(imgTypeName)
 			_, _, err := imgType.Manifest(bp.Customizations, distro.ImageOptions{}, nil, nil, nil, 0)
-			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" {
+			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" || imgTypeName == "iot-qcow2-image" {
 				assert.EqualError(t, err, "Custom mountpoints are not supported for ostree types")
 			} else if imgTypeName == "iot-installer" || imgTypeName == "iot-simplified-installer" || imgTypeName == "image-installer" {
 				continue
@@ -619,7 +649,7 @@ func TestDistro_TestRootMountPoint(t *testing.T) {
 			imgType, _ := arch.GetImageType(imgTypeName)
 			testPackageSpecSets := distro_test_common.GetTestingImagePackageSpecSets("kernel", imgType)
 			_, _, err := imgType.Manifest(bp.Customizations, distro.ImageOptions{}, nil, testPackageSpecSets, nil, 0)
-			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" {
+			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" || imgTypeName == "iot-qcow2-image" {
 				assert.EqualError(t, err, "Custom mountpoints are not supported for ostree types")
 			} else if imgTypeName == "iot-installer" || imgTypeName == "iot-simplified-installer" || imgTypeName == "image-installer" {
 				continue
@@ -755,7 +785,7 @@ func TestDistro_CustomFileSystemPatternMatching(t *testing.T) {
 		for _, imgTypeName := range arch.ListImageTypes() {
 			imgType, _ := arch.GetImageType(imgTypeName)
 			_, _, err := imgType.Manifest(bp.Customizations, distro.ImageOptions{}, nil, nil, nil, 0)
-			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" {
+			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" || imgTypeName == "iot-qcow2-image" {
 				assert.EqualError(t, err, "Custom mountpoints are not supported for ostree types")
 			} else if imgTypeName == "iot-installer" || imgTypeName == "iot-simplified-installer" || imgTypeName == "image-installer" {
 				continue
@@ -784,7 +814,7 @@ func TestDistro_CustomUsrPartitionNotLargeEnough(t *testing.T) {
 			imgType, _ := arch.GetImageType(imgTypeName)
 			testPackageSpecSets := distro_test_common.GetTestingImagePackageSpecSets("kernel", imgType)
 			_, _, err := imgType.Manifest(bp.Customizations, distro.ImageOptions{}, nil, testPackageSpecSets, nil, 0)
-			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" {
+			if imgTypeName == "iot-commit" || imgTypeName == "iot-container" || imgTypeName == "iot-raw-image" || imgTypeName == "iot-qcow2-image" {
 				assert.EqualError(t, err, "Custom mountpoints are not supported for ostree types")
 			} else if imgTypeName == "iot-installer" || imgTypeName == "iot-simplified-installer" || imgTypeName == "image-installer" {
 				continue

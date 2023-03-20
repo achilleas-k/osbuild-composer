@@ -86,6 +86,8 @@ const (
 
 	ImageTypesIotRawImage ImageTypes = "iot-raw-image"
 
+	ImageTypesIotQcow2Image ImageTypes = "iot-qcow2-image"
+
 	ImageTypesVsphere ImageTypes = "vsphere"
 )
 
