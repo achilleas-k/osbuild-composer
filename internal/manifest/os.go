@@ -30,22 +30,26 @@ type OSCustomizations struct {
 
 	// Packages to install in addition to the ones required by the
 	// pipeline.
+	// WORKLOAD or REMOVE: what would require adding arbitrary packages other than a workload (whether built-in or custom)?
 	ExtraBasePackages []string
 
 	// Packages to exclude from the base package set. This is useful in
 	// case of weak dependencies, comps groups, or where multiple packages
 	// can satisfy a dependency. Must not conflict with the included base
 	// package set.
+	// WORKLOAD or REMOVE: what would require excluding arbitrary packages other than a workload (whether built-in or custom)?
 	ExcludeBasePackages []string
 
 	// Additional repos to install the base packages from.
 	ExtraBaseRepos []rpmmd.RepoConfig
 
 	// Containers to embed in the image
+	// WORKLOAD: currently, only user-defined (custom) workloads include containers.
 	Containers []container.Spec
 
 	// KernelName indicates that a kernel is installed, and names the kernel
 	// package.
+	// WORKLOAD: this is modified by the user, usually to install the rt kernel
 	KernelName string
 
 	// KernelOptionsAppend are appended to the kernel commandline
@@ -63,9 +67,12 @@ type OSCustomizations struct {
 	//
 	// This should only be used for RHEL 8 and CentOS 8 images that use grub
 	// (non s390x).  Newer releases (9+) should keep this disabled.
+	// PLATFORM
 	KernelOptionsBootloader bool
 
-	GPGKeyFiles      []string
+	GPGKeyFiles []string
+
+	// WORKLOAD: built-in or custom
 	Language         string
 	Keyboard         *string
 	X11KeymapLayouts []string
@@ -77,48 +84,105 @@ type OSCustomizations struct {
 
 	// SELinux policy, when set it enables the labeling of the tree with the
 	// selected profile
+	// ENVIRONMENT
 	SElinux string
 
+	// Only used on RHEL 7
 	SELinuxForceRelabel *bool
 
 	// Do not install documentation
+	// WORKLOAD
 	ExcludeDocs bool
 
+	// WORKLOAD or ENVIRONMENT depending on purpose.  For example, the
+	// "ec2-user" for AWS should be defined by the environment.
 	Groups []users.Group
 	Users  []users.User
-	// TODO: drop osbuild types from the API
-	Firewall            *osbuild.FirewallStageOptions
-	Grub2Config         *osbuild.GRUB2Config
-	Sysconfig           []*osbuild.SysconfigStageOptions
-	SystemdLogind       []*osbuild.SystemdLogindStageOptions
-	CloudInit           []*osbuild.CloudInitStageOptions
-	Modprobe            []*osbuild.ModprobeStageOptions
-	DracutConf          []*osbuild.DracutConfStageOptions
-	SystemdUnit         []*osbuild.SystemdUnitStageOptions
-	Authselect          *osbuild.AuthselectStageOptions
-	SELinuxConfig       *osbuild.SELinuxConfigStageOptions
-	Tuned               *osbuild.TunedStageOptions
-	Tmpfilesd           []*osbuild.TmpfilesdStageOptions
-	PamLimitsConf       []*osbuild.PamLimitsConfStageOptions
-	Sysctld             []*osbuild.SysctldStageOptions
-	DNFConfig           []*osbuild.DNFConfigStageOptions
-	DNFAutomaticConfig  *osbuild.DNFAutomaticConfigStageOptions
-	YUMConfig           *osbuild.YumConfigStageOptions
-	YUMRepos            []*osbuild.YumReposStageOptions
-	SshdConfig          *osbuild.SshdConfigStageOptions
+
+	// WORKLOAD
+	Firewall *osbuild.FirewallStageOptions
+
+	// PLATFORM: bootloader configuration; hardware dependent
+	Grub2Config *osbuild.GRUB2Config
+
+	// PLATFORM: hardware (network) configs
+	Sysconfig []*osbuild.SysconfigStageOptions
+
+	// PLATFORM or ENVIRONMENT: used for AMIs to set NAutoVTs
+	SystemdLogind []*osbuild.SystemdLogindStageOptions
+
+	// ENVIRONMENT: depends on the deployment environment of the image
+	CloudInit []*osbuild.CloudInitStageOptions
+
+	// PLATFORM: hardware
+	Modprobe []*osbuild.ModprobeStageOptions
+
+	// PLATFORM: hardware
+	DracutConf []*osbuild.DracutConfStageOptions
+
+	// ENVIRONMENT
+	// Only supports overriding the environment of the nm-cloud-setup.service
+	// for automatically setting up network manager in cloud environments
+	SystemdUnit []*osbuild.SystemdUnitStageOptions
+
+	// ENVIRONMENT or WORKLOAD
+	// Select identity and authentication sources
+	Authselect    *osbuild.AuthselectStageOptions
+	SELinuxConfig *osbuild.SELinuxConfigStageOptions
+
+	// PLATFORM: hardware related
+	Tuned *osbuild.TunedStageOptions
+
+	// WORKLOAD
+	Tmpfilesd []*osbuild.TmpfilesdStageOptions
+
+	// WORKLOAD
+	PamLimitsConf []*osbuild.PamLimitsConfStageOptions
+	Sysctld       []*osbuild.SysctldStageOptions
+
+	// WORKLOAD: usually release ver, but could be other things
+	DNFConfig []*osbuild.DNFConfigStageOptions
+
+	// WORKLOAD
+	DNFAutomaticConfig *osbuild.DNFAutomaticConfigStageOptions
+
+	// Same as DNFConfig
+	YUMConfig *osbuild.YumConfigStageOptions
+	YUMRepos  []*osbuild.YumReposStageOptions
+
+	// WORKLOAD
+	SshdConfig *osbuild.SshdConfigStageOptions
+
+	// ENVIRONMENT: GCP stuff
 	GCPGuestAgentConfig *osbuild.GcpGuestAgentConfigOptions
-	AuthConfig          *osbuild.AuthconfigStageOptions
-	PwQuality           *osbuild.PwqualityConfStageOptions
-	OpenSCAPConfig      *osbuild.OscapRemediationStageOptions
-	NTPServers          []osbuild.ChronyConfigServer
-	WAAgentConfig       *osbuild.WAAgentConfStageOptions
-	UdevRules           *osbuild.UdevRulesStageOptions
-	LeapSecTZ           *string
-	FactAPIType         string
+
+	// WORKLOAD
+	AuthConfig *osbuild.AuthconfigStageOptions
+
+	// ENVIRONMENT: used in azure
+	PwQuality *osbuild.PwqualityConfStageOptions
+
+	// WORKLOAD
+	OpenSCAPConfig *osbuild.OscapRemediationStageOptions
+
+	// ENVIRONMENT (default for image type) and WORKLOAD (overrides)
+	NTPServers []osbuild.ChronyConfigServer
+
+	// ENVIRONMENT: Azure agent
+	WAAgentConfig *osbuild.WAAgentConfStageOptions
+
+	// PLATFORM: hardware thingies
+	UdevRules *osbuild.UdevRulesStageOptions
+
+	// ENVIRONMENT (default for image type) and WORKLOAD (overrides)
+	LeapSecTZ *string
+
+	FactAPIType string
 
 	Subscription *distro.SubscriptionImageOptions
 	RHSMConfig   map[distro.RHSMSubscriptionStatus]*osbuild.RHSMStageOptions
 
+	// VERY WORKLOAD
 	// Custom directories and files to create in the image
 	Directories []*fsnode.Directory
 	Files       []*fsnode.File
