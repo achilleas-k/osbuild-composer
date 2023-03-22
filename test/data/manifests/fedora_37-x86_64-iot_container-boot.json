@@ -2108,6 +2108,14 @@
                     }
                   },
                   {
+                    "id": "sha256:667a15745213f1c5f1f0bb10c70d3920913e210fed90549a81b6c42af5d39993",
+                    "options": {
+                      "metadata": {
+                        "rpm.check_gpg": true
+                      }
+                    }
+                  },
+                  {
                     "id": "sha256:1502c8529c0e0e9e57c9a1a1635fd28fdcfc1f63004b1d5aa667baa868ea41fd",
                     "options": {
                       "metadata": {
@@ -7702,6 +7710,9 @@
           "sha256:66305d7a3ca92165f1c17e14cc29ea70280fa1c1fd3bf223b5b1d4f7d1ce0dd8": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20221025/Packages/l/libsemanage-3.4-5.fc37.x86_64.rpm"
           },
+          "sha256:667a15745213f1c5f1f0bb10c70d3920913e210fed90549a81b6c42af5d39993": {
+            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20221025/Packages/b/biosdevname-0.7.3-10.fc37.x86_64.rpm"
+          },
           "sha256:66e967462b711f2b62856dcb115ce53e06d58268ad7e20aa31ef282ea42b0faa": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20221025/Packages/d/device-mapper-persistent-data-0.9.0-8.fc37.x86_64.rpm"
           },
@@ -12863,6 +12874,16 @@
         "arch": "noarch",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20221025/Packages/b/bash-completion-2.11-8.fc37.noarch.rpm",
         "checksum": "sha256:dc2ddc1c946a8f6b7f6d7261ab6662f953a48c160417d57591943602c1a14a70",
+        "check_gpg": true
+      },
+      {
+        "name": "biosdevname",
+        "epoch": 0,
+        "version": "0.7.3",
+        "release": "10.fc37",
+        "arch": "x86_64",
+        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f37/f37-x86_64-fedora-development-20221025/Packages/b/biosdevname-0.7.3-10.fc37.x86_64.rpm",
+        "checksum": "sha256:667a15745213f1c5f1f0bb10c70d3920913e210fed90549a81b6c42af5d39993",
         "check_gpg": true
       },
       {

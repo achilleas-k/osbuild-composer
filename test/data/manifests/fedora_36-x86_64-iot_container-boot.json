@@ -2012,6 +2012,14 @@
                     }
                   },
                   {
+                    "id": "sha256:24511c16d8cc4ae8d14c31f583346b58d4190f7da6de9d403aa02bccb84f4d0e",
+                    "options": {
+                      "metadata": {
+                        "rpm.check_gpg": true
+                      }
+                    }
+                  },
+                  {
                     "id": "sha256:4db9bb285f364b472000badad7fc7e29999f8edf0b62b6d1ef5d379435fd165f",
                     "options": {
                       "metadata": {
@@ -7278,6 +7286,9 @@
           },
           "sha256:241d1b49d117d229191f8f188bc9d767ce3a6be8bcb1e1bdb147d81825cf8cd7": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f36/f36-x86_64-fedora-20220617/Packages/m/memstrack-0.2.4-2.fc36.x86_64.rpm"
+          },
+          "sha256:24511c16d8cc4ae8d14c31f583346b58d4190f7da6de9d403aa02bccb84f4d0e": {
+            "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f36/f36-x86_64-fedora-20220617/Packages/b/biosdevname-0.7.3-9.fc36.x86_64.rpm"
           },
           "sha256:26a52a1f741452daf0aa9ae664782f185aafaa190698403553838ef28001e562": {
             "url": "https://rpmrepo.osbuild.org/v2/mirror/public/f36/f36-x86_64-fedora-20220617/Packages/d/diffutils-3.8-2.fc36.x86_64.rpm"
@@ -12598,6 +12609,16 @@
         "arch": "noarch",
         "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f36/f36-x86_64-fedora-20220617/Packages/b/bash-completion-2.11-6.fc36.noarch.rpm",
         "checksum": "sha256:29c7630d3036cffa99fb1c078c4dcd8ea1611b95cb1c6ebbc57571cd3cb71325",
+        "check_gpg": true
+      },
+      {
+        "name": "biosdevname",
+        "epoch": 0,
+        "version": "0.7.3",
+        "release": "9.fc36",
+        "arch": "x86_64",
+        "remote_location": "https://rpmrepo.osbuild.org/v2/mirror/public/f36/f36-x86_64-fedora-20220617/Packages/b/biosdevname-0.7.3-9.fc36.x86_64.rpm",
+        "checksum": "sha256:24511c16d8cc4ae8d14c31f583346b58d4190f7da6de9d403aa02bccb84f4d0e",
         "check_gpg": true
       },
       {

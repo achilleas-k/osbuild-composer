@@ -71,6 +71,7 @@ var (
 		"redboot-task-runner",
 		"parsec",
 		"dbus-parsec",
+		// these services are already part of 80-iot.preset, why redefine??
 	}
 
 	// Image Definitions
