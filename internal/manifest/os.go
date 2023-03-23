@@ -239,10 +239,6 @@ func NewOS(m *Manifest,
 func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 	packages := p.platform.GetPackages()
 
-	if p.KernelName != "" {
-		packages = append(packages, p.KernelName)
-	}
-
 	// If we have a logical volume we need to include the lvm2 package.
 	// OSTree-based images (commit and container) aren't bootable images and
 	// don't have partition tables.
@@ -252,30 +248,6 @@ func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 
 	if p.Environment != nil {
 		packages = append(packages, p.Environment.GetPackages()...)
-	}
-
-	if len(p.NTPServers) > 0 {
-		packages = append(packages, "chrony")
-	}
-
-	if p.SElinux != "" {
-		packages = append(packages, fmt.Sprintf("selinux-policy-%s", p.SElinux))
-	}
-
-	if p.OpenSCAPConfig != nil {
-		packages = append(packages, "openscap-scanner", "scap-security-guide")
-	}
-
-	// Make sure the right packages are included for subscriptions
-	// rhc always uses insights, and depends on subscription-manager
-	// non-rhc uses subscription-manager and optionally includes Insights
-	if p.Subscription != nil {
-		packages = append(packages, "subscription-manager")
-		if p.Subscription.Rhc {
-			packages = append(packages, "rhc", "insights-client")
-		} else if p.Subscription.Insights {
-			packages = append(packages, "insights-client")
-		}
 	}
 
 	chain := []rpmmd.PackageSet{

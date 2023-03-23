@@ -197,20 +197,15 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 		return nil, err
 	}
 
-	// TODO: let image types specify valid workloads, rather than
-	// always assume Custom.
-	w := &workload.Custom{
-		UserRepos: append(packageSets[osPkgsKey].Repositories,
-			packageSets[blueprintPkgsKey].Repositories...),
-		UserPackages: bp.GetPackagesEx(false),
+	customizations := bp.Customizations
+	bpPackages := bp.GetPackagesEx(false)
+	userPackageSets := rpmmd.PackageSet{
+		Include:      bpPackages,
+		Repositories: packageSets[blueprintPkgsKey].Repositories,
 	}
-	if services := bp.Customizations.GetServices(); services != nil {
-		w.Services = services.Enabled
-		w.DisabledServices = services.Disabled
-	}
-	w.OSPackages = packageSets[osPkgsKey].Include
-	w.OSExcludePackages = packageSets[osPkgsKey].Exclude
-	w.OSRepos = packageSets[osPkgsKey].Repositories
+
+	w := workload.NewCustomWorkload(customizations, packageSets[osPkgsKey], userPackageSets)
+	w.Subscription = options.Subscription
 
 	source := rand.NewSource(seed)
 	// math/rand is good enough in this case

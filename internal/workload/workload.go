@@ -1,6 +1,8 @@
 package workload
 
-import "github.com/osbuild/osbuild-composer/internal/rpmmd"
+import (
+	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+)
 
 type Workload interface {
 	GetPackages() []string
