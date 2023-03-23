@@ -51,6 +51,7 @@ type imageType struct {
 	arch               *architecture
 	platform           platform.Platform
 	environment        environment.Environment
+	workload           workload.Workload
 	name               string
 	nameAliases        []string
 	filename           string

@@ -280,18 +280,22 @@ func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 
 	chain := []rpmmd.PackageSet{
 		{
-			Include:      append(packages, p.ExtraBasePackages...),
-			Exclude:      p.ExcludeBasePackages,
-			Repositories: append(p.repos, p.ExtraBaseRepos...),
+			Include:      packages,
+			Repositories: p.repos,
 		},
 	}
 
 	if p.Workload != nil {
-		workloadPackages := p.Workload.GetPackages()
-		if len(workloadPackages) > 0 {
+		osPackages := p.Workload.GetOSPackages()
+		if len(osPackages) > 0 {
+			chain[0].Include = append(chain[0].Include, osPackages...)
+			chain[0].Repositories = append(chain[0].Repositories, p.repos...)
+		}
+		userPackages := p.Workload.GetUserPackages()
+		if len(userPackages) > 0 {
 			chain = append(chain, rpmmd.PackageSet{
-				Include:      workloadPackages,
-				Repositories: append(p.repos, p.Workload.GetRepos()...),
+				Include:      userPackages,
+				Repositories: p.Workload.GetUserRepos(),
 			})
 		}
 	}
