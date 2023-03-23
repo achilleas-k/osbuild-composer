@@ -9,6 +9,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/runner"
+	"github.com/osbuild/osbuild-composer/internal/workload"
 )
 
 type MyImage struct {
@@ -46,8 +47,10 @@ func (img *MyImage) InstantiateManifest(m *manifest.Manifest,
 
 	// create a minimal bootable OS tree
 	os := manifest.NewOS(m, build, platform, repos)
-	os.PartitionTable = pt   // we need a partition table
-	os.KernelName = "kernel" // use the default fedora kernel
+	os.PartitionTable = pt // we need a partition table
+	os.Workload = &workload.Custom{
+		KernelName: "kernel", // use the default fedora kernel
+	}
 
 	// create a raw image containing the OS tree created above
 	raw := manifest.NewRawImage(m, build, os)

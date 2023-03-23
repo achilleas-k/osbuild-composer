@@ -16,8 +16,13 @@ type Custom struct {
 	Services         []string
 	DisabledServices []string
 
-	KernelName     string
+	// KernelName indicates that a kernel is installed, and names the kernel
+	// package.
+	KernelName string
+
+	// TODO: replace type with internal (not osbuild)
 	NTPServers     []osbuild.ChronyConfigServer
+	LeapSecTZ      *string
 	OpenSCAPConfig *osbuild.OscapRemediationStageOptions
 	SElinux        string
 	Subscription   *distro.SubscriptionImageOptions
@@ -105,4 +110,20 @@ func (p Custom) GetOSPackages() []string {
 		}
 	}
 	return packages
+}
+
+func (p Custom) GetKernelName() string {
+	return p.KernelName
+}
+
+func (p Custom) GetNTPConfig() ([]osbuild.ChronyConfigServer, *string) {
+	return p.NTPServers, p.LeapSecTZ
+}
+
+func (p Custom) GetSubscription() *distro.SubscriptionImageOptions {
+	return p.Subscription
+}
+
+func (p Custom) GetOSCAPConfig() *osbuild.OscapRemediationStageOptions {
+	return p.OpenSCAPConfig
 }

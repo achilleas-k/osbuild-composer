@@ -1,6 +1,8 @@
 package workload
 
 import (
+	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
@@ -14,6 +16,13 @@ type Workload interface {
 	GetUserRepos() []rpmmd.RepoConfig
 	GetServices() []string
 	GetDisabledServices() []string
+
+	GetKernelName() string
+
+	// TODO: replace type with internal (not osbuild)
+	GetNTPConfig() ([]osbuild.ChronyConfigServer, *string)
+	GetSubscription() *distro.SubscriptionImageOptions
+	GetOSCAPConfig() *osbuild.OscapRemediationStageOptions
 }
 
 type BaseWorkload struct {
@@ -57,5 +66,21 @@ func (p BaseWorkload) GetOSRepos() []rpmmd.RepoConfig {
 }
 
 func (p BaseWorkload) GetUserRepos() []rpmmd.RepoConfig {
+	return nil
+}
+
+func (p BaseWorkload) GetKernelName() string {
+	return ""
+}
+
+func (p BaseWorkload) GetNTPConfig() ([]osbuild.ChronyConfigServer, *string) {
+	return nil, nil
+}
+
+func (p BaseWorkload) GetSubscription() *distro.SubscriptionImageOptions {
+	return nil
+}
+
+func (p BaseWorkload) GetOSCAPConfig() *osbuild.OscapRemediationStageOptions {
 	return nil
 }

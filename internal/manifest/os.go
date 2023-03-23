@@ -47,11 +47,6 @@ type OSCustomizations struct {
 	// WORKLOAD: currently, only user-defined (custom) workloads include containers.
 	Containers []container.Spec
 
-	// KernelName indicates that a kernel is installed, and names the kernel
-	// package.
-	// WORKLOAD: this is modified by the user, usually to install the rt kernel
-	KernelName string
-
 	// KernelOptionsAppend are appended to the kernel commandline
 	KernelOptionsAppend []string
 
@@ -162,12 +157,6 @@ type OSCustomizations struct {
 	// ENVIRONMENT: used in azure
 	PwQuality *osbuild.PwqualityConfStageOptions
 
-	// WORKLOAD
-	OpenSCAPConfig *osbuild.OscapRemediationStageOptions
-
-	// ENVIRONMENT (default for image type) and WORKLOAD (overrides)
-	NTPServers []osbuild.ChronyConfigServer
-
 	// ENVIRONMENT: Azure agent
 	WAAgentConfig *osbuild.WAAgentConfStageOptions
 
@@ -179,8 +168,7 @@ type OSCustomizations struct {
 
 	FactAPIType string
 
-	Subscription *distro.SubscriptionImageOptions
-	RHSMConfig   map[distro.RHSMSubscriptionStatus]*osbuild.RHSMStageOptions
+	RHSMConfig map[distro.RHSMSubscriptionStatus]*osbuild.RHSMStageOptions
 
 	// VERY WORKLOAD
 	// Custom directories and files to create in the image
@@ -325,8 +313,8 @@ func (p *OS) serializeStart(packages []rpmmd.PackageSpec) {
 		panic("double call to serializeStart()")
 	}
 	p.packageSpecs = packages
-	if p.KernelName != "" {
-		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.KernelName)
+	if p.Workload.GetKernelName() != "" {
+		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.Workload.GetKernelName())
 	}
 }
 
@@ -408,10 +396,10 @@ func (p *OS) serialize() osbuild.Pipeline {
 	}
 	pipeline.AddStage(osbuild.NewTimezoneStage(&osbuild.TimezoneStageOptions{Zone: p.Timezone}))
 
-	if len(p.NTPServers) > 0 {
-		chronyOptions := &osbuild.ChronyStageOptions{Servers: p.NTPServers}
-		if p.LeapSecTZ != nil {
-			chronyOptions.LeapsecTz = p.LeapSecTZ
+	if ntpServers, leapSecTz := p.Workload.GetNTPConfig(); len(ntpServers) > 0 {
+		chronyOptions := &osbuild.ChronyStageOptions{Servers: ntpServers}
+		if leapSecTz != nil {
+			chronyOptions.LeapsecTz = leapSecTz
 		}
 		pipeline.AddStage(osbuild.NewChronyStage(chronyOptions))
 	}
@@ -530,19 +518,19 @@ func (p *OS) serialize() osbuild.Pipeline {
 	// - Register the system with rhc and enable Insights
 	// - Register with subscription-manager, no Insights or rhc
 	// - Register with subscription-manager and enable Insights, no rhc
-	if p.Subscription != nil {
+	if subscription := p.Workload.GetSubscription(); subscription != nil {
 		var commands []string
-		if p.Subscription.Rhc {
+		if subscription.Rhc {
 			// Use rhc for registration instead of subscription manager
-			commands = []string{fmt.Sprintf("/usr/bin/rhc connect -o=%s -a=%s --server %s", p.Subscription.Organization, p.Subscription.ActivationKey, p.Subscription.ServerUrl)}
+			commands = []string{fmt.Sprintf("/usr/bin/rhc connect -o=%s -a=%s --server %s", subscription.Organization, subscription.ActivationKey, subscription.ServerUrl)}
 
 			// Always enable Insights when using rhc
 			commands = append(commands, "/usr/bin/insights-client --register")
 		} else {
-			commands = []string{fmt.Sprintf("/usr/sbin/subscription-manager register --org=%s --activationkey=%s --serverurl %s --baseurl %s", p.Subscription.Organization, p.Subscription.ActivationKey, p.Subscription.ServerUrl, p.Subscription.BaseUrl)}
+			commands = []string{fmt.Sprintf("/usr/sbin/subscription-manager register --org=%s --activationkey=%s --serverurl %s --baseurl %s", subscription.Organization, subscription.ActivationKey, subscription.ServerUrl, subscription.BaseUrl)}
 
 			// Insights is optional when using subscription-manager
-			if p.Subscription.Insights {
+			if subscription.Insights {
 				commands = append(commands, "/usr/bin/insights-client --register")
 			}
 		}
@@ -634,8 +622,8 @@ func (p *OS) serialize() osbuild.Pipeline {
 		pipeline.AddStage(bootloader)
 	}
 
-	if p.OpenSCAPConfig != nil {
-		pipeline.AddStage(osbuild.NewOscapRemediationStage(p.OpenSCAPConfig))
+	if oscap := p.Workload.GetOSCAPConfig(); oscap != nil {
+		pipeline.AddStage(osbuild.NewOscapRemediationStage(oscap))
 	}
 
 	if p.FactAPIType != "" {

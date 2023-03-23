@@ -31,8 +31,6 @@ func osCustomizations(
 	osc := manifest.OSCustomizations{}
 
 	if t.bootable || t.rpmOstree {
-		osc.KernelName = c.GetKernel().Name
-
 		var kernelOptions []string
 		if t.kernelOptions != "" {
 			kernelOptions = append(kernelOptions, t.kernelOptions)
@@ -97,19 +95,11 @@ func osCustomizations(
 		osc.Hostname = "localhost.localdomain"
 	}
 
-	timezone, ntpServers := c.GetTimezoneSettings()
+	timezone, _ := c.GetTimezoneSettings()
 	if timezone != nil {
 		osc.Timezone = *timezone
 	} else if imageConfig.Timezone != nil {
 		osc.Timezone = *imageConfig.Timezone
-	}
-
-	if len(ntpServers) > 0 {
-		for _, server := range ntpServers {
-			osc.NTPServers = append(osc.NTPServers, osbuild.ChronyConfigServer{Hostname: server})
-		}
-	} else if imageConfig.TimeSynchronization != nil {
-		osc.NTPServers = imageConfig.TimeSynchronization.Servers
 	}
 
 	// Relabel the tree, unless the `NoSElinux` flag is explicitly set to `true`
@@ -121,12 +111,6 @@ func osCustomizations(
 		if t.rpmOstree {
 			panic("unexpected oscap options for ostree image type")
 		}
-		osc.OpenSCAPConfig = osbuild.NewOscapRemediationStageOptions(
-			osbuild.OscapConfig{
-				Datastream: oscapConfig.DataStream,
-				ProfileID:  oscapConfig.ProfileID,
-			},
-		)
 	}
 
 	var err error
