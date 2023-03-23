@@ -209,6 +209,7 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 		w.DisabledServices = services.Disabled
 	}
 	w.OSPackages = packageSets[osPkgsKey].Include
+	w.OSExcludePackages = packageSets[osPkgsKey].Exclude
 	w.OSRepos = packageSets[osPkgsKey].Repositories
 
 	source := rand.NewSource(seed)

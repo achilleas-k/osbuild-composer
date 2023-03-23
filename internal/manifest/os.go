@@ -289,6 +289,7 @@ func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 		osPackages := p.Workload.GetOSPackages()
 		if len(osPackages) > 0 {
 			chain[0].Include = append(chain[0].Include, osPackages...)
+			chain[0].Exclude = p.Workload.GetOSExcludePackages()
 			chain[0].Repositories = append(chain[0].Repositories, p.repos...)
 		}
 		userPackages := p.Workload.GetUserPackages()

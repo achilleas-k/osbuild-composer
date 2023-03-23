@@ -5,6 +5,7 @@ import "github.com/osbuild/osbuild-composer/internal/rpmmd"
 type Workload interface {
 	GetPackages() []string
 	GetOSPackages() []string
+	GetOSExcludePackages() []string
 	GetUserPackages() []string
 	GetRepos() []rpmmd.RepoConfig
 	GetOSRepos() []rpmmd.RepoConfig
@@ -14,8 +15,9 @@ type Workload interface {
 }
 
 type BaseWorkload struct {
-	OSPackages []string
-	OSRepos    []rpmmd.RepoConfig
+	OSPackages        []string
+	OSExcludePackages []string
+	OSRepos           []rpmmd.RepoConfig
 }
 
 func (p BaseWorkload) GetPackages() []string {
@@ -38,6 +40,10 @@ func (p BaseWorkload) GetDisabledServices() []string {
 
 func (p BaseWorkload) GetOSPackages() []string {
 	return p.OSPackages
+}
+
+func (p BaseWorkload) GetOSExcludePackages() []string {
+	return p.OSExcludePackages
 }
 
 func (p BaseWorkload) GetUserPackages() []string {
