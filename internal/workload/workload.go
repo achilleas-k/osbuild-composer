@@ -14,7 +14,8 @@ type Workload interface {
 }
 
 type BaseWorkload struct {
-	Repos []rpmmd.RepoConfig
+	OSPackages []string
+	OSRepos    []rpmmd.RepoConfig
 }
 
 func (p BaseWorkload) GetPackages() []string {
@@ -24,7 +25,7 @@ func (p BaseWorkload) GetPackages() []string {
 
 func (p BaseWorkload) GetRepos() []rpmmd.RepoConfig {
 	// TODO: Remove in favour of GetUserRepos() and distinguish from OS repos
-	return p.Repos
+	return p.GetUserRepos()
 }
 
 func (p BaseWorkload) GetServices() []string {
@@ -36,17 +37,17 @@ func (p BaseWorkload) GetDisabledServices() []string {
 }
 
 func (p BaseWorkload) GetOSPackages() []string {
-	return []string{}
+	return p.OSPackages
 }
 
 func (p BaseWorkload) GetUserPackages() []string {
-	return p.GetPackages()
-}
-
-func (p BaseWorkload) GetOSRepos() []rpmmd.RepoConfig {
 	return nil
 }
 
+func (p BaseWorkload) GetOSRepos() []rpmmd.RepoConfig {
+	return p.OSRepos
+}
+
 func (p BaseWorkload) GetUserRepos() []rpmmd.RepoConfig {
-	return p.GetRepos()
+	return nil
 }

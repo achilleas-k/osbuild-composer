@@ -295,7 +295,7 @@ func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 		if len(userPackages) > 0 {
 			chain = append(chain, rpmmd.PackageSet{
 				Include:      userPackages,
-				Repositories: p.Workload.GetUserRepos(),
+				Repositories: append(chain[0].Repositories, p.Workload.GetUserRepos()...),
 			})
 		}
 	}

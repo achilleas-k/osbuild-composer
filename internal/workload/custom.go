@@ -1,14 +1,21 @@
 package workload
 
+import "github.com/osbuild/osbuild-composer/internal/rpmmd"
+
 type Custom struct {
 	BaseWorkload
-	Packages         []string
+	UserPackages     []string
+	UserRepos        []rpmmd.RepoConfig
 	Services         []string
 	DisabledServices []string
 }
 
-func (p *Custom) GetPackages() []string {
-	return p.Packages
+func (p *Custom) GetUserPackages() []string {
+	return p.UserPackages
+}
+
+func (p *Custom) GetUserRepos() []rpmmd.RepoConfig {
+	return p.UserRepos
 }
 
 func (p *Custom) GetServices() []string {

@@ -697,9 +697,9 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 	// always assume Custom.
 	w := &workload.Custom{
 		BaseWorkload: workload.BaseWorkload{
-			Repos: packageSets[blueprintPkgsKey].Repositories,
+			OSRepos: packageSets[blueprintPkgsKey].Repositories,
 		},
-		Packages: bp.GetPackagesEx(false),
+		UserPackages: bp.GetPackagesEx(false),
 	}
 	if services := bp.Customizations.GetServices(); services != nil {
 		w.Services = services.Enabled
