@@ -353,6 +353,7 @@ func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 			OSRepos: packageSets[blueprintPkgsKey].Repositories,
 		},
 		UserPackages: bp.GetPackagesEx(false),
+		KernelName:   bp.Customizations.GetKernel().Name,
 	}
 	if services := bp.Customizations.GetServices(); services != nil {
 		w.Services = services.Enabled

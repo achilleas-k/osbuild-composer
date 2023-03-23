@@ -3,6 +3,7 @@ package rhel9
 import (
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/environment"
 	"github.com/osbuild/osbuild-composer/internal/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
@@ -11,9 +12,10 @@ const amiKernelOptions = "console=ttyS0,115200n8 console=tty0 net.ifnames=0 rd.b
 
 var (
 	amiImgTypeX86_64 = imageType{
-		name:     "ami",
-		filename: "image.raw",
-		mimeType: "application/octet-stream",
+		name:        "ami",
+		filename:    "image.raw",
+		environment: environment.NewEC2(),
+		mimeType:    "application/octet-stream",
 		packageSets: map[string]packageSetFunc{
 			osPkgsKey: ec2CommonPackageSet,
 		},
@@ -31,6 +33,7 @@ var (
 	ec2ImgTypeX86_64 = imageType{
 		name:        "ec2",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -50,6 +53,7 @@ var (
 	ec2HaImgTypeX86_64 = imageType{
 		name:        "ec2-ha",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -68,9 +72,10 @@ var (
 	}
 
 	amiImgTypeAarch64 = imageType{
-		name:     "ami",
-		filename: "image.raw",
-		mimeType: "application/octet-stream",
+		name:        "ami",
+		filename:    "image.raw",
+		environment: environment.NewEC2(),
+		mimeType:    "application/octet-stream",
 		packageSets: map[string]packageSetFunc{
 			buildPkgsKey: ec2BuildPackageSet,
 			osPkgsKey:    ec2CommonPackageSet,
@@ -88,6 +93,7 @@ var (
 	ec2ImgTypeAarch64 = imageType{
 		name:        "ec2",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -107,6 +113,7 @@ var (
 	ec2SapImgTypeX86_64 = imageType{
 		name:        "ec2-sap",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{

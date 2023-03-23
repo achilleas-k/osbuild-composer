@@ -1,11 +1,17 @@
 package environment
 
-import "github.com/osbuild/osbuild-composer/internal/rpmmd"
+import (
+	"github.com/osbuild/osbuild-composer/internal/osbuild"
+	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+)
 
 type Environment interface {
 	GetPackages() []string
 	GetRepos() []rpmmd.RepoConfig
 	GetServices() []string
+
+	// TODO: replace type with internal (not osbuild)
+	GetNTPConfig() ([]osbuild.ChronyConfigServer, *string)
 }
 
 type BaseEnvironment struct {
@@ -22,4 +28,8 @@ func (p BaseEnvironment) GetRepos() []rpmmd.RepoConfig {
 
 func (p BaseEnvironment) GetServices() []string {
 	return []string{}
+}
+
+func (p BaseEnvironment) GetNTPConfig() ([]osbuild.ChronyConfigServer, *string) {
+	return nil, nil
 }

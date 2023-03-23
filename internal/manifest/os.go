@@ -313,7 +313,7 @@ func (p *OS) serializeStart(packages []rpmmd.PackageSpec) {
 		panic("double call to serializeStart()")
 	}
 	p.packageSpecs = packages
-	if p.Workload.GetKernelName() != "" {
+	if p.Workload != nil && p.Workload.GetKernelName() != "" {
 		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.Workload.GetKernelName())
 	}
 }
@@ -396,11 +396,16 @@ func (p *OS) serialize() osbuild.Pipeline {
 	}
 	pipeline.AddStage(osbuild.NewTimezoneStage(&osbuild.TimezoneStageOptions{Zone: p.Timezone}))
 
-	if ntpServers, leapSecTz := p.Workload.GetNTPConfig(); len(ntpServers) > 0 {
-		chronyOptions := &osbuild.ChronyStageOptions{Servers: ntpServers}
-		if leapSecTz != nil {
-			chronyOptions.LeapsecTz = leapSecTz
+	var ntpServers []osbuild.ChronyConfigServer
+	var leapSecTZ *string
+	if ntpServers, leapSecTZ = p.Workload.GetNTPConfig(); len(ntpServers) == 0 {
+		if p.Environment != nil {
+			ntpServers, leapSecTZ = p.Environment.GetNTPConfig()
 		}
+	}
+	if len(ntpServers) > 0 || leapSecTZ != nil {
+		chronyOptions := &osbuild.ChronyStageOptions{Servers: ntpServers}
+		chronyOptions.LeapsecTz = leapSecTZ
 		pipeline.AddStage(osbuild.NewChronyStage(chronyOptions))
 	}
 
