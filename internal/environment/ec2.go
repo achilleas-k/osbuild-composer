@@ -14,7 +14,12 @@ func (p *EC2) GetPackages() []string {
 }
 
 func (p *EC2) GetServices() []string {
-	return []string{"cloud-init"}
+	return []string{
+		"cloud-init",
+		"cloud-init-local",
+		"cloud-config",
+		"cloud-final",
+	}
 }
 
 func (p *EC2) GetNTPConfig() ([]osbuild.ChronyConfigServer, *string) {

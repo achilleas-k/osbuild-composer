@@ -4650,11 +4650,11 @@
                 "NetworkManager",
                 "nm-cloud-setup.service",
                 "nm-cloud-setup.timer",
+                "reboot.target",
                 "cloud-init",
                 "cloud-init-local",
                 "cloud-config",
-                "cloud-final",
-                "reboot.target"
+                "cloud-final"
               ],
               "default_target": "multi-user.target"
             }

@@ -143,18 +143,6 @@ func baseEc2ImageConfig() *distro.ImageConfig {
 				Layouts: []string{"us"},
 			},
 		},
-		EnabledServices: []string{
-			"sshd",
-			"NetworkManager",
-			"nm-cloud-setup.service",
-			"nm-cloud-setup.timer",
-			"cloud-init",
-			"cloud-init-local",
-			"cloud-config",
-			"cloud-final",
-			"reboot.target",
-			"tuned",
-		},
 		DefaultTarget: common.ToPtr("multi-user.target"),
 		Sysconfig: []*osbuild.SysconfigStageOptions{
 			{
