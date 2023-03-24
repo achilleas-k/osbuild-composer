@@ -125,10 +125,9 @@ func (img *ImageInstaller) InstantiateManifest(m *manifest.Manifest,
 	kernelOpts = append(kernelOpts, img.AdditionalKernelOpts...)
 	bootTreePipeline.KernelOpts = kernelOpts
 
-	osPipeline := manifest.NewOS(m, buildPipeline, img.Platform, repos)
+	osPipeline := manifest.NewOS(m, buildPipeline, img.Platform, img.Workload, repos)
 	osPipeline.OSCustomizations = img.OSCustomizations
 	osPipeline.Environment = img.Environment
-	osPipeline.Workload = img.Workload
 
 	// enable ISOLinux on x86_64 only
 	isoLinuxEnabled := img.Platform.GetArch() == platform.ARCH_X86_64

@@ -39,10 +39,9 @@ func (img *OSTreeArchive) InstantiateManifest(m *manifest.Manifest,
 	buildPipeline := manifest.NewBuild(m, runner, repos)
 	buildPipeline.Checkpoint()
 
-	osPipeline := manifest.NewOS(m, buildPipeline, img.Platform, repos)
+	osPipeline := manifest.NewOS(m, buildPipeline, img.Platform, img.Workload, repos)
 	osPipeline.OSCustomizations = img.OSCustomizations
 	osPipeline.Environment = img.Environment
-	osPipeline.Workload = img.Workload
 	osPipeline.OSTreeParent = img.OSTreeParent
 	osPipeline.OSTreeRef = img.OSTreeRef
 

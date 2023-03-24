@@ -48,11 +48,10 @@ func (img *LiveImage) InstantiateManifest(m *manifest.Manifest,
 	buildPipeline := manifest.NewBuild(m, runner, repos)
 	buildPipeline.Checkpoint()
 
-	osPipeline := manifest.NewOS(m, buildPipeline, img.Platform, repos)
+	osPipeline := manifest.NewOS(m, buildPipeline, img.Platform, img.Workload, repos)
 	osPipeline.PartitionTable = img.PartitionTable
 	osPipeline.OSCustomizations = img.OSCustomizations
 	osPipeline.Environment = img.Environment
-	osPipeline.Workload = img.Workload
 	osPipeline.NoBLS = img.NoBLS
 	osPipeline.OSProduct = img.OSProduct
 	osPipeline.OSVersion = img.OSVersion

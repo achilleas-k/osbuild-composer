@@ -184,14 +184,15 @@ type OS struct {
 	OSCustomizations
 	// Environment the system will run in
 	Environment environment.Environment
-	// Workload to install on top of the base system
-	Workload workload.Workload
 	// Ref of ostree commit, if empty the tree cannot be in an ostree commit
 	OSTreeRef string
 	// OSTree parent spec, if nil the new commit (if applicable) will have no parent
 	OSTreeParent *ostree.CommitSpec
 	// Partition table, if nil the tree cannot be put on a partitioned disk
 	PartitionTable *disk.PartitionTable
+
+	// workload defines the purpose of the system
+	workload workload.Workload
 
 	repos        []rpmmd.RepoConfig
 	packageSpecs []rpmmd.PackageSpec
@@ -212,12 +213,14 @@ type OS struct {
 func NewOS(m *Manifest,
 	buildPipeline *Build,
 	platform platform.Platform,
+	workload workload.Workload,
 	repos []rpmmd.RepoConfig) *OS {
 	name := "os"
 	p := &OS{
 		Base:     NewBase(m, name, buildPipeline),
 		repos:    filterRepos(repos, name),
 		platform: platform,
+		workload: workload,
 	}
 	buildPipeline.addDependent(p)
 	m.addPipeline(p)
@@ -245,18 +248,18 @@ func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 		},
 	}
 
-	if p.Workload != nil {
-		osPackages := p.Workload.GetOSPackages(p.platform.Bootable())
+	if p.workload != nil {
+		osPackages := p.workload.GetOSPackages(p.platform.Bootable())
 		if len(osPackages) > 0 {
 			chain[0].Include = append(chain[0].Include, osPackages...)
-			chain[0].Exclude = p.Workload.GetOSExcludePackages()
+			chain[0].Exclude = p.workload.GetOSExcludePackages()
 			chain[0].Repositories = append(chain[0].Repositories, p.repos...)
 		}
-		userPackages := p.Workload.GetUserPackages()
+		userPackages := p.workload.GetUserPackages()
 		if len(userPackages) > 0 {
 			chain = append(chain, rpmmd.PackageSet{
 				Include:      userPackages,
-				Repositories: append(chain[0].Repositories, p.Workload.GetUserRepos()...),
+				Repositories: append(chain[0].Repositories, p.workload.GetUserRepos()...),
 			})
 		}
 	}
@@ -314,7 +317,7 @@ func (p *OS) serializeStart(packages []rpmmd.PackageSpec) {
 	}
 	p.packageSpecs = packages
 	if p.platform.Bootable() {
-		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.Workload.GetKernelName())
+		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.workload.GetKernelName())
 	}
 }
 
@@ -398,7 +401,7 @@ func (p *OS) serialize() osbuild.Pipeline {
 
 	var ntpServers []osbuild.ChronyConfigServer
 	var leapSecTZ *string
-	if ntpServers, leapSecTZ = p.Workload.GetNTPConfig(); len(ntpServers) == 0 {
+	if ntpServers, leapSecTZ = p.workload.GetNTPConfig(); len(ntpServers) == 0 {
 		if p.Environment != nil {
 			ntpServers, leapSecTZ = p.Environment.GetNTPConfig()
 		}
@@ -523,7 +526,7 @@ func (p *OS) serialize() osbuild.Pipeline {
 	// - Register the system with rhc and enable Insights
 	// - Register with subscription-manager, no Insights or rhc
 	// - Register with subscription-manager and enable Insights, no rhc
-	if subscription := p.Workload.GetSubscription(); subscription != nil {
+	if subscription := p.workload.GetSubscription(); subscription != nil {
 		var commands []string
 		if subscription.Rhc {
 			// Use rhc for registration instead of subscription manager
@@ -627,7 +630,7 @@ func (p *OS) serialize() osbuild.Pipeline {
 		pipeline.AddStage(bootloader)
 	}
 
-	if oscap := p.Workload.GetOSCAPConfig(); oscap != nil {
+	if oscap := p.workload.GetOSCAPConfig(); oscap != nil {
 		pipeline.AddStage(osbuild.NewOscapRemediationStage(oscap))
 	}
 
@@ -667,9 +670,9 @@ func (p *OS) serialize() osbuild.Pipeline {
 	if p.Environment != nil {
 		enabledServices = append(enabledServices, p.Environment.GetServices()...)
 	}
-	if p.Workload != nil {
-		enabledServices = append(enabledServices, p.Workload.GetServices()...)
-		disabledServices = append(disabledServices, p.Workload.GetDisabledServices()...)
+	if p.workload != nil {
+		enabledServices = append(enabledServices, p.workload.GetServices()...)
+		disabledServices = append(disabledServices, p.workload.GetDisabledServices()...)
 	}
 	if len(enabledServices) != 0 ||
 		len(disabledServices) != 0 || p.DefaultTarget != "" {

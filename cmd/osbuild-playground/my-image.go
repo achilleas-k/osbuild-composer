@@ -46,11 +46,11 @@ func (img *MyImage) InstantiateManifest(m *manifest.Manifest,
 	}
 
 	// create a minimal bootable OS tree
-	os := manifest.NewOS(m, build, platform, repos)
-	os.PartitionTable = pt // we need a partition table
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		KernelName: "kernel", // use the default fedora kernel
 	}
+	os := manifest.NewOS(m, build, platform, wl, repos)
+	os.PartitionTable = pt // we need a partition table
 
 	// create a raw image containing the OS tree created above
 	raw := manifest.NewRawImage(m, build, os)

@@ -15,7 +15,7 @@ import (
 )
 
 // NewTestOS returns a minimally populated OS struct for use in testing
-func NewTestOS() *OS {
+func NewTestOS(wl workload.Workload) *OS {
 	repos := []rpmmd.RepoConfig{}
 	manifest := New()
 	runner := &runner.Fedora{Version: 36}
@@ -27,7 +27,7 @@ func NewTestOS() *OS {
 		BIOS: true,
 	}
 
-	os := NewOS(&manifest, build, platform, repos)
+	os := NewOS(&manifest, build, platform, wl, repos)
 	packages := []rpmmd.PackageSpec{
 		rpmmd.PackageSpec{Name: "pkg1"},
 	}
@@ -69,9 +69,8 @@ func CheckPkgSetInclude(t *testing.T, pkgSetChain []rpmmd.PackageSet, pkgs []str
 }
 
 func TestSubscriptionManagerCommands(t *testing.T) {
-	os := NewTestOS()
 
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		Subscription: &distro.SubscriptionImageOptions{
 			Organization:  "2040324",
 			ActivationKey: "my-secret-key",
@@ -79,6 +78,7 @@ func TestSubscriptionManagerCommands(t *testing.T) {
 			BaseUrl:       "http://cdn.redhat.com/",
 		},
 	}
+	os := NewTestOS(wl)
 
 	pipeline := os.serialize()
 	CheckFirstBootStageOptions(t, pipeline.Stages, []string{
@@ -87,8 +87,7 @@ func TestSubscriptionManagerCommands(t *testing.T) {
 }
 
 func TestSubscriptionManagerInsightsCommands(t *testing.T) {
-	os := NewTestOS()
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		Subscription: &distro.SubscriptionImageOptions{
 			Organization:  "2040324",
 			ActivationKey: "my-secret-key",
@@ -97,6 +96,7 @@ func TestSubscriptionManagerInsightsCommands(t *testing.T) {
 			Insights:      true,
 		},
 	}
+	os := NewTestOS(wl)
 	pipeline := os.serialize()
 	CheckFirstBootStageOptions(t, pipeline.Stages, []string{
 		"/usr/sbin/subscription-manager register --org=2040324 --activationkey=my-secret-key --serverurl subscription.rhsm.redhat.com --baseurl http://cdn.redhat.com/",
@@ -105,8 +105,7 @@ func TestSubscriptionManagerInsightsCommands(t *testing.T) {
 }
 
 func TestRhcInsightsCommands(t *testing.T) {
-	os := NewTestOS()
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		Subscription: &distro.SubscriptionImageOptions{
 			Organization:  "2040324",
 			ActivationKey: "my-secret-key",
@@ -116,6 +115,7 @@ func TestRhcInsightsCommands(t *testing.T) {
 			Rhc:           true,
 		},
 	}
+	os := NewTestOS(wl)
 	pipeline := os.serialize()
 	CheckFirstBootStageOptions(t, pipeline.Stages, []string{
 		"/usr/bin/rhc connect -o=2040324 -a=my-secret-key --server subscription.rhsm.redhat.com",
@@ -124,8 +124,7 @@ func TestRhcInsightsCommands(t *testing.T) {
 }
 
 func TestSubscriptionManagerPackages(t *testing.T) {
-	os := NewTestOS()
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		Subscription: &distro.SubscriptionImageOptions{
 			Organization:  "2040324",
 			ActivationKey: "my-secret-key",
@@ -133,12 +132,12 @@ func TestSubscriptionManagerPackages(t *testing.T) {
 			BaseUrl:       "http://cdn.redhat.com/",
 		},
 	}
+	os := NewTestOS(wl)
 	CheckPkgSetInclude(t, os.getPackageSetChain(), []string{"subscription-manager"})
 }
 
 func TestSubscriptionManagerInsightsPackages(t *testing.T) {
-	os := NewTestOS()
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		Subscription: &distro.SubscriptionImageOptions{
 			Organization:  "2040324",
 			ActivationKey: "my-secret-key",
@@ -147,12 +146,12 @@ func TestSubscriptionManagerInsightsPackages(t *testing.T) {
 			Insights:      true,
 		},
 	}
+	os := NewTestOS(wl)
 	CheckPkgSetInclude(t, os.getPackageSetChain(), []string{"subscription-manager", "insights-client"})
 }
 
 func TestRhcInsightsPackages(t *testing.T) {
-	os := NewTestOS()
-	os.Workload = &workload.Custom{
+	wl := &workload.Custom{
 		Subscription: &distro.SubscriptionImageOptions{
 			Organization:  "2040324",
 			ActivationKey: "my-secret-key",
@@ -162,5 +161,6 @@ func TestRhcInsightsPackages(t *testing.T) {
 			Rhc:           true,
 		},
 	}
+	os := NewTestOS(wl)
 	CheckPkgSetInclude(t, os.getPackageSetChain(), []string{"rhc", "subscription-manager", "insights-client"})
 }

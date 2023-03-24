@@ -8,6 +8,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/runner"
+	"github.com/osbuild/osbuild-composer/internal/workload"
 )
 
 // MyContainer contains the arguments passed in as a JSON blob.
@@ -50,7 +51,7 @@ func (img *MyContainer) InstantiateManifest(m *manifest.Manifest,
 	build.Checkpoint()
 
 	// create a minimal non-bootable OS tree
-	os := manifest.NewOS(m, build, &platform.X86{}, repos)
+	os := manifest.NewOS(m, build, &platform.X86Unbootable{}, &workload.Custom{}, repos)
 	os.ExtraBasePackages = []string{"@core"}
 	os.OSCustomizations.Language = "en_US.UTF-8"
 	os.OSCustomizations.Hostname = "my-host"
