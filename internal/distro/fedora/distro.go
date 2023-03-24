@@ -927,7 +927,7 @@ func newDistro(version int) distro.Distro {
 		amiImgType,
 	)
 	x86_64.addImageTypes(
-		&platform.X86{},
+		&platform.X86Unbootable{},
 		containerImgType,
 	)
 	x86_64.addImageTypes(
@@ -996,7 +996,7 @@ func newDistro(version int) distro.Distro {
 		openstackImgType,
 	)
 	aarch64.addImageTypes(
-		&platform.Aarch64{},
+		&platform.Aarch64Unbootable{},
 		containerImgType,
 	)
 	aarch64.addImageTypes(

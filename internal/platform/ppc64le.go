@@ -31,3 +31,33 @@ func (p *PPC64LE) GetBuildPackages() []string {
 		"grub2-ppc64le-modules",
 	}
 }
+
+type PPC64LEUnbootable struct {
+	BasePlatform
+}
+
+func (p *PPC64LEUnbootable) Bootable() bool {
+	return false
+}
+
+func (p *PPC64LEUnbootable) GetArch() Arch {
+	return ARCH_AARCH64
+}
+
+func (p *PPC64LEUnbootable) GetPackages() []string {
+	// TODO: remove these for unbootable?
+	return []string{
+		"dracut-config-generic",
+		"powerpc-utils",
+		"grub2-ppc64le",
+		"grub2-ppc64le-modules",
+	}
+}
+
+func (p *PPC64LEUnbootable) GetBuildPackages() []string {
+	// TODO: remove these for unbootable?
+	return []string{
+		"grub2-ppc64le",
+		"grub2-ppc64le-modules",
+	}
+}

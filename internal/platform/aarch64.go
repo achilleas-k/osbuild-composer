@@ -27,3 +27,15 @@ func (p *Aarch64) GetPackages() []string {
 
 	return packages
 }
+
+type Aarch64Unbootable struct {
+	BasePlatform
+}
+
+func (p *Aarch64Unbootable) Bootable() bool {
+	return false
+}
+
+func (p *Aarch64Unbootable) GetArch() Arch {
+	return ARCH_AARCH64
+}

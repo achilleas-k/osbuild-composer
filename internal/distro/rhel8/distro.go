@@ -309,7 +309,7 @@ func newDistro(name string, minor int) *distribution {
 	)
 
 	x86_64.addImageTypes(
-		&platform.X86{},
+		&platform.X86Unbootable{},
 		tarImgType(),
 	)
 
@@ -335,7 +335,7 @@ func newDistro(name string, minor int) *distribution {
 	)
 
 	aarch64.addImageTypes(
-		&platform.Aarch64{},
+		&platform.Aarch64Unbootable{},
 		tarImgType(),
 	)
 
@@ -376,7 +376,7 @@ func newDistro(name string, minor int) *distribution {
 	)
 
 	ppc64le.addImageTypes(
-		&platform.PPC64LE{},
+		&platform.PPC64LEUnbootable{},
 		tarImgType(),
 	)
 
@@ -392,7 +392,7 @@ func newDistro(name string, minor int) *distribution {
 	)
 
 	s390x.addImageTypes(
-		&platform.S390X{},
+		&platform.S390XUnbootable{},
 		tarImgType(),
 	)
 

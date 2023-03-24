@@ -50,3 +50,15 @@ func (p *X86) GetBuildPackages() []string {
 	}
 	return packages
 }
+
+type X86Unbootable struct {
+	BasePlatform
+}
+
+func (p *X86Unbootable) Bootable() bool {
+	return false
+}
+
+func (p *X86Unbootable) GetArch() Arch {
+	return ARCH_X86_64
+}

@@ -246,7 +246,7 @@ func (p *OS) getPackageSetChain() []rpmmd.PackageSet {
 	}
 
 	if p.Workload != nil {
-		osPackages := p.Workload.GetOSPackages()
+		osPackages := p.Workload.GetOSPackages(p.platform.Bootable())
 		if len(osPackages) > 0 {
 			chain[0].Include = append(chain[0].Include, osPackages...)
 			chain[0].Exclude = p.Workload.GetOSExcludePackages()
@@ -313,7 +313,7 @@ func (p *OS) serializeStart(packages []rpmmd.PackageSpec) {
 		panic("double call to serializeStart()")
 	}
 	p.packageSpecs = packages
-	if p.Workload != nil && p.Workload.GetKernelName() != "" {
+	if p.platform.Bootable() {
 		p.kernelVer = rpmmd.GetVerStrFromPackageSpecListPanic(p.packageSpecs, p.Workload.GetKernelName())
 	}
 }

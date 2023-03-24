@@ -8,7 +8,7 @@ import (
 
 type Workload interface {
 	GetPackages() []string
-	GetOSPackages() []string
+	GetOSPackages(bootable bool) []string
 	GetOSExcludePackages() []string
 	GetUserPackages() []string
 	GetRepos() []rpmmd.RepoConfig
@@ -49,7 +49,7 @@ func (p BaseWorkload) GetDisabledServices() []string {
 	return []string{}
 }
 
-func (p BaseWorkload) GetOSPackages() []string {
+func (p BaseWorkload) GetOSPackages(bootable bool) []string {
 	return p.OSPackages
 }
 

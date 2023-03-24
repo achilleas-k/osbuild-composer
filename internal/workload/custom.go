@@ -83,9 +83,9 @@ func NewCustomWorkload(customizations *blueprint.Customizations, extraBasePackag
 	return w
 }
 
-func (p Custom) GetOSPackages() []string {
+func (p Custom) GetOSPackages(bootable bool) []string {
 	packages := p.OSPackages
-	if p.KernelName != "" {
+	if bootable && p.KernelName != "" {
 		packages = append(packages, p.KernelName)
 	}
 	if len(p.NTPServers) > 0 {

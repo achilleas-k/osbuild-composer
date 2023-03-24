@@ -63,6 +63,7 @@ type Platform interface {
 	GetZiplSupport() bool
 	GetPackages() []string
 	GetBuildPackages() []string
+	Bootable() bool
 }
 
 type BasePlatform struct {
@@ -97,4 +98,8 @@ func (p BasePlatform) GetPackages() []string {
 
 func (p BasePlatform) GetBuildPackages() []string {
 	return []string{}
+}
+
+func (p BasePlatform) Bootable() bool {
+	return true
 }
