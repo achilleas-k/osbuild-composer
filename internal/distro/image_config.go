@@ -16,14 +16,13 @@ const (
 
 // ImageConfig represents a (default) configuration applied to the image
 type ImageConfig struct {
-	Timezone            *string
-	TimeSynchronization *osbuild.ChronyStageOptions
-	Locale              *string
-	Keyboard            *osbuild.KeymapStageOptions
-	EnabledServices     []string
-	DisabledServices    []string
-	DefaultTarget       *string
-	Sysconfig           []*osbuild.SysconfigStageOptions
+	Timezone         *string
+	Locale           *string
+	Keyboard         *osbuild.KeymapStageOptions
+	EnabledServices  []string
+	DisabledServices []string
+	DefaultTarget    *string
+	Sysconfig        []*osbuild.SysconfigStageOptions
 
 	// List of files from which to import GPG keys into the RPM database
 	GPGKeyFiles []string

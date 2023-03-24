@@ -3,6 +3,7 @@ package rhel8
 import (
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/environment"
 	"github.com/osbuild/osbuild-composer/internal/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
@@ -12,9 +13,10 @@ const gceKernelOptions = "net.ifnames=0 biosdevname=0 scsi_mod.use_blk_mq=Y cras
 
 func gceImgType(rd distribution) imageType {
 	return imageType{
-		name:     "gce",
-		filename: "image.tar.gz",
-		mimeType: "application/gzip",
+		name:        "gce",
+		filename:    "image.tar.gz",
+		environment: environment.NewGCP(),
+		mimeType:    "application/gzip",
 		packageSets: map[string]packageSetFunc{
 			osPkgsKey: gcePackageSet,
 		},
@@ -33,9 +35,10 @@ func gceImgType(rd distribution) imageType {
 
 func gceRhuiImgType(rd distribution) imageType {
 	return imageType{
-		name:     "gce-rhui",
-		filename: "image.tar.gz",
-		mimeType: "application/gzip",
+		name:        "gce-rhui",
+		filename:    "image.tar.gz",
+		environment: environment.NewGCP(),
+		mimeType:    "application/gzip",
 		packageSets: map[string]packageSetFunc{
 			osPkgsKey: gceRhuiPackageSet,
 		},
@@ -55,9 +58,6 @@ func gceRhuiImgType(rd distribution) imageType {
 func defaultGceByosImageConfig(rd distribution) *distro.ImageConfig {
 	ic := &distro.ImageConfig{
 		Timezone: common.ToPtr("UTC"),
-		TimeSynchronization: &osbuild.ChronyStageOptions{
-			Servers: []osbuild.ChronyConfigServer{{Hostname: "metadata.google.internal"}},
-		},
 		Firewall: &osbuild.FirewallStageOptions{
 			DefaultZone: "trusted",
 		},

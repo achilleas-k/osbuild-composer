@@ -137,19 +137,6 @@ func baseEc2ImageConfig() *distro.ImageConfig {
 	return &distro.ImageConfig{
 		Locale:   common.ToPtr("en_US.UTF-8"),
 		Timezone: common.ToPtr("UTC"),
-		TimeSynchronization: &osbuild.ChronyStageOptions{
-			Servers: []osbuild.ChronyConfigServer{
-				{
-					Hostname: "169.254.169.123",
-					Prefer:   common.ToPtr(true),
-					Iburst:   common.ToPtr(true),
-					Minpoll:  common.ToPtr(4),
-					Maxpoll:  common.ToPtr(4),
-				},
-			},
-			// empty string will remove any occurrences of the option from the configuration
-			LeapsecTz: common.ToPtr(""),
-		},
 		Keyboard: &osbuild.KeymapStageOptions{
 			Keymap: "us",
 			X11Keymap: &osbuild.X11KeymapOptions{

@@ -20,10 +20,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			name: "inheritance with overridden values",
 			distroConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -58,34 +55,10 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			},
 			imageConfig: &ImageConfig{
 				Timezone: common.ToPtr("UTC"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{
-						{
-							Hostname: "169.254.169.123",
-							Prefer:   common.ToPtr(true),
-							Iburst:   common.ToPtr(true),
-							Minpoll:  common.ToPtr(4),
-							Maxpoll:  common.ToPtr(4),
-						},
-					},
-					LeapsecTz: common.ToPtr(""),
-				},
 			},
 			expectedConfig: &ImageConfig{
 				Timezone: common.ToPtr("UTC"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{
-						{
-							Hostname: "169.254.169.123",
-							Prefer:   common.ToPtr(true),
-							Iburst:   common.ToPtr(true),
-							Minpoll:  common.ToPtr(4),
-							Maxpoll:  common.ToPtr(4),
-						},
-					},
-					LeapsecTz: common.ToPtr(""),
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -123,10 +96,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			name: "empty image type configuration",
 			distroConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -137,10 +107,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			imageConfig: &ImageConfig{},
 			expectedConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -154,10 +121,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			distroConfig: &ImageConfig{},
 			imageConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -167,10 +131,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			},
 			expectedConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -184,10 +145,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			distroConfig: nil,
 			imageConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},
@@ -197,10 +155,7 @@ func TestImageConfigInheritFrom(t *testing.T) {
 			},
 			expectedConfig: &ImageConfig{
 				Timezone: common.ToPtr("America/New_York"),
-				TimeSynchronization: &osbuild.ChronyStageOptions{
-					Servers: []osbuild.ChronyConfigServer{{Hostname: "127.0.0.1"}},
-				},
-				Locale: common.ToPtr("en_US.UTF-8"),
+				Locale:   common.ToPtr("en_US.UTF-8"),
 				Keyboard: &osbuild.KeymapStageOptions{
 					Keymap: "us",
 				},

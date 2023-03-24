@@ -3,15 +3,17 @@ package rhel8
 import (
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/environment"
 	"github.com/osbuild/osbuild-composer/internal/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
 func amiImgTypeX86_64(rd distribution) imageType {
 	it := imageType{
-		name:     "ami",
-		filename: "image.raw",
-		mimeType: "application/octet-stream",
+		name:        "ami",
+		filename:    "image.raw",
+		environment: environment.NewEC2(),
+		mimeType:    "application/octet-stream",
 		packageSets: map[string]packageSetFunc{
 			osPkgsKey: ec2CommonPackageSet,
 		},
@@ -34,6 +36,7 @@ func ec2ImgTypeX86_64(rd distribution) imageType {
 	it := imageType{
 		name:        "ec2",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -57,6 +60,7 @@ func ec2HaImgTypeX86_64(rd distribution) imageType {
 	it := imageType{
 		name:        "ec2-ha",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -78,9 +82,10 @@ func ec2HaImgTypeX86_64(rd distribution) imageType {
 
 func amiImgTypeAarch64(rd distribution) imageType {
 	it := imageType{
-		name:     "ami",
-		filename: "image.raw",
-		mimeType: "application/octet-stream",
+		name:        "ami",
+		filename:    "image.raw",
+		environment: environment.NewEC2(),
+		mimeType:    "application/octet-stream",
 		packageSets: map[string]packageSetFunc{
 			osPkgsKey: ec2CommonPackageSet,
 		},
@@ -101,6 +106,7 @@ func ec2ImgTypeAarch64(rd distribution) imageType {
 	it := imageType{
 		name:        "ec2",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -123,6 +129,7 @@ func ec2SapImgTypeX86_64(rd distribution) imageType {
 	it := imageType{
 		name:        "ec2-sap",
 		filename:    "image.raw.xz",
+		environment: environment.NewEC2(),
 		mimeType:    "application/xz",
 		compression: "xz",
 		packageSets: map[string]packageSetFunc{
@@ -146,19 +153,6 @@ func ec2SapImgTypeX86_64(rd distribution) imageType {
 func baseEc2ImageConfig() *distro.ImageConfig {
 	return &distro.ImageConfig{
 		Timezone: common.ToPtr("UTC"),
-		TimeSynchronization: &osbuild.ChronyStageOptions{
-			Servers: []osbuild.ChronyConfigServer{
-				{
-					Hostname: "169.254.169.123",
-					Prefer:   common.ToPtr(true),
-					Iburst:   common.ToPtr(true),
-					Minpoll:  common.ToPtr(4),
-					Maxpoll:  common.ToPtr(4),
-				},
-			},
-			// empty string will remove any occurrences of the option from the configuration
-			LeapsecTz: common.ToPtr(""),
-		},
 		Keyboard: &osbuild.KeymapStageOptions{
 			Keymap: "us",
 			X11Keymap: &osbuild.X11KeymapOptions{

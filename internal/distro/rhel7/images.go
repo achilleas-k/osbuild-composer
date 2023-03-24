@@ -112,10 +112,6 @@ func osCustomizations(
 		osc.Timezone = *imageConfig.Timezone
 	}
 
-	if imageConfig.TimeSynchronization != nil {
-		osc.LeapSecTZ = imageConfig.TimeSynchronization.LeapsecTz
-	}
-
 	// Relabel the tree, unless the `NoSElinux` flag is explicitly set to `true`
 	if imageConfig.NoSElinux == nil || imageConfig.NoSElinux != nil && !*imageConfig.NoSElinux {
 		osc.SElinux = "targeted"
