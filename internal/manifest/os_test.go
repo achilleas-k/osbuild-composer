@@ -23,9 +23,7 @@ func NewTestOS(wl workload.Workload) *OS {
 	build.Checkpoint()
 
 	// create an x86_64 platform with bios boot
-	platform := &platform.X86{
-		BIOS: true,
-	}
+	platform := &platform.X86Unbootable{}
 
 	os := NewOS(&manifest, build, platform, wl, repos)
 	packages := []rpmmd.PackageSpec{
