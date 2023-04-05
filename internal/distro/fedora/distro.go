@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
+	"golang.org/x/exp/slices"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
 	"github.com/osbuild/osbuild-composer/internal/common"
@@ -681,9 +682,10 @@ func (t *imageType) PartitionType() string {
 	return basePartitionTable.Type
 }
 
-func (t *imageType) Manifest(bp *blueprint.Blueprint,
+func (t *imageType) initializeManifest(bp *blueprint.Blueprint,
 	options distro.ImageOptions,
 	repos []rpmmd.RepoConfig,
+	packageSets map[string]rpmmd.PackageSet,
 	containers []container.Spec,
 	seed int64) (*manifest.Manifest, []string, error) {
 
@@ -695,8 +697,10 @@ func (t *imageType) Manifest(bp *blueprint.Blueprint,
 	// TODO: let image types specify valid workloads, rather than
 	// always assume Custom.
 	w := &workload.Custom{
-		BaseWorkload: workload.BaseWorkload{},
-		Packages:     bp.GetPackagesEx(false),
+		BaseWorkload: workload.BaseWorkload{
+			Repos: packageSets[blueprintPkgsKey].Repositories,
+		},
+		Packages: bp.GetPackagesEx(false),
 	}
 	if services := bp.Customizations.GetServices(); services != nil {
 		w.Services = services.Enabled
@@ -708,7 +712,7 @@ func (t *imageType) Manifest(bp *blueprint.Blueprint,
 	/* #nosec G404 */
 	rng := rand.New(source)
 
-	img, err := t.image(w, t, bp.Customizations, options, nil, containers, rng)
+	img, err := t.image(w, t, bp.Customizations, options, packageSets, containers, rng)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -717,8 +721,51 @@ func (t *imageType) Manifest(bp *blueprint.Blueprint,
 	if err != nil {
 		return nil, nil, err
 	}
-
 	return &manifest, warnings, err
+}
+
+func (t *imageType) Manifest(customizations *blueprint.Customizations,
+	options distro.ImageOptions,
+	repos []rpmmd.RepoConfig,
+	packageSets map[string][]rpmmd.PackageSpec,
+	containers []container.Spec,
+	seed int64) (distro.Manifest, []string, error) {
+
+	bp := &blueprint.Blueprint{Name: "empty blueprint"}
+	err := bp.Initialize()
+	if err != nil {
+		panic("could not initialize empty blueprint: " + err.Error())
+	}
+	bp.Customizations = customizations
+
+	// the os pipeline filters repos based on the `osPkgsKey` package set, merge the repos which
+	// contain a payload package set into the `osPkgsKey`, so those repos are included when
+	// building the rpm stage in the os pipeline
+	// TODO: roll this into workloads
+	mergedRepos := make([]rpmmd.RepoConfig, 0, len(repos))
+	for _, repo := range repos {
+		for _, pkgsKey := range t.PayloadPackageSets() {
+			// If the repo already contains the osPkgsKey, skip
+			if slices.Contains(repo.PackageSets, osPkgsKey) {
+				break
+			}
+			if slices.Contains(repo.PackageSets, pkgsKey) {
+				repo.PackageSets = append(repo.PackageSets, osPkgsKey)
+			}
+		}
+		mergedRepos = append(mergedRepos, repo)
+	}
+
+	manifest, warnings, err := t.initializeManifest(bp, options, mergedRepos, nil, containers, seed)
+	if err != nil {
+		return distro.Manifest{}, nil, err
+	}
+
+	ret, err := manifest.Serialize(packageSets)
+	if err != nil {
+		return ret, nil, err
+	}
+	return ret, warnings, err
 }
 
 // checkOptions checks the validity and compatibility of options and customizations for the image type.
