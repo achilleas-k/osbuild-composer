@@ -26,7 +26,7 @@ type imageType struct {
 	basePartitionTables distro.BasePartitionTableMap
 }
 
-func (it *imageType) Manifest() (*manifest.Manifest, []rpmmd.PackageSpec, error) {
+func (it *imageType) Manifest() (*manifest.Manifest, map[string][]rpmmd.PackageSpec, error) {
 	m := manifest.New()
 	rng := rand.New(rand.NewSource(9))
 	repos := getRepos("fedora-37", "x86_64")
@@ -64,15 +64,22 @@ func (it *imageType) Manifest() (*manifest.Manifest, []rpmmd.PackageSpec, error)
 	img.PartitionTable = pt
 	img.Filename = "disk.qcow2"
 
-	img.InstantiateManifest(&m, repos, runner, rng)
+	_, err = img.InstantiateManifest(&m, repos, runner, rng)
+	check(err)
+
 	solver := dnfjson.NewSolver("platform:f37", "37", "x86_64", "fedora-37", path.Join(store, "rpmmd"))
 	solver.SetDNFJSONPath("./dnf-json")
 
 	// Set cache size to 3 GiB
 	solver.SetMaxCacheSize(1 * 1024 * 1024 * 1024)
 
-	pkgs, err := solver.Depsolve(pkgSets)
-	check(err)
+	chains := m.GetPackageSetChains()
+	solved := make(map[string][]rpmmd.PackageSpec, len(chains))
+	for name, chain := range chains {
+		pkgs, err := solver.Depsolve(chain)
+		check(err)
+		solved[name] = pkgs
+	}
 
-	return &m, pkgs, nil
+	return &m, solved, nil
 }

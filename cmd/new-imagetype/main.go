@@ -34,20 +34,10 @@ func write_manifest(bytes []byte) {
 }
 
 func build(it imageType) {
-
-	res := resolvers{}
-	fr := NewFileResolver()
-	fr.Add(URL("https://example.org"))
-	res.Register(fr)
-
 	m, pkgs, err := it.Manifest()
 	check(err)
 
-	pkgSpecs := map[string][]rpmmd.PackageSpec{
-		"build": pkgs,
-		"os":    pkgs,
-	}
-	bytes, err := m.Serialize(pkgSpecs)
+	bytes, err := m.Serialize(pkgs)
 	check(err)
 
 	write_manifest(bytes)
