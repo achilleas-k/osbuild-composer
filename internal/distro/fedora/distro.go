@@ -412,6 +412,10 @@ func (d *distribution) GetArch(name string) (distro.Arch, error) {
 	return arch, nil
 }
 
+func (d *distribution) Runner() runner.Runner {
+	return d.runner
+}
+
 func (d *distribution) addArches(arches ...architecture) {
 	if d.arches == nil {
 		d.arches = map[string]distro.Arch{}

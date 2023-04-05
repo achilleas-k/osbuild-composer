@@ -12,6 +12,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/distroregistry"
 	"github.com/osbuild/osbuild-composer/internal/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+	"github.com/osbuild/osbuild-composer/internal/runner"
 )
 
 const (
@@ -106,6 +107,11 @@ func (d *TestDistro) GetArch(arch string) (distro.Arch, error) {
 		return nil, errors.New("invalid arch: " + arch)
 	}
 	return a, nil
+}
+
+func (d *TestDistro) Runner() runner.Runner {
+	// test doesn't need one
+	return nil
 }
 
 func (d *TestDistro) addArches(arches ...*TestArch) {

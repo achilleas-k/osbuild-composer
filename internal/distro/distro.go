@@ -8,6 +8,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/container"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+	"github.com/osbuild/osbuild-composer/internal/runner"
 )
 
 const (
@@ -51,6 +52,9 @@ type Distro interface {
 	// Returns an object representing the given architecture as support
 	// by this distro.
 	GetArch(arch string) (Arch, error)
+
+	// Returns the osbuild runner for this distro.
+	Runner() runner.Runner
 }
 
 // An Arch represents a given distribution's support for a given architecture.
