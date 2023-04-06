@@ -5,7 +5,6 @@ import (
 	"math/rand"
 
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
-	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/container"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/distro"
@@ -94,14 +93,7 @@ func (t *ImageType) OSTreeRef() string {
 }
 
 func (t *ImageType) Size(size uint64) uint64 {
-	// Microsoft Azure requires vhd images to be rounded up to the nearest MB
-	if t.name == "vhd" && size%common.MebiByte != 0 {
-		size = (size/common.MebiByte + 1) * common.MebiByte
-	}
-	if size == 0 {
-		size = t.defaultSize
-	}
-	return size
+	return t.defaultSize
 }
 
 func (t *ImageType) BuildPipelines() []string {

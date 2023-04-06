@@ -6,9 +6,6 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-	"golang.org/x/exp/slices"
-
 	"github.com/osbuild/osbuild-composer/internal/blueprint"
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/container"
@@ -16,7 +13,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/distro"
 	"github.com/osbuild/osbuild-composer/internal/environment"
 	"github.com/osbuild/osbuild-composer/internal/image"
-	"github.com/osbuild/osbuild-composer/internal/manifest"
+	"github.com/osbuild/osbuild-composer/internal/imagetype"
 	"github.com/osbuild/osbuild-composer/internal/oscap"
 	"github.com/osbuild/osbuild-composer/internal/pathpolicy"
 	"github.com/osbuild/osbuild-composer/internal/platform"
@@ -48,6 +45,7 @@ type imageFunc func(workload workload.Workload, t *imageType, customizations *bl
 type packageSetFunc func(t *imageType) rpmmd.PackageSet
 
 type imageType struct {
+	imagetype.ImageType
 	arch               *architecture
 	platform           platform.Platform
 	environment        environment.Environment
@@ -184,177 +182,6 @@ func (t *imageType) PartitionType() string {
 	}
 
 	return basePartitionTable.Type
-}
-
-func (t *imageType) Manifest(customizations *blueprint.Customizations,
-	options distro.ImageOptions,
-	repos []rpmmd.RepoConfig,
-	packageSpecs map[string][]rpmmd.PackageSpec,
-	containers []container.Spec,
-	seed int64) (distro.Manifest, []string, error) {
-
-	bp := &blueprint.Blueprint{Name: "empty blueprint"}
-	err := bp.Initialize()
-	if err != nil {
-		panic("could not initialize empty blueprint: " + err.Error())
-	}
-	bp.Customizations = customizations
-
-	// the os pipeline filters repos based on the `osPkgsKey` package set, merge the repos which
-	// contain a payload package set into the `osPkgsKey`, so those repos are included when
-	// building the rpm stage in the os pipeline
-	// TODO: roll this into workloads
-	mergedRepos := make([]rpmmd.RepoConfig, 0, len(repos))
-	for _, repo := range repos {
-		for _, pkgsKey := range t.PayloadPackageSets() {
-			// If the repo already contains the osPkgsKey, skip
-			if slices.Contains(repo.PackageSets, osPkgsKey) {
-				break
-			}
-			if slices.Contains(repo.PackageSets, pkgsKey) {
-				repo.PackageSets = append(repo.PackageSets, osPkgsKey)
-			}
-		}
-		mergedRepos = append(mergedRepos, repo)
-	}
-
-	repos = mergedRepos
-	warnings, err := t.checkOptions(bp.Customizations, options, containers)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var packageSets map[string]rpmmd.PackageSet
-	w := t.workload
-	if w == nil {
-		cw := &workload.Custom{
-			BaseWorkload: workload.BaseWorkload{
-				Repos: packageSets[blueprintPkgsKey].Repositories,
-			},
-			Packages: bp.GetPackagesEx(false),
-		}
-		if services := bp.Customizations.GetServices(); services != nil {
-			cw.Services = services.Enabled
-			cw.DisabledServices = services.Disabled
-		}
-		w = cw
-	}
-
-	source := rand.NewSource(seed)
-	// math/rand is good enough in this case
-	/* #nosec G404 */
-	rng := rand.New(source)
-
-	img, err := t.image(w, t, bp.Customizations, options, packageSets, containers, rng)
-	if err != nil {
-		return nil, nil, err
-	}
-	manifest := manifest.New()
-	_, err = img.InstantiateManifest(&manifest, repos, t.arch.distro.runner, rng)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	ret, err := manifest.Serialize(packageSpecs)
-	if err != nil {
-		return ret, nil, err
-	}
-	return ret, warnings, err
-}
-
-func (t *imageType) PackageSets(bp blueprint.Blueprint, options distro.ImageOptions, repos []rpmmd.RepoConfig) map[string][]rpmmd.PackageSet {
-	// merge package sets that appear in the image type with the package sets
-	// of the same name from the distro and arch
-	packageSets := make(map[string]rpmmd.PackageSet)
-
-	for name, getter := range t.packageSets {
-		packageSets[name] = getter(t)
-	}
-
-	// amend with repository information
-	for _, repo := range repos {
-		if len(repo.PackageSets) > 0 {
-			// only apply the repo to the listed package sets
-			for _, psName := range repo.PackageSets {
-				ps := packageSets[psName]
-				ps.Repositories = append(ps.Repositories, repo)
-				packageSets[psName] = ps
-			}
-		}
-	}
-
-	// In case of Cloud API, this method is called before the ostree commit
-	// is resolved. Unfortunately, initializeManifest when called for
-	// an ostree installer returns an error.
-	//
-	// Work around this by providing a dummy FetchChecksum to convince the
-	// method that it's fine to initialize the manifest. Note that the ostree
-	// content has no effect on the package sets, so this is fine.
-	//
-	// See: https://github.com/osbuild/osbuild-composer/issues/3125
-	//
-	// TODO: Remove me when it's possible the get the package set chain without
-	//       resolving the ostree reference before. Also remove the test for
-	//       this workaround
-	if t.rpmOstree && t.bootISO && options.OSTree.FetchChecksum == "" {
-		options.OSTree.FetchChecksum = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-		logrus.Warn("FIXME: Requesting package sets for iot-installer without a resolved ostree ref. Faking one.")
-	}
-
-	// Similar to above, for edge-commit and edge-container, we need to set an
-	// ImageRef in order to properly initialize the manifest and package
-	// selection.
-	options.OSTree.ImageRef = t.OSTreeRef()
-
-	// create a temporary container spec array with the info from the blueprint
-	// to initialize the manifest
-	containers := make([]container.Spec, len(bp.Containers))
-	for idx := range bp.Containers {
-		containers[idx] = container.Spec{
-			Source:    bp.Containers[idx].Source,
-			TLSVerify: bp.Containers[idx].TLSVerify,
-			LocalName: bp.Containers[idx].Name,
-		}
-	}
-
-	_, err := t.checkOptions(bp.Customizations, options, containers)
-	if err != nil {
-		logrus.Errorf("Initializing the manifest failed for %s (%s/%s): %v", t.Name(), t.arch.distro.Name(), t.arch.Name(), err)
-		return nil
-	}
-
-	w := t.workload
-	if w == nil {
-		cw := &workload.Custom{
-			BaseWorkload: workload.BaseWorkload{
-				Repos: packageSets[blueprintPkgsKey].Repositories,
-			},
-			Packages: bp.GetPackagesEx(false),
-		}
-		if services := bp.Customizations.GetServices(); services != nil {
-			cw.Services = services.Enabled
-			cw.DisabledServices = services.Disabled
-		}
-		w = cw
-	}
-
-	source := rand.NewSource(0)
-	// math/rand is good enough in this case
-	/* #nosec G404 */
-	rng := rand.New(source)
-
-	img, err := t.image(w, t, bp.Customizations, options, packageSets, containers, rng)
-	if err != nil {
-		logrus.Errorf("Initializing the manifest failed for %s (%s/%s): %v", t.Name(), t.arch.distro.Name(), t.arch.Name(), err)
-		return nil
-	}
-	manifest := manifest.New()
-	_, err = img.InstantiateManifest(&manifest, repos, t.arch.distro.runner, rng)
-	if err != nil {
-		logrus.Errorf("Initializing the manifest failed for %s (%s/%s): %v", t.Name(), t.arch.distro.Name(), t.arch.Name(), err)
-		return nil
-	}
-	return manifest.GetPackageSetChains()
 }
 
 // checkOptions checks the validity and compatibility of options and customizations for the image type.
