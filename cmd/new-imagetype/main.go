@@ -45,12 +45,21 @@ func makeSolver() solver {
 	// Set cache size to 3 GiB
 	solver.SetMaxCacheSize(1 * 1024 * 1024 * 1024)
 
+	setChan := make(chan []rpmmd.PackageSet)
+	solvedChan := make(chan []rpmmd.PackageSpec)
+	go func() {
+		for set := range setChan {
+			pkgs, err := solver.Depsolve(set)
+			check(err)
+			solvedChan <- pkgs
+		}
+	}()
+
 	return func(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec {
 		solved := make(map[string][]rpmmd.PackageSpec, len(chains))
 		for name, chain := range chains {
-			pkgs, err := solver.Depsolve(chain)
-			check(err)
-			solved[name] = pkgs
+			setChan <- chain
+			solved[name] = <-solvedChan
 		}
 		return solved
 	}
