@@ -23,8 +23,16 @@ const (
 // TODO: use this instead of distro.Manifest below
 type OSBuildManifest []byte
 
+type Sources struct {
+	packages      map[string][]rpmmd.PackageSpec
+	containers    []container.Spec
+	ostreeCommits []ostree.CommitSpec
+	inlineData    []string
+}
+
 type Manifest struct {
 	pipelines []Pipeline
+	sources   Sources
 }
 
 func New() Manifest {
@@ -55,6 +63,9 @@ func (m Manifest) GetPackageSetChains() map[string][]rpmmd.PackageSet {
 }
 
 func (m Manifest) Serialize(packageSets map[string][]rpmmd.PackageSpec) (distro.Manifest, error) {
+	if packageSets == nil {
+		packageSets = m.sources.packages
+	}
 	pipelines := make([]osbuild.Pipeline, 0)
 	packages := make([]rpmmd.PackageSpec, 0)
 	commits := make([]ostree.CommitSpec, 0)
@@ -101,6 +112,10 @@ func (m Manifest) GetExports() []string {
 		}
 	}
 	return exports
+}
+
+func (m *Manifest) AddPackages(pkgs map[string][]rpmmd.PackageSpec) {
+	m.sources.packages = pkgs
 }
 
 // filterRepos returns a list of repositories that specify the given pipeline

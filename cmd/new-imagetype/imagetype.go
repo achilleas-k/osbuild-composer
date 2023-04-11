@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"path"
+	"path/filepath"
 
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/distro"
@@ -26,7 +27,7 @@ type imageType struct {
 	basePartitionTables distro.BasePartitionTableMap
 }
 
-func (it *imageType) Manifest() (*manifest.Manifest, map[string][]rpmmd.PackageSpec, error) {
+func (it *imageType) Manifest() (*manifest.Manifest, error) {
 	m := manifest.New()
 	rng := rand.New(rand.NewSource(9))
 	repos := getRepos("fedora-37", "x86_64")
@@ -68,7 +69,7 @@ func (it *imageType) Manifest() (*manifest.Manifest, map[string][]rpmmd.PackageS
 	check(err)
 
 	solver := dnfjson.NewSolver("platform:f37", "37", "x86_64", "fedora-37", path.Join(store, "rpmmd"))
-	solver.SetDNFJSONPath("./dnf-json")
+	solver.SetDNFJSONPath(filepath.Join(source, "./dnf-json"))
 
 	// Set cache size to 3 GiB
 	solver.SetMaxCacheSize(1 * 1024 * 1024 * 1024)
@@ -81,5 +82,7 @@ func (it *imageType) Manifest() (*manifest.Manifest, map[string][]rpmmd.PackageS
 		solved[name] = pkgs
 	}
 
-	return &m, solved, nil
+	m.AddPackages(solved)
+
+	return &m, nil
 }
