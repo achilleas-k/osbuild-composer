@@ -24,7 +24,7 @@ type imageType struct {
 	basePartitionTables distro.BasePartitionTableMap
 }
 
-func (it *imageType) Manifest(depsolve func(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec) (*manifest.Manifest, error) {
+func (it *imageType) Manifest(depsolve solver) (*manifest.Manifest, error) {
 	m := manifest.New()
 	rng := rand.New(rand.NewSource(9))
 	repos := getRepos("fedora-37", "x86_64")

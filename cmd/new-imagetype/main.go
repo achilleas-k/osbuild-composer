@@ -36,24 +36,28 @@ func write_manifest(bytes []byte) {
 	fmt.Printf("Saved manifest to %s\n", fname)
 }
 
-func depsolveJob(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec {
+type solver func(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec
+
+func makeSolver() solver {
 	solver := dnfjson.NewSolver("platform:f37", "37", "x86_64", "fedora-37", path.Join(store, "rpmmd"))
 	solver.SetDNFJSONPath(filepath.Join(source, "./dnf-json"))
 
 	// Set cache size to 3 GiB
 	solver.SetMaxCacheSize(1 * 1024 * 1024 * 1024)
 
-	solved := make(map[string][]rpmmd.PackageSpec, len(chains))
-	for name, chain := range chains {
-		pkgs, err := solver.Depsolve(chain)
-		check(err)
-		solved[name] = pkgs
+	return func(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec {
+		solved := make(map[string][]rpmmd.PackageSpec, len(chains))
+		for name, chain := range chains {
+			pkgs, err := solver.Depsolve(chain)
+			check(err)
+			solved[name] = pkgs
+		}
+		return solved
 	}
-	return solved
 }
 
 func build(it imageType) {
-	m, err := it.Manifest(depsolveJob)
+	m, err := it.Manifest(makeSolver())
 	check(err)
 
 	bytes, err := m.Serialize(nil)
