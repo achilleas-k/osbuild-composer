@@ -2,12 +2,9 @@ package main
 
 import (
 	"math/rand"
-	"path"
-	"path/filepath"
 
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/distro"
-	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/environment"
 	"github.com/osbuild/osbuild-composer/internal/image"
 	"github.com/osbuild/osbuild-composer/internal/manifest"
@@ -27,7 +24,7 @@ type imageType struct {
 	basePartitionTables distro.BasePartitionTableMap
 }
 
-func (it *imageType) Manifest() (*manifest.Manifest, error) {
+func (it *imageType) Manifest(depsolve func(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec) (*manifest.Manifest, error) {
 	m := manifest.New()
 	rng := rand.New(rand.NewSource(9))
 	repos := getRepos("fedora-37", "x86_64")
@@ -68,19 +65,7 @@ func (it *imageType) Manifest() (*manifest.Manifest, error) {
 	_, err = img.InstantiateManifest(&m, repos, runner, rng)
 	check(err)
 
-	solver := dnfjson.NewSolver("platform:f37", "37", "x86_64", "fedora-37", path.Join(store, "rpmmd"))
-	solver.SetDNFJSONPath(filepath.Join(source, "./dnf-json"))
-
-	// Set cache size to 3 GiB
-	solver.SetMaxCacheSize(1 * 1024 * 1024 * 1024)
-
-	chains := m.GetPackageSetChains()
-	solved := make(map[string][]rpmmd.PackageSpec, len(chains))
-	for name, chain := range chains {
-		pkgs, err := solver.Depsolve(chain)
-		check(err)
-		solved[name] = pkgs
-	}
+	solved := depsolve(m.GetPackageSetChains())
 
 	m.AddPackages(solved)
 

@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 
+	"github.com/osbuild/osbuild-composer/internal/dnfjson"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
@@ -34,8 +36,24 @@ func write_manifest(bytes []byte) {
 	fmt.Printf("Saved manifest to %s\n", fname)
 }
 
+func depsolveJob(chains map[string][]rpmmd.PackageSet) map[string][]rpmmd.PackageSpec {
+	solver := dnfjson.NewSolver("platform:f37", "37", "x86_64", "fedora-37", path.Join(store, "rpmmd"))
+	solver.SetDNFJSONPath(filepath.Join(source, "./dnf-json"))
+
+	// Set cache size to 3 GiB
+	solver.SetMaxCacheSize(1 * 1024 * 1024 * 1024)
+
+	solved := make(map[string][]rpmmd.PackageSpec, len(chains))
+	for name, chain := range chains {
+		pkgs, err := solver.Depsolve(chain)
+		check(err)
+		solved[name] = pkgs
+	}
+	return solved
+}
+
 func build(it imageType) {
-	m, err := it.Manifest()
+	m, err := it.Manifest(depsolveJob)
 	check(err)
 
 	bytes, err := m.Serialize(nil)
