@@ -8,6 +8,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/container"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+	"github.com/osbuild/osbuild-composer/internal/subscription"
 )
 
 const (
@@ -128,7 +129,7 @@ type ImageType interface {
 type ImageOptions struct {
 	Size         uint64
 	OSTree       OSTreeImageOptions
-	Subscription *SubscriptionImageOptions
+	Subscription *subscription.ImageOptions
 	Facts        *FactsImageOptions
 }
 
@@ -156,18 +157,6 @@ type OSTreeImageOptions struct {
 	// Indicate if the 'org.osbuild.rhsm.consumer' secret should be added when pulling from the
 	// remote.
 	RHSM bool
-}
-
-// The SubscriptionImageOptions specify subscription-specific image options
-// ServerUrl denotes the host to register the system with
-// BaseUrl specifies the repository URL for DNF
-type SubscriptionImageOptions struct {
-	Organization  string
-	ActivationKey string
-	ServerUrl     string
-	BaseUrl       string
-	Insights      bool
-	Rhc           bool
 }
 
 // The FactsImageOptions specify things to be stored into the Insights facts
