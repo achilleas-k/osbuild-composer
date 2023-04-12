@@ -929,9 +929,15 @@ func TestCompose(t *testing.T) {
 	manifest, _, err := imgType.Manifest(nil, distro.ImageOptions{}, nil, nil, nil, 0)
 	require.NoError(t, err)
 
+	mf, err := manifest.Serialize(nil)
+	require.NoError(t, err)
+
 	ostreeImgType, err := arch.GetImageType(test_distro.TestImageTypeOSTree)
 	require.NoError(t, err)
 	ostreeManifest, _, err := ostreeImgType.Manifest(nil, distro.ImageOptions{}, nil, nil, nil, 0)
+	require.NoError(t, err)
+
+	omf, err := ostreeManifest.Serialize(nil)
 	require.NoError(t, err)
 
 	expectedComposeLocal := &store.Compose{
@@ -946,7 +952,7 @@ func TestCompose(t *testing.T) {
 		ImageBuild: store.ImageBuild{
 			QueueStatus: common.IBWaiting,
 			ImageType:   imgType,
-			Manifest:    manifest,
+			Manifest:    mf,
 			Targets: []*target.Target{
 				{
 					ImageName: imgType.Filename(),
@@ -973,7 +979,7 @@ func TestCompose(t *testing.T) {
 		ImageBuild: store.ImageBuild{
 			QueueStatus: common.IBWaiting,
 			ImageType:   imgType,
-			Manifest:    manifest,
+			Manifest:    mf,
 			Targets: []*target.Target{
 				{
 					ImageName: imgType.Filename(),
@@ -1016,7 +1022,7 @@ func TestCompose(t *testing.T) {
 		ImageBuild: store.ImageBuild{
 			QueueStatus: common.IBWaiting,
 			ImageType:   ostreeImgType,
-			Manifest:    ostreeManifest,
+			Manifest:    omf,
 			Targets: []*target.Target{
 				{
 					ImageName: ostreeImgType.Filename(),
@@ -1040,6 +1046,9 @@ func TestCompose(t *testing.T) {
 	manifest2, _, err := imgType.Manifest(nil, distro.ImageOptions{}, nil, nil, nil, 0)
 	require.NoError(t, err)
 
+	mf2, err := manifest2.Serialize(nil)
+	require.NoError(t, err)
+
 	expectedComposeGoodDistro := &store.Compose{
 		Blueprint: &blueprint.Blueprint{
 			Name:           "test-distro-2",
@@ -1053,7 +1062,7 @@ func TestCompose(t *testing.T) {
 		ImageBuild: store.ImageBuild{
 			QueueStatus: common.IBWaiting,
 			ImageType:   imgType2,
-			Manifest:    manifest2,
+			Manifest:    mf2,
 			Targets: []*target.Target{
 				{
 					ImageName: imgType2.Filename(),
@@ -1368,10 +1377,10 @@ func TestComposeLogs(t *testing.T) {
 	}{
 		{"/api/v0/compose/logs/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002-logs.tar", "application/x-tar", "logs/osbuild.log", "The compose result is empty.\n"},
 		{"/api/v1/compose/logs/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002-logs.tar", "application/x-tar", "logs/osbuild.log", "The compose result is empty.\n"},
-		{"/api/v0/compose/metadata/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002-metadata.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"","pipelines":[],"sources":{}}`},
-		{"/api/v1/compose/metadata/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002-metadata.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"","pipelines":[],"sources":{}}`},
-		{"/api/v0/compose/results/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"","pipelines":[],"sources":{}}`},
-		{"/api/v1/compose/results/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"","pipelines":[],"sources":{}}`},
+		{"/api/v0/compose/metadata/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002-metadata.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"2","pipelines":[],"sources":{}}`},
+		{"/api/v1/compose/metadata/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002-metadata.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"2","pipelines":[],"sources":{}}`},
+		{"/api/v0/compose/results/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"2","pipelines":[],"sources":{}}`},
+		{"/api/v1/compose/results/30000000-0000-0000-0000-000000000002", "attachment; filename=30000000-0000-0000-0000-000000000002.tar", "application/x-tar", "30000000-0000-0000-0000-000000000002.json", `{"version":"2","pipelines":[],"sources":{}}`},
 	}
 
 	tempdir := t.TempDir()
@@ -2031,6 +2040,9 @@ func TestComposePOST_ImageTypeDenylist(t *testing.T) {
 	manifest, _, err := imgType.Manifest(nil, distro.ImageOptions{}, nil, nil, nil, 0)
 	require.NoError(t, err)
 
+	mf, err := manifest.Serialize(nil)
+	require.NoError(t, err)
+
 	expectedComposeLocal := &store.Compose{
 		Blueprint: &blueprint.Blueprint{
 			Name:           "test",
@@ -2043,7 +2055,7 @@ func TestComposePOST_ImageTypeDenylist(t *testing.T) {
 		ImageBuild: store.ImageBuild{
 			QueueStatus: common.IBWaiting,
 			ImageType:   imgType,
-			Manifest:    manifest,
+			Manifest:    mf,
 			Targets: []*target.Target{
 				{
 					ImageName: imgType.Filename(),
@@ -2071,7 +2083,7 @@ func TestComposePOST_ImageTypeDenylist(t *testing.T) {
 		ImageBuild: store.ImageBuild{
 			QueueStatus: common.IBWaiting,
 			ImageType:   imgType2,
-			Manifest:    manifest,
+			Manifest:    mf,
 			Targets: []*target.Target{
 				{
 					ImageName: imgType2.Filename(),
