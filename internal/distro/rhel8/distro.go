@@ -194,27 +194,27 @@ func newDistro(name string, minor int) *distribution {
 
 	// Architecture definitions
 	x86_64 := architecture{
-		name:     distro.X86_64ArchName,
+		name:     platform.X86_64ArchName,
 		distro:   &rd,
 		legacy:   "i386-pc",
 		bootType: distro.HybridBootType,
 	}
 
 	aarch64 := architecture{
-		name:     distro.Aarch64ArchName,
+		name:     platform.Aarch64ArchName,
 		distro:   &rd,
 		bootType: distro.UEFIBootType,
 	}
 
 	ppc64le := architecture{
 		distro:   &rd,
-		name:     distro.Ppc64leArchName,
+		name:     platform.Ppc64leArchName,
 		legacy:   "powerpc-ieee1275",
 		bootType: distro.LegacyBootType,
 	}
 	s390x := architecture{
 		distro:   &rd,
-		name:     distro.S390xArchName,
+		name:     platform.S390xArchName,
 		bootType: distro.LegacyBootType,
 	}
 

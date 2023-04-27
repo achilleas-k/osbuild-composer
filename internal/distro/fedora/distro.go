@@ -496,18 +496,18 @@ func newDistro(version int) distro.Distro {
 
 	// Architecture definitions
 	x86_64 := architecture{
-		name:   distro.X86_64ArchName,
+		name:   platform.X86_64ArchName,
 		distro: &rd,
 	}
 
 	aarch64 := architecture{
-		name:   distro.Aarch64ArchName,
+		name:   platform.Aarch64ArchName,
 		distro: &rd,
 	}
 
 	s390x := architecture{
 		distro: &rd,
-		name:   distro.S390xArchName,
+		name:   platform.S390xArchName,
 	}
 
 	ociImgType := qcow2ImgType

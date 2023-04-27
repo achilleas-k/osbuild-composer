@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
@@ -32,7 +33,7 @@ func bootPackageSet(t *imageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{}
 
 	switch t.arch.Name() {
-	case distro.X86_64ArchName:
+	case platform.X86_64ArchName:
 		if addLegacyBootPkg {
 			ps = ps.Append(x8664LegacyBootPackageSet(t))
 		}

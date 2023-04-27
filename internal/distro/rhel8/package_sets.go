@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
@@ -30,7 +31,7 @@ func anacondaBootPackageSet(t *imageType) rpmmd.PackageSet {
 	}
 
 	switch t.arch.Name() {
-	case distro.X86_64ArchName:
+	case platform.X86_64ArchName:
 		ps = ps.Append(grubCommon)
 		ps = ps.Append(efiCommon)
 		ps = ps.Append(rpmmd.PackageSet{
@@ -46,7 +47,7 @@ func anacondaBootPackageSet(t *imageType) rpmmd.PackageSet {
 				"syslinux-nonlinux",
 			},
 		})
-	case distro.Aarch64ArchName:
+	case platform.Aarch64ArchName:
 		ps = ps.Append(grubCommon)
 		ps = ps.Append(efiCommon)
 		ps = ps.Append(rpmmd.PackageSet{
@@ -89,7 +90,7 @@ func bootPackageSet(t *imageType) rpmmd.PackageSet {
 	ps := rpmmd.PackageSet{}
 
 	switch t.arch.Name() {
-	case distro.X86_64ArchName:
+	case platform.X86_64ArchName:
 		if addLegacyBootPkg {
 			ps = ps.Append(x8664LegacyBootPackageSet(t))
 		}
@@ -97,13 +98,13 @@ func bootPackageSet(t *imageType) rpmmd.PackageSet {
 			ps = ps.Append(x8664UEFIBootPackageSet(t))
 		}
 
-	case distro.Aarch64ArchName:
+	case platform.Aarch64ArchName:
 		ps = ps.Append(aarch64UEFIBootPackageSet(t))
 
-	case distro.Ppc64leArchName:
+	case platform.Ppc64leArchName:
 		ps = ps.Append(ppc64leLegacyBootPackageSet(t))
 
-	case distro.S390xArchName:
+	case platform.S390xArchName:
 		ps = ps.Append(s390xLegacyBootPackageSet(t))
 
 	default:

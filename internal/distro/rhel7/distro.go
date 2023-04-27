@@ -202,7 +202,7 @@ func newDistro(distroName string) distro.Distro {
 
 	// Architecture definitions
 	x86_64 := architecture{
-		name:     distro.X86_64ArchName,
+		name:     platform.X86_64ArchName,
 		distro:   &rd,
 		legacy:   "i386-pc",
 		bootType: distro.HybridBootType,

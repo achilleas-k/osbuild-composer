@@ -3,14 +3,21 @@ package platform
 type Arch uint64
 type ImageFormat uint64
 
-const (
+const ( // architecture enum
 	ARCH_AARCH64 Arch = iota
 	ARCH_PPC64LE
 	ARCH_S390X
 	ARCH_X86_64
 )
 
-const (
+const ( // architecture names
+	X86_64ArchName  = "x86_64"
+	Aarch64ArchName = "aarch64"
+	Ppc64leArchName = "ppc64le"
+	S390xArchName   = "s390x"
+)
+
+const ( // image format enum
 	FORMAT_UNSET ImageFormat = iota
 	FORMAT_RAW
 	FORMAT_ISO

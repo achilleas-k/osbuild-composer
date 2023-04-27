@@ -6,6 +6,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/common"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/distro"
+	"github.com/osbuild/osbuild-composer/internal/platform"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 )
 
@@ -137,7 +138,7 @@ var (
 
 	// Partition tables
 	edgeBasePartitionTables = distro.BasePartitionTableMap{
-		distro.X86_64ArchName: disk.PartitionTable{
+		platform.X86_64ArchName: disk.PartitionTable{
 			UUID: "D209C89E-EA5E-4FBD-B161-B461CCE297E0",
 			Type: "gpt",
 			Partitions: []disk.Partition{
@@ -213,7 +214,7 @@ var (
 				},
 			},
 		},
-		distro.Aarch64ArchName: disk.PartitionTable{
+		platform.Aarch64ArchName: disk.PartitionTable{
 			UUID: "D209C89E-EA5E-4FBD-B161-B461CCE297E0",
 			Type: "gpt",
 			Partitions: []disk.Partition{
@@ -376,10 +377,10 @@ func edgeCommitPackageSet(t *imageType) rpmmd.PackageSet {
 	ps = ps.Append(bootPackageSet(t))
 
 	switch t.arch.Name() {
-	case distro.X86_64ArchName:
+	case platform.X86_64ArchName:
 		ps = ps.Append(x8664EdgeCommitPackageSet(t))
 
-	case distro.Aarch64ArchName:
+	case platform.Aarch64ArchName:
 		ps = ps.Append(aarch64EdgeCommitPackageSet(t))
 	}
 
@@ -476,9 +477,9 @@ func edgeSimplifiedInstallerPackageSet(t *imageType) rpmmd.PackageSet {
 
 	switch t.arch.Name() {
 
-	case distro.X86_64ArchName:
+	case platform.X86_64ArchName:
 		ps = ps.Append(x8664EdgeCommitPackageSet(t))
-	case distro.Aarch64ArchName:
+	case platform.Aarch64ArchName:
 		ps = ps.Append(aarch64EdgeCommitPackageSet(t))
 
 	default:
