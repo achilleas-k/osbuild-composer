@@ -7,6 +7,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/container"
 	"github.com/osbuild/osbuild-composer/internal/disk"
 	"github.com/osbuild/osbuild-composer/internal/manifest"
+	"github.com/osbuild/osbuild-composer/internal/rhsm"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/subscription"
 )
@@ -121,7 +122,7 @@ type ImageOptions struct {
 	Size         uint64
 	OSTree       OSTreeImageOptions
 	Subscription *subscription.ImageOptions
-	Facts        *FactsImageOptions
+	Facts        *rhsm.FactsImageOptions
 }
 
 // The OSTreeImageOptions specify an ostree ref, checksum, URL, ContentURL, and RHSM. The meaning of
@@ -148,12 +149,6 @@ type OSTreeImageOptions struct {
 	// Indicate if the 'org.osbuild.rhsm.consumer' secret should be added when pulling from the
 	// remote.
 	RHSM bool
-}
-
-// The FactsImageOptions specify things to be stored into the Insights facts
-// storage. This mostly relates to how the build of the image was performed.
-type FactsImageOptions struct {
-	ApiType string
 }
 
 type BasePartitionTableMap map[string]disk.PartitionTable

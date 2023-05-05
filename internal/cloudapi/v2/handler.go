@@ -20,6 +20,7 @@ import (
 	"github.com/osbuild/osbuild-composer/internal/manifest"
 	"github.com/osbuild/osbuild-composer/internal/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/ostree"
+	"github.com/osbuild/osbuild-composer/internal/rhsm"
 	"github.com/osbuild/osbuild-composer/internal/rpmmd"
 	"github.com/osbuild/osbuild-composer/internal/subscription"
 	"github.com/osbuild/osbuild-composer/internal/target"
@@ -436,8 +437,8 @@ func (h *apiHandlers) PostCompose(ctx echo.Context) error {
 		imageOptions := distro.ImageOptions{Size: imageType.Size(0)}
 
 		if request.Koji == nil {
-			imageOptions.Facts = &distro.FactsImageOptions{
-				ApiType: "cloudapi-v2",
+			imageOptions.Facts = &rhsm.FactsImageOptions{
+				APIType: rhsm.CloudV2APIType,
 			}
 		}
 
