@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -70,6 +71,40 @@ func (r *RepoConfig) Hash() string {
 		bts(r.IgnoreSSL)+
 		r.MetadataExpire+
 		bts(r.RHSM))))
+}
+
+const repoFilenameRegex = "^[\\w.-]{1,250}\\.repo$"
+
+func (repo RepoConfig) Validate() error {
+	if repo.Id == "" {
+		return fmt.Errorf("Repository ID is required")
+	}
+
+	if len(repo.BaseURLs) == 0 && repo.MirrorList == "" && repo.Metalink == "" {
+		return fmt.Errorf("Repository base URL, mirrorlist or metalink is required")
+	}
+
+	if repo.CheckGPG != nil && *repo.CheckGPG && len(repo.GPGKeys) == 0 {
+		return fmt.Errorf("Repository gpg check is set to true but no gpg keys are provided")
+	}
+
+	for _, key := range repo.GPGKeys {
+		// check for a valid GPG key prefix & contains GPG suffix
+		keyIsGPGKey := strings.HasPrefix(key, "-----BEGIN PGP PUBLIC KEY BLOCK-----") && strings.Contains(key, "-----END PGP PUBLIC KEY BLOCK-----")
+
+		// check for a valid URL
+		keyIsURL := false
+		_, err := url.ParseRequestURI(key)
+		if err == nil {
+			keyIsURL = true
+		}
+
+		if !keyIsGPGKey && !keyIsURL {
+			return fmt.Errorf("Repository gpg key is not a valid URL or a valid gpg key")
+		}
+	}
+
+	return nil
 }
 
 type DistrosRepoConfigs map[string]map[string][]RepoConfig

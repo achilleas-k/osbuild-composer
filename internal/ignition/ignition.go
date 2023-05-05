@@ -29,3 +29,10 @@ func EmbeddedOptionsFromBP(bpIgnitionEmbedded blueprint.EmbeddedIgnitionCustomiz
 		Config: string(decodedConfig),
 	}, nil
 }
+
+// ImageOptions specify is used to specify ignition-related image options when
+// initializing a Manifest.
+type ImageOptions struct {
+	Embedded  *EmbeddedOptions
+	FirstBoot *FirstBootOptions
+}

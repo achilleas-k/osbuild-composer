@@ -19,6 +19,11 @@ type PartitionTable struct {
 	ExtraPadding uint64 // Extra space at the end of the partition table (sectors)
 }
 
+type MountpointOption struct {
+	Mountpoint string
+	MinSize    uint64
+}
+
 func NewPartitionTable(basePT *PartitionTable, mountpoints []blueprint.FilesystemCustomization, imageSize uint64, lvmify bool, requiredSizes map[string]uint64, rng *rand.Rand) (*PartitionTable, error) {
 	newPT := basePT.Clone().(*PartitionTable)
 
