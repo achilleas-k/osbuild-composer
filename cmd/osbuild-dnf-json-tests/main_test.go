@@ -46,7 +46,7 @@ func TestCrossArchDepsolve(t *testing.T) {
 					imgType, err := arch.GetImageType(imgTypeStr)
 					require.NoError(t, err)
 
-					packages := imgType.PackageSets(blueprint.Blueprint{},
+					manifest, _, err := imgType.Manifest(&blueprint.Blueprint{},
 						distro.ImageOptions{
 							OSTree: &ostree.ImageOptions{
 								URL:           "foo",
@@ -54,9 +54,10 @@ func TestCrossArchDepsolve(t *testing.T) {
 								FetchChecksum: "baz",
 							},
 						},
-						repos[archStr])
+						repos[archStr], nil, nil, 0)
+					assert.NoError(t, err)
 
-					for _, set := range packages {
+					for _, set := range manifest.Content.PackageSets {
 						_, err = solver.Depsolve(set)
 						assert.NoError(t, err)
 					}

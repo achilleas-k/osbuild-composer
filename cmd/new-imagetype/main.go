@@ -73,11 +73,10 @@ func build(it distro.ImageType) {
 
 	repos := getRepos(it.Arch().Distro().Name(), it.Arch().Name())
 
-	pkgSets := it.PackageSets(*bp, options, repos)
-	pkgs, err := depsolve(pkgSets)
+	manifest, _, err := it.Manifest(bp, options, repos, nil, nil, 0)
 	check(err)
 
-	manifest, _, err := it.Manifest(bp, options, repos, pkgs, nil, 0)
+	pkgs, err := depsolve(manifest.Content.PackageSets)
 	check(err)
 
 	m, err := manifest.Serialize(pkgs)
