@@ -51,7 +51,9 @@ func (m *OSBuildManifest) UnmarshalJSON(payload []byte) error {
 // to generate the pipelines but no content. The content included in the
 // Content field must be resolved before serializing.
 type Manifest struct {
-	pipelines []Pipeline
+
+	// Pipelines describe the build process for an image.
+	Pipelines []Pipeline
 
 	// Content for the image that will be built by the Manifest. Each content
 	// type should be resolved before passing to the Serialize method.
@@ -78,23 +80,23 @@ type Content struct {
 
 func New() Manifest {
 	return Manifest{
-		pipelines: make([]Pipeline, 0),
+		Pipelines: make([]Pipeline, 0),
 	}
 }
 
 func (m *Manifest) addPipeline(p Pipeline) {
-	for _, pipeline := range m.pipelines {
+	for _, pipeline := range m.Pipelines {
 		if pipeline.Name() == p.Name() {
 			panic("duplicate pipeline name in manifest")
 		}
 	}
-	m.pipelines = append(m.pipelines, p)
+	m.Pipelines = append(m.Pipelines, p)
 }
 
 func (m Manifest) GetPackageSetChains() map[string][]rpmmd.PackageSet {
 	chains := make(map[string][]rpmmd.PackageSet)
 
-	for _, pipeline := range m.pipelines {
+	for _, pipeline := range m.Pipelines {
 		if chain := pipeline.getPackageSetChain(); chain != nil {
 			chains[pipeline.Name()] = chain
 		}
@@ -109,17 +111,17 @@ func (m Manifest) Serialize(packageSets map[string][]rpmmd.PackageSpec) (OSBuild
 	commits := make([]ostree.CommitSpec, 0)
 	inline := make([]string, 0)
 	containers := make([]container.Spec, 0)
-	for _, pipeline := range m.pipelines {
+	for _, pipeline := range m.Pipelines {
 		pipeline.serializeStart(packageSets[pipeline.Name()])
 	}
-	for _, pipeline := range m.pipelines {
+	for _, pipeline := range m.Pipelines {
 		commits = append(commits, pipeline.getOSTreeCommits()...)
 		pipelines = append(pipelines, pipeline.serialize())
 		packages = append(packages, packageSets[pipeline.Name()]...)
 		inline = append(inline, pipeline.getInline()...)
 		containers = append(containers, pipeline.getContainerSpecs()...)
 	}
-	for _, pipeline := range m.pipelines {
+	for _, pipeline := range m.Pipelines {
 		pipeline.serializeEnd()
 	}
 
@@ -134,7 +136,7 @@ func (m Manifest) Serialize(packageSets map[string][]rpmmd.PackageSpec) (OSBuild
 
 func (m Manifest) GetCheckpoints() []string {
 	checkpoints := []string{}
-	for _, p := range m.pipelines {
+	for _, p := range m.Pipelines {
 		if p.getCheckpoint() {
 			checkpoints = append(checkpoints, p.Name())
 		}
@@ -144,7 +146,7 @@ func (m Manifest) GetCheckpoints() []string {
 
 func (m Manifest) GetExports() []string {
 	exports := []string{}
-	for _, p := range m.pipelines {
+	for _, p := range m.Pipelines {
 		if p.getExport() {
 			exports = append(exports, p.Name())
 		}
