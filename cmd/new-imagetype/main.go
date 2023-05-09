@@ -77,7 +77,7 @@ func build(it distro.ImageType) {
 	pkgs, err := depsolve(pkgSets)
 	check(err)
 
-	manifest, _, err := it.Manifest(bp.Customizations, options, repos, pkgs, nil, 0)
+	manifest, _, err := it.Manifest(bp, options, repos, pkgs, nil, 0)
 	check(err)
 
 	m, err := manifest.Serialize(pkgs)
