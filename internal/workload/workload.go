@@ -1,12 +1,16 @@
 package workload
 
-import "github.com/osbuild/osbuild-composer/internal/rpmmd"
+import (
+	"github.com/osbuild/osbuild-composer/internal/rpmmd"
+)
 
 type Workload interface {
 	GetPackages() []string
 	GetRepos() []rpmmd.RepoConfig
 	GetServices() []string
 	GetDisabledServices() []string
+
+	SetRepos(repos []rpmmd.RepoConfig)
 }
 
 type BaseWorkload struct {
@@ -27,4 +31,8 @@ func (p BaseWorkload) GetServices() []string {
 
 func (p BaseWorkload) GetDisabledServices() []string {
 	return []string{}
+}
+
+func (p *BaseWorkload) SetRepos(repos []rpmmd.RepoConfig) {
+	p.Repos = repos
 }
