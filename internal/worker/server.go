@@ -153,8 +153,8 @@ func (s *Server) EnqueueKojiFinalize(job *KojiFinalizeJob, initID uuid.UUID, bui
 	return s.enqueue(JobTypeKojiFinalize, job, append([]uuid.UUID{initID}, buildIDs...), channel)
 }
 
-func (s *Server) EnqueueDepsolve(job *DepsolveJob, channel string) (uuid.UUID, error) {
-	return s.enqueue(JobTypeDepsolve, job, nil, channel)
+func (s *Server) EnqueueDepsolve(job *DepsolveJob, dependencies []uuid.UUID, channel string) (uuid.UUID, error) {
+	return s.enqueue(JobTypeDepsolve, job, dependencies, channel)
 }
 
 func (s *Server) EnqueueManifestJobByID(job *ManifestJobByID, dependencies []uuid.UUID, channel string) (uuid.UUID, error) {
@@ -164,16 +164,16 @@ func (s *Server) EnqueueManifestJobByID(job *ManifestJobByID, dependencies []uui
 	return s.enqueue(JobTypeManifestIDOnly, job, dependencies, channel)
 }
 
-func (s *Server) EnqueueContainerResolveJob(job *ContainerResolveJob, channel string) (uuid.UUID, error) {
-	return s.enqueue(JobTypeContainerResolve, job, nil, channel)
+func (s *Server) EnqueueContainerResolveJob(job *ContainerResolveJob, dependencies []uuid.UUID, channel string) (uuid.UUID, error) {
+	return s.enqueue(JobTypeContainerResolve, job, dependencies, channel)
 }
 
-func (s *Server) EnqueueFileResolveJob(job *FileResolveJob, channel string) (uuid.UUID, error) {
-	return s.enqueue(JobTypeFileResolve, job, nil, channel)
+func (s *Server) EnqueueFileResolveJob(job *FileResolveJob, dependencies []uuid.UUID, channel string) (uuid.UUID, error) {
+	return s.enqueue(JobTypeFileResolve, job, dependencies, channel)
 }
 
-func (s *Server) EnqueueOSTreeResolveJob(job *OSTreeResolveJob, channel string) (uuid.UUID, error) {
-	return s.enqueue(JobTypeOSTreeResolve, job, nil, channel)
+func (s *Server) EnqueueOSTreeResolveJob(job *OSTreeResolveJob, dependencies []uuid.UUID, channel string) (uuid.UUID, error) {
+	return s.enqueue(JobTypeOSTreeResolve, job, dependencies, channel)
 }
 
 func (s *Server) EnqueueAWSEC2CopyJob(job *AWSEC2CopyJob, parent uuid.UUID, channel string) (uuid.UUID, error) {

@@ -112,7 +112,7 @@ func (s *Server) enqueueCompose(distribution distro.Distro, bp blueprint.Bluepri
 		ModulePlatformID: distribution.ModulePlatformID(),
 		Arch:             ir.arch.Name(),
 		Releasever:       distribution.Releasever(),
-	}, channel)
+	}, nil, channel)
 	if err != nil {
 		return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 	}
@@ -133,7 +133,7 @@ func (s *Server) enqueueCompose(distribution distro.Distro, bp blueprint.Bluepri
 			}
 		}
 
-		jobId, err := s.workers.EnqueueContainerResolveJob(&job, channel)
+		jobId, err := s.workers.EnqueueContainerResolveJob(&job, nil, channel)
 
 		if err != nil {
 			return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
@@ -154,7 +154,7 @@ func (s *Server) enqueueCompose(distribution distro.Distro, bp blueprint.Bluepri
 					RHSM:   ir.ostree.RHSM,
 				},
 			},
-		}, channel)
+		}, nil, channel)
 		if err != nil {
 			return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 		}
@@ -210,7 +210,7 @@ func (s *Server) enqueueKojiCompose(taskID uint64, server, name, version, releas
 			ModulePlatformID: distribution.ModulePlatformID(),
 			Arch:             ir.arch.Name(),
 			Releasever:       distribution.Releasever(),
-		}, channel)
+		}, nil, channel)
 		if err != nil {
 			return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 		}
@@ -231,7 +231,7 @@ func (s *Server) enqueueKojiCompose(taskID uint64, server, name, version, releas
 				}
 			}
 
-			jobId, err := s.workers.EnqueueContainerResolveJob(&job, channel)
+			jobId, err := s.workers.EnqueueContainerResolveJob(&job, nil, channel)
 
 			if err != nil {
 				return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
@@ -251,7 +251,7 @@ func (s *Server) enqueueKojiCompose(taskID uint64, server, name, version, releas
 						Parent: ir.ostree.Parent,
 					},
 				},
-			}, channel)
+			}, nil, channel)
 			if err != nil {
 				return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 			}

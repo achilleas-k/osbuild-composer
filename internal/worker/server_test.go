@@ -401,7 +401,7 @@ func TestRequestJobById(t *testing.T) {
 	server := newTestServer(t, t.TempDir(), time.Duration(0), "/api/worker/v1", false)
 	handler := server.Handler()
 
-	depsolveJobId, err := server.EnqueueDepsolve(&worker.DepsolveJob{}, "")
+	depsolveJobId, err := server.EnqueueDepsolve(&worker.DepsolveJob{}, nil, "")
 	require.NoError(t, err)
 
 	jobId, err := server.EnqueueManifestJobByID(&worker.ManifestJobByID{}, []uuid.UUID{depsolveJobId}, "")
@@ -599,7 +599,7 @@ func TestDepsolveLegacyErrorConversion(t *testing.T) {
 	}
 	server := newTestServer(t, t.TempDir(), time.Duration(0), "/api/worker/v1", false)
 
-	depsolveJobId, err := server.EnqueueDepsolve(&worker.DepsolveJob{}, "")
+	depsolveJobId, err := server.EnqueueDepsolve(&worker.DepsolveJob{}, nil, "")
 	require.NoError(t, err)
 
 	_, _, _, _, _, err = server.RequestJob(context.Background(), arch.Name(), []string{worker.JobTypeDepsolve}, []string{""})
@@ -787,7 +787,7 @@ func enqueueAndFinishTestJobDependencies(s *worker.Server, deps []testJob) ([]uu
 			if len(depUUIDs) != 0 {
 				return nil, fmt.Errorf("dependencies are not supported for DepsolveJob, got: %d", len(depUUIDs))
 			}
-			id, err = s.EnqueueDepsolve(job, "")
+			id, err = s.EnqueueDepsolve(job, nil, "")
 			if err != nil {
 				return nil, err
 			}
@@ -817,7 +817,7 @@ func enqueueAndFinishTestJobDependencies(s *worker.Server, deps []testJob) ([]uu
 			if len(depUUIDs) != 0 {
 				return nil, fmt.Errorf("dependencies are not supported for ContainerResolveJob, got: %d", len(depUUIDs))
 			}
-			id, err = s.EnqueueContainerResolveJob(job, "")
+			id, err = s.EnqueueContainerResolveJob(job, nil, "")
 			if err != nil {
 				return nil, err
 			}
@@ -827,7 +827,7 @@ func enqueueAndFinishTestJobDependencies(s *worker.Server, deps []testJob) ([]uu
 			if len(depUUIDs) != 0 {
 				return nil, fmt.Errorf("dependencies are not supported for OSTreeResolveJob, got: %d", len(depUUIDs))
 			}
-			id, err = s.EnqueueOSTreeResolveJob(job, "")
+			id, err = s.EnqueueOSTreeResolveJob(job, nil, "")
 			if err != nil {
 				return nil, err
 			}
