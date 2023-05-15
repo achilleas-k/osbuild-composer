@@ -73,7 +73,7 @@ func build(it distro.ImageType) {
 
 	repos := getRepos(it.Arch().Distro().Name(), it.Arch().Name())
 
-	manifest, _, err := it.Manifest(bp, options, repos, nil, nil, 0)
+	manifest, _, err := it.Manifest(bp, options, repos, 0)
 	check(err)
 
 	pkgs, err := depsolve(manifest.Content.PackageSets)
