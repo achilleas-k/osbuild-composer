@@ -241,6 +241,14 @@ type DepsolveJobResult struct {
 	JobResult
 }
 
+type ManifestSourceJob struct{}
+
+type ManifestSourceJobResult struct {
+	Manifest manifest.Manifest `json:"manifest"`
+	Error    string
+	JobResult
+}
+
 type ManifestJobByID struct{}
 
 type ManifestJobByIDResult struct {

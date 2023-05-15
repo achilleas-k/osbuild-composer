@@ -39,6 +39,7 @@ const (
 	JobTypeOSTreeResolve    string = "ostree-resolve"
 	JobTypeAWSEC2Copy       string = "aws-ec2-copy"
 	JobTypeAWSEC2Share      string = "aws-ec2-share"
+	JobTypeManifestSource   string = "manifest-source"
 )
 
 type Server struct {
@@ -164,6 +165,10 @@ func (s *Server) EnqueueManifestJobByID(job *ManifestJobByID, dependencies []uui
 	return s.enqueue(JobTypeManifestIDOnly, job, dependencies, channel)
 }
 
+func (s *Server) EnqueueManifestSourceJob(job *ManifestSourceJob, channel string) (uuid.UUID, error) {
+	return s.enqueue(JobTypeContainerResolve, job, nil, channel)
+}
+
 func (s *Server) EnqueueContainerResolveJob(job *ContainerResolveJob, dependencies []uuid.UUID, channel string) (uuid.UUID, error) {
 	return s.enqueue(JobTypeContainerResolve, job, dependencies, channel)
 }
@@ -219,6 +224,14 @@ func (s *Server) JobDependencyChainErrors(id uuid.UUID) (*clienterrors.Error, er
 	case JobTypeManifestIDOnly:
 		var manifestJR ManifestJobByIDResult
 		jobInfo, err = s.ManifestJobInfo(id, &manifestJR)
+		if err != nil {
+			return nil, err
+		}
+		jobResult = &manifestJR.JobResult
+
+	case JobTypeManifestSource:
+		var manifestJR ManifestSourceJobResult
+		jobInfo, err = s.ManifestSourceJobInfo(id, &manifestJR)
 		if err != nil {
 			return nil, err
 		}
@@ -381,6 +394,19 @@ func (s *Server) ManifestJobInfo(id uuid.UUID, result *ManifestJobByIDResult) (*
 
 	if jobInfo.JobType != JobTypeManifestIDOnly {
 		return nil, fmt.Errorf("expected %q, found %q job instead", JobTypeManifestIDOnly, jobInfo.JobType)
+	}
+
+	return jobInfo, nil
+}
+
+func (s *Server) ManifestSourceJobInfo(id uuid.UUID, result *ManifestSourceJobResult) (*JobInfo, error) {
+	jobInfo, err := s.jobInfo(id, result)
+	if err != nil {
+		return nil, err
+	}
+
+	if jobInfo.JobType != JobTypeManifestSource {
+		return nil, fmt.Errorf("expected %q, found %q job instead", JobTypeManifestSource, jobInfo.JobType)
 	}
 
 	return jobInfo, nil
