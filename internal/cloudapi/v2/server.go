@@ -107,17 +107,7 @@ func (s *Server) enqueueCompose(distribution distro.Distro, bp blueprint.Bluepri
 	}
 	ir := irs[0]
 
-	depsolveJobID, err := s.workers.EnqueueDepsolve(&worker.DepsolveJob{
-		PackageSets:      ir.imageType.PackageSets(bp, ir.imageOptions, ir.repositories),
-		ModulePlatformID: distribution.ModulePlatformID(),
-		Arch:             ir.arch.Name(),
-		Releasever:       distribution.Releasever(),
-	}, nil, channel)
-	if err != nil {
-		return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
-	}
-
-	dependencies := []uuid.UUID{depsolveJobID}
+	dependencies := []uuid.UUID{}
 	var containerResolveJob uuid.UUID
 	if len(bp.Containers) > 0 {
 		job := worker.ContainerResolveJob{
@@ -168,13 +158,23 @@ func (s *Server) enqueueCompose(distribution distro.Distro, bp blueprint.Bluepri
 		return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 	}
 
+	depsolveJobID, err := s.workers.EnqueueDepsolve(&worker.DepsolveJob{
+		PackageSets:      ir.imageType.PackageSets(bp, ir.imageOptions, ir.repositories),
+		ModulePlatformID: distribution.ModulePlatformID(),
+		Arch:             ir.arch.Name(),
+		Releasever:       distribution.Releasever(),
+	}, nil, channel)
+	if err != nil {
+		return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
+	}
+
 	id, err = s.workers.EnqueueOSBuildAsDependency(ir.arch.Name(), &worker.OSBuildJob{
 		Targets: []*target.Target{ir.target},
 		PipelineNames: &worker.PipelineNames{
 			Build:   ir.imageType.BuildPipelines(),
 			Payload: ir.imageType.PayloadPipelines(),
 		},
-	}, []uuid.UUID{manifestJobID}, channel)
+	}, []uuid.UUID{manifestJobID, depsolveJobID}, channel)
 	if err != nil {
 		return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 	}
@@ -205,18 +205,8 @@ func (s *Server) enqueueKojiCompose(taskID uint64, server, name, version, releas
 	var kojiFilenames []string
 	var buildIDs []uuid.UUID
 	for _, ir := range irs {
-		depsolveJobID, err := s.workers.EnqueueDepsolve(&worker.DepsolveJob{
-			PackageSets:      ir.imageType.PackageSets(bp, ir.imageOptions, ir.repositories),
-			ModulePlatformID: distribution.ModulePlatformID(),
-			Arch:             ir.arch.Name(),
-			Releasever:       distribution.Releasever(),
-		}, nil, channel)
-		if err != nil {
-			return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
-		}
-
 		var containerResolveJob uuid.UUID
-		dependencies := []uuid.UUID{depsolveJobID}
+		dependencies := []uuid.UUID{}
 		if len(bp.Containers) > 0 {
 			job := worker.ContainerResolveJob{
 				Arch:  ir.arch.Name(),
@@ -273,6 +263,16 @@ func (s *Server) enqueueKojiCompose(taskID uint64, server, name, version, releas
 			splitExtension(ir.imageType.Filename()),
 		)
 
+		depsolveJobID, err := s.workers.EnqueueDepsolve(&worker.DepsolveJob{
+			PackageSets:      ir.imageType.PackageSets(bp, ir.imageOptions, ir.repositories),
+			ModulePlatformID: distribution.ModulePlatformID(),
+			Arch:             ir.arch.Name(),
+			Releasever:       distribution.Releasever(),
+		}, []uuid.UUID{manifestJobID}, channel)
+		if err != nil {
+			return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
+		}
+
 		kojiTarget := target.NewKojiTarget(&target.KojiTargetOptions{
 			Server:          server,
 			UploadDirectory: kojiDirectory,
@@ -294,7 +294,7 @@ func (s *Server) enqueueKojiCompose(taskID uint64, server, name, version, releas
 			},
 			Targets:            targets,
 			ManifestDynArgsIdx: common.ToPtr(1),
-		}, []uuid.UUID{initID, manifestJobID}, channel)
+		}, []uuid.UUID{initID, manifestJobID, depsolveJobID}, channel)
 		if err != nil {
 			return id, HTTPErrorWithInternal(ErrorEnqueueingJob, err)
 		}
