@@ -69,6 +69,8 @@ func UnmarshalTargetResultOptions(trName TargetName, rawOptions json.RawMessage)
 		options = new(OCITargetResultOptions)
 	case TargetNameContainer:
 		options = new(ContainerTargetResultOptions)
+	case TargetNamePulpOSTree:
+		options = new(PulpOSTreeTargetResultOptions)
 	default:
 		return nil, fmt.Errorf("unexpected target result name: %s", trName)
 	}
