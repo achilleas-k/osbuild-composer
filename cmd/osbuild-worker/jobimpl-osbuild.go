@@ -75,6 +75,7 @@ type OSBuildJobImpl struct {
 	AWSBucket        string
 	S3Config         S3Configuration
 	ContainersConfig ContainersConfiguration
+	PulpConfig       PulpConfiguration
 }
 
 // Returns an *awscloud.AWS object with the credentials of the request. If they
@@ -267,23 +268,31 @@ func (impl *OSBuildJobImpl) getContainerClient(destination string, targetOptions
 }
 
 func (impl *OSBuildJobImpl) getPulpClient(targetOptions *target.PulpOSTreeTargetOptions) (*pulp.Client, error) {
-	creds := &pulp.Credentials{}
+	var creds *pulp.Credentials
 	if targetOptions.Username != "" && targetOptions.Password != "" {
 		creds = &pulp.Credentials{
 			Username: targetOptions.Username,
 			Password: targetOptions.Password,
 		}
-	} else {
-		// TODO: read from worker configuration
-		return nil, fmt.Errorf("no credentials for pulp were set")
 	}
-
-	if targetOptions.ServerAddress == "" {
-		// TODO: read from worker configuration
+	address := targetOptions.ServerAddress
+	if address == "" {
+		address = impl.PulpConfig.ServerAddress
+	}
+	if address == "" {
 		return nil, fmt.Errorf("pulp server address not set")
 	}
 
-	return pulp.NewClient(targetOptions.ServerAddress, creds), nil
+	if creds != nil {
+		return pulp.NewClient(address, creds), nil
+	}
+
+	// read from worker configuration
+	if impl.PulpConfig.CredsFilePath == "" {
+		return nil, fmt.Errorf("pulp credentials not set")
+	}
+
+	return pulp.NewClientFromFile(impl.PulpConfig.ServerAddress, impl.PulpConfig.CredsFilePath)
 }
 
 func (impl *OSBuildJobImpl) Run(job worker.Job) error {
