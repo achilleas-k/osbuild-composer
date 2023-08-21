@@ -62,6 +62,11 @@ type containersConfig struct {
 	TLSVerify    bool   `toml:"tls_verify"`
 }
 
+type pulpConfig struct {
+	Credentials string `toml:"credentials"`
+	ServerURL   string `toml:"server_address"`
+}
+
 type workerConfig struct {
 	Composer       *composerConfig             `toml:"composer"`
 	Koji           map[string]kojiServerConfig `toml:"koji"`
@@ -71,6 +76,7 @@ type workerConfig struct {
 	GenericS3      *genericS3Config            `toml:"generic_s3"`
 	Authentication *authenticationConfig       `toml:"authentication"`
 	Containers     *containersConfig           `toml:"containers"`
+	Pulp           *pulpConfig                 `toml:"pulp"`
 	// default value: /api/worker/v1
 	BasePath string `toml:"base_path"`
 	DNFJson  string `toml:"dnf-json"`
