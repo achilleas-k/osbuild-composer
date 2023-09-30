@@ -50,39 +50,9 @@ type APIClient struct {
 
 	// API Services
 
-	AccessPoliciesAPI *AccessPoliciesAPIService
-
-	AcsFileAPI *AcsFileAPIService
-
-	AcsRpmAPI *AcsRpmAPIService
-
-	AnsibleCollectionsAPI *AnsibleCollectionsAPIService
-
-	AnsibleCopyAPI *AnsibleCopyAPIService
-
-	ApiCollectionsAPI *ApiCollectionsAPIService
-
-	ApiRolesAPI *ApiRolesAPIService
-
 	ArtifactsAPI *ArtifactsAPIService
 
-	CollectionImportAPI *CollectionImportAPIService
-
-	ContentAPI *ContentAPIService
-
-	ContentAdvisoriesAPI *ContentAdvisoriesAPIService
-
 	ContentArtifactAPI *ContentArtifactAPIService
-
-	ContentBlobsAPI *ContentBlobsAPIService
-
-	ContentCollectionDeprecationsAPI *ContentCollectionDeprecationsAPIService
-
-	ContentCollectionMarksAPI *ContentCollectionMarksAPIService
-
-	ContentCollectionSignaturesAPI *ContentCollectionSignaturesAPIService
-
-	ContentCollectionVersionsAPI *ContentCollectionVersionsAPIService
 
 	ContentCommitsAPI *ContentCommitsAPIService
 
@@ -90,341 +60,37 @@ type APIClient struct {
 
 	ContentContentAPI *ContentContentAPIService
 
-	ContentDistributionTreesAPI *ContentDistributionTreesAPIService
-
-	ContentFilesAPI *ContentFilesAPIService
-
-	ContentGemAPI *ContentGemAPIService
-
-	ContentGenericContentsAPI *ContentGenericContentsAPIService
-
-	ContentInstallerFileIndicesAPI *ContentInstallerFileIndicesAPIService
-
-	ContentInstallerPackagesAPI *ContentInstallerPackagesAPIService
-
-	ContentManifestsAPI *ContentManifestsAPIService
-
-	ContentModulemdDefaultsAPI *ContentModulemdDefaultsAPIService
-
-	ContentModulemdObsoletesAPI *ContentModulemdObsoletesAPIService
-
-	ContentModulemdsAPI *ContentModulemdsAPIService
-
-	ContentNamespacesAPI *ContentNamespacesAPIService
-
 	ContentObjectsAPI *ContentObjectsAPIService
-
-	ContentPackageIndicesAPI *ContentPackageIndicesAPIService
-
-	ContentPackageReleaseComponentsAPI *ContentPackageReleaseComponentsAPIService
-
-	ContentPackagecategoriesAPI *ContentPackagecategoriesAPIService
-
-	ContentPackageenvironmentsAPI *ContentPackageenvironmentsAPIService
-
-	ContentPackagegroupsAPI *ContentPackagegroupsAPIService
-
-	ContentPackagelangpacksAPI *ContentPackagelangpacksAPIService
-
-	ContentPackagesAPI *ContentPackagesAPIService
 
 	ContentRefsAPI *ContentRefsAPIService
 
-	ContentReleaseArchitecturesAPI *ContentReleaseArchitecturesAPIService
-
-	ContentReleaseComponentsAPI *ContentReleaseComponentsAPIService
-
-	ContentReleaseFilesAPI *ContentReleaseFilesAPIService
-
-	ContentReleasesAPI *ContentReleasesAPIService
-
-	ContentRepoMetadataFilesAPI *ContentRepoMetadataFilesAPIService
-
-	ContentRolesAPI *ContentRolesAPIService
-
-	ContentSignaturesAPI *ContentSignaturesAPIService
-
 	ContentSummariesAPI *ContentSummariesAPIService
-
-	ContentTagsAPI *ContentTagsAPIService
-
-	ContentguardsAPI *ContentguardsAPIService
-
-	ContentguardsContentRedirectAPI *ContentguardsContentRedirectAPIService
-
-	ContentguardsRbacAPI *ContentguardsRbacAPIService
-
-	ContentguardsRhsmAPI *ContentguardsRhsmAPIService
-
-	ContentguardsX509API *ContentguardsX509APIService
-
-	DebCopyAPI *DebCopyAPIService
-
-	DistributionsAPI *DistributionsAPIService
-
-	DistributionsAnsibleAPI *DistributionsAnsibleAPIService
-
-	DistributionsAptAPI *DistributionsAptAPIService
 
 	DistributionsArtifactsAPI *DistributionsArtifactsAPIService
 
-	DistributionsContainerAPI *DistributionsContainerAPIService
-
-	DistributionsFileAPI *DistributionsFileAPIService
-
-	DistributionsGemAPI *DistributionsGemAPIService
-
-	DistributionsMavenAPI *DistributionsMavenAPIService
-
 	DistributionsOstreeAPI *DistributionsOstreeAPIService
-
-	DistributionsPypiAPI *DistributionsPypiAPIService
-
-	DistributionsRpmAPI *DistributionsRpmAPIService
-
-	DocsApiJsonAPI *DocsApiJsonAPIService
-
-	DocsApiYamlAPI *DocsApiYamlAPIService
-
-	DomainsAPI *DomainsAPIService
-
-	ExportersFilesystemAPI *ExportersFilesystemAPIService
-
-	ExportersFilesystemExportsAPI *ExportersFilesystemExportsAPIService
-
-	ExportersPulpAPI *ExportersPulpAPIService
-
-	ExportersPulpExportsAPI *ExportersPulpExportsAPIService
-
-	GalaxyDetailAPI *GalaxyDetailAPIService
-
-	GroupsAPI *GroupsAPIService
-
-	GroupsRolesAPI *GroupsRolesAPIService
-
-	GroupsUsersAPI *GroupsUsersAPIService
-
-	ImportersPulpAPI *ImportersPulpAPIService
-
-	ImportersPulpImportCheckAPI *ImportersPulpImportCheckAPIService
-
-	ImportersPulpImportsAPI *ImportersPulpImportsAPIService
-
-	OrphansAPI *OrphansAPIService
-
-	OrphansCleanupAPI *OrphansCleanupAPIService
-
-	PublicationsAPI *PublicationsAPIService
-
-	PublicationsAptAPI *PublicationsAptAPIService
-
-	PublicationsFileAPI *PublicationsFileAPIService
-
-	PublicationsGemAPI *PublicationsGemAPIService
-
-	PublicationsPypiAPI *PublicationsPypiAPIService
-
-	PublicationsRpmAPI *PublicationsRpmAPIService
-
-	PublicationsVerbatimAPI *PublicationsVerbatimAPIService
-
-	PulpAnsibleApiAPI *PulpAnsibleApiAPIService
-
-	PulpAnsibleApiV2CollectionsVersionsAPI *PulpAnsibleApiV2CollectionsVersionsAPIService
-
-	PulpAnsibleApiV3API *PulpAnsibleApiV3APIService
 
 	PulpAnsibleApiV3ArtifactsCollectionsAPI *PulpAnsibleApiV3ArtifactsCollectionsAPIService
 
-	PulpAnsibleApiV3CollectionVersionsAllAPI *PulpAnsibleApiV3CollectionVersionsAllAPIService
-
-	PulpAnsibleApiV3CollectionsAPI *PulpAnsibleApiV3CollectionsAPIService
-
-	PulpAnsibleApiV3CollectionsAllAPI *PulpAnsibleApiV3CollectionsAllAPIService
-
-	PulpAnsibleApiV3CollectionsVersionsAPI *PulpAnsibleApiV3CollectionsVersionsAPIService
-
-	PulpAnsibleApiV3CollectionsVersionsDocsBlobAPI *PulpAnsibleApiV3CollectionsVersionsDocsBlobAPIService
-
-	PulpAnsibleApiV3NamespacesAPI *PulpAnsibleApiV3NamespacesAPIService
-
-	PulpAnsibleApiV3PluginAnsibleClientConfigurationAPI *PulpAnsibleApiV3PluginAnsibleClientConfigurationAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentCollectionsAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentCollectionsAllCollectionsAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsAllCollectionsAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentCollectionsAllVersionsAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsAllVersionsAPIService
-
 	PulpAnsibleApiV3PluginAnsibleContentCollectionsArtifactsAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsArtifactsAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPI *PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPIService
-
-	PulpAnsibleApiV3PluginAnsibleContentNamespacesAPI *PulpAnsibleApiV3PluginAnsibleContentNamespacesAPIService
-
-	PulpAnsibleApiV3PluginAnsibleSearchCollectionVersionsAPI *PulpAnsibleApiV3PluginAnsibleSearchCollectionVersionsAPIService
 
 	PulpAnsibleArtifactsCollectionsV3API *PulpAnsibleArtifactsCollectionsV3APIService
 
-	PulpAnsibleDefaultApiAPI *PulpAnsibleDefaultApiAPIService
-
-	PulpAnsibleDefaultApiV3API *PulpAnsibleDefaultApiV3APIService
-
 	PulpAnsibleDefaultApiV3ArtifactsCollectionsAPI *PulpAnsibleDefaultApiV3ArtifactsCollectionsAPIService
-
-	PulpAnsibleDefaultApiV3CollectionVersionsAllAPI *PulpAnsibleDefaultApiV3CollectionVersionsAllAPIService
-
-	PulpAnsibleDefaultApiV3CollectionsAPI *PulpAnsibleDefaultApiV3CollectionsAPIService
-
-	PulpAnsibleDefaultApiV3CollectionsAllAPI *PulpAnsibleDefaultApiV3CollectionsAllAPIService
-
-	PulpAnsibleDefaultApiV3CollectionsVersionsAPI *PulpAnsibleDefaultApiV3CollectionsVersionsAPIService
-
-	PulpAnsibleDefaultApiV3CollectionsVersionsDocsBlobAPI *PulpAnsibleDefaultApiV3CollectionsVersionsDocsBlobAPIService
-
-	PulpAnsibleDefaultApiV3NamespacesAPI *PulpAnsibleDefaultApiV3NamespacesAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleClientConfigurationAPI *PulpAnsibleDefaultApiV3PluginAnsibleClientConfigurationAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllCollectionsAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllCollectionsAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllVersionsAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllVersionsAPIService
 
 	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsArtifactsAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsArtifactsAPIService
 
-	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleContentNamespacesAPI *PulpAnsibleDefaultApiV3PluginAnsibleContentNamespacesAPIService
-
-	PulpAnsibleDefaultApiV3PluginAnsibleSearchCollectionVersionsAPI *PulpAnsibleDefaultApiV3PluginAnsibleSearchCollectionVersionsAPIService
-
-	PulpAnsibleTagsAPI *PulpAnsibleTagsAPIService
-
-	PulpContainerNamespacesAPI *PulpContainerNamespacesAPIService
-
-	PulpMavenAPI *PulpMavenAPIService
-
-	PypiAPI *PypiAPIService
-
-	PypiLegacyAPI *PypiLegacyAPIService
-
-	PypiMetadataAPI *PypiMetadataAPIService
-
-	PypiSimpleAPI *PypiSimpleAPIService
-
-	RemotesAPI *RemotesAPIService
-
-	RemotesAptAPI *RemotesAptAPIService
-
-	RemotesCollectionAPI *RemotesCollectionAPIService
-
-	RemotesContainerAPI *RemotesContainerAPIService
-
-	RemotesFileAPI *RemotesFileAPIService
-
-	RemotesGemAPI *RemotesGemAPIService
-
-	RemotesGitAPI *RemotesGitAPIService
-
-	RemotesMavenAPI *RemotesMavenAPIService
-
 	RemotesOstreeAPI *RemotesOstreeAPIService
-
-	RemotesPythonAPI *RemotesPythonAPIService
-
-	RemotesRoleAPI *RemotesRoleAPIService
-
-	RemotesRpmAPI *RemotesRpmAPIService
-
-	RemotesUlnAPI *RemotesUlnAPIService
-
-	RepairAPI *RepairAPIService
-
-	RepositoriesAPI *RepositoriesAPIService
-
-	RepositoriesAnsibleAPI *RepositoriesAnsibleAPIService
-
-	RepositoriesAnsibleVersionsAPI *RepositoriesAnsibleVersionsAPIService
-
-	RepositoriesAptAPI *RepositoriesAptAPIService
-
-	RepositoriesAptVersionsAPI *RepositoriesAptVersionsAPIService
-
-	RepositoriesContainerAPI *RepositoriesContainerAPIService
-
-	RepositoriesContainerPushAPI *RepositoriesContainerPushAPIService
-
-	RepositoriesContainerPushVersionsAPI *RepositoriesContainerPushVersionsAPIService
-
-	RepositoriesContainerVersionsAPI *RepositoriesContainerVersionsAPIService
-
-	RepositoriesFileAPI *RepositoriesFileAPIService
-
-	RepositoriesFileVersionsAPI *RepositoriesFileVersionsAPIService
-
-	RepositoriesGemAPI *RepositoriesGemAPIService
-
-	RepositoriesGemVersionsAPI *RepositoriesGemVersionsAPIService
-
-	RepositoriesMavenAPI *RepositoriesMavenAPIService
-
-	RepositoriesMavenVersionsAPI *RepositoriesMavenVersionsAPIService
 
 	RepositoriesOstreeAPI *RepositoriesOstreeAPIService
 
 	RepositoriesOstreeVersionsAPI *RepositoriesOstreeVersionsAPIService
-
-	RepositoriesPythonAPI *RepositoriesPythonAPIService
-
-	RepositoriesPythonVersionsAPI *RepositoriesPythonVersionsAPIService
-
-	RepositoriesReclaimSpaceAPI *RepositoriesReclaimSpaceAPIService
-
-	RepositoriesRpmAPI *RepositoriesRpmAPIService
-
-	RepositoriesRpmVersionsAPI *RepositoriesRpmVersionsAPIService
-
-	RepositoryVersionsAPI *RepositoryVersionsAPIService
-
-	RolesAPI *RolesAPIService
-
-	RpmCompsAPI *RpmCompsAPIService
-
-	RpmCopyAPI *RpmCopyAPIService
-
-	SigningServicesAPI *SigningServicesAPIService
-
-	StatusAPI *StatusAPIService
 
 	TaskGroupsAPI *TaskGroupsAPIService
 
 	TaskSchedulesAPI *TaskSchedulesAPIService
 
 	TasksAPI *TasksAPIService
-
-	TokenAPI *TokenAPIService
-
-	UploadsAPI *UploadsAPIService
-
-	UpstreamPulpsAPI *UpstreamPulpsAPIService
-
-	UsersAPI *UsersAPIService
-
-	UsersRolesAPI *UsersRolesAPIService
-
-	VersionsAPI *VersionsAPIService
-
-	WorkersAPI *WorkersAPIService
 }
 
 type service struct {
@@ -443,194 +109,27 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
-	c.AccessPoliciesAPI = (*AccessPoliciesAPIService)(&c.common)
-	c.AcsFileAPI = (*AcsFileAPIService)(&c.common)
-	c.AcsRpmAPI = (*AcsRpmAPIService)(&c.common)
-	c.AnsibleCollectionsAPI = (*AnsibleCollectionsAPIService)(&c.common)
-	c.AnsibleCopyAPI = (*AnsibleCopyAPIService)(&c.common)
-	c.ApiCollectionsAPI = (*ApiCollectionsAPIService)(&c.common)
-	c.ApiRolesAPI = (*ApiRolesAPIService)(&c.common)
 	c.ArtifactsAPI = (*ArtifactsAPIService)(&c.common)
-	c.CollectionImportAPI = (*CollectionImportAPIService)(&c.common)
-	c.ContentAPI = (*ContentAPIService)(&c.common)
-	c.ContentAdvisoriesAPI = (*ContentAdvisoriesAPIService)(&c.common)
 	c.ContentArtifactAPI = (*ContentArtifactAPIService)(&c.common)
-	c.ContentBlobsAPI = (*ContentBlobsAPIService)(&c.common)
-	c.ContentCollectionDeprecationsAPI = (*ContentCollectionDeprecationsAPIService)(&c.common)
-	c.ContentCollectionMarksAPI = (*ContentCollectionMarksAPIService)(&c.common)
-	c.ContentCollectionSignaturesAPI = (*ContentCollectionSignaturesAPIService)(&c.common)
-	c.ContentCollectionVersionsAPI = (*ContentCollectionVersionsAPIService)(&c.common)
 	c.ContentCommitsAPI = (*ContentCommitsAPIService)(&c.common)
 	c.ContentConfigsAPI = (*ContentConfigsAPIService)(&c.common)
 	c.ContentContentAPI = (*ContentContentAPIService)(&c.common)
-	c.ContentDistributionTreesAPI = (*ContentDistributionTreesAPIService)(&c.common)
-	c.ContentFilesAPI = (*ContentFilesAPIService)(&c.common)
-	c.ContentGemAPI = (*ContentGemAPIService)(&c.common)
-	c.ContentGenericContentsAPI = (*ContentGenericContentsAPIService)(&c.common)
-	c.ContentInstallerFileIndicesAPI = (*ContentInstallerFileIndicesAPIService)(&c.common)
-	c.ContentInstallerPackagesAPI = (*ContentInstallerPackagesAPIService)(&c.common)
-	c.ContentManifestsAPI = (*ContentManifestsAPIService)(&c.common)
-	c.ContentModulemdDefaultsAPI = (*ContentModulemdDefaultsAPIService)(&c.common)
-	c.ContentModulemdObsoletesAPI = (*ContentModulemdObsoletesAPIService)(&c.common)
-	c.ContentModulemdsAPI = (*ContentModulemdsAPIService)(&c.common)
-	c.ContentNamespacesAPI = (*ContentNamespacesAPIService)(&c.common)
 	c.ContentObjectsAPI = (*ContentObjectsAPIService)(&c.common)
-	c.ContentPackageIndicesAPI = (*ContentPackageIndicesAPIService)(&c.common)
-	c.ContentPackageReleaseComponentsAPI = (*ContentPackageReleaseComponentsAPIService)(&c.common)
-	c.ContentPackagecategoriesAPI = (*ContentPackagecategoriesAPIService)(&c.common)
-	c.ContentPackageenvironmentsAPI = (*ContentPackageenvironmentsAPIService)(&c.common)
-	c.ContentPackagegroupsAPI = (*ContentPackagegroupsAPIService)(&c.common)
-	c.ContentPackagelangpacksAPI = (*ContentPackagelangpacksAPIService)(&c.common)
-	c.ContentPackagesAPI = (*ContentPackagesAPIService)(&c.common)
 	c.ContentRefsAPI = (*ContentRefsAPIService)(&c.common)
-	c.ContentReleaseArchitecturesAPI = (*ContentReleaseArchitecturesAPIService)(&c.common)
-	c.ContentReleaseComponentsAPI = (*ContentReleaseComponentsAPIService)(&c.common)
-	c.ContentReleaseFilesAPI = (*ContentReleaseFilesAPIService)(&c.common)
-	c.ContentReleasesAPI = (*ContentReleasesAPIService)(&c.common)
-	c.ContentRepoMetadataFilesAPI = (*ContentRepoMetadataFilesAPIService)(&c.common)
-	c.ContentRolesAPI = (*ContentRolesAPIService)(&c.common)
-	c.ContentSignaturesAPI = (*ContentSignaturesAPIService)(&c.common)
 	c.ContentSummariesAPI = (*ContentSummariesAPIService)(&c.common)
-	c.ContentTagsAPI = (*ContentTagsAPIService)(&c.common)
-	c.ContentguardsAPI = (*ContentguardsAPIService)(&c.common)
-	c.ContentguardsContentRedirectAPI = (*ContentguardsContentRedirectAPIService)(&c.common)
-	c.ContentguardsRbacAPI = (*ContentguardsRbacAPIService)(&c.common)
-	c.ContentguardsRhsmAPI = (*ContentguardsRhsmAPIService)(&c.common)
-	c.ContentguardsX509API = (*ContentguardsX509APIService)(&c.common)
-	c.DebCopyAPI = (*DebCopyAPIService)(&c.common)
-	c.DistributionsAPI = (*DistributionsAPIService)(&c.common)
-	c.DistributionsAnsibleAPI = (*DistributionsAnsibleAPIService)(&c.common)
-	c.DistributionsAptAPI = (*DistributionsAptAPIService)(&c.common)
 	c.DistributionsArtifactsAPI = (*DistributionsArtifactsAPIService)(&c.common)
-	c.DistributionsContainerAPI = (*DistributionsContainerAPIService)(&c.common)
-	c.DistributionsFileAPI = (*DistributionsFileAPIService)(&c.common)
-	c.DistributionsGemAPI = (*DistributionsGemAPIService)(&c.common)
-	c.DistributionsMavenAPI = (*DistributionsMavenAPIService)(&c.common)
 	c.DistributionsOstreeAPI = (*DistributionsOstreeAPIService)(&c.common)
-	c.DistributionsPypiAPI = (*DistributionsPypiAPIService)(&c.common)
-	c.DistributionsRpmAPI = (*DistributionsRpmAPIService)(&c.common)
-	c.DocsApiJsonAPI = (*DocsApiJsonAPIService)(&c.common)
-	c.DocsApiYamlAPI = (*DocsApiYamlAPIService)(&c.common)
-	c.DomainsAPI = (*DomainsAPIService)(&c.common)
-	c.ExportersFilesystemAPI = (*ExportersFilesystemAPIService)(&c.common)
-	c.ExportersFilesystemExportsAPI = (*ExportersFilesystemExportsAPIService)(&c.common)
-	c.ExportersPulpAPI = (*ExportersPulpAPIService)(&c.common)
-	c.ExportersPulpExportsAPI = (*ExportersPulpExportsAPIService)(&c.common)
-	c.GalaxyDetailAPI = (*GalaxyDetailAPIService)(&c.common)
-	c.GroupsAPI = (*GroupsAPIService)(&c.common)
-	c.GroupsRolesAPI = (*GroupsRolesAPIService)(&c.common)
-	c.GroupsUsersAPI = (*GroupsUsersAPIService)(&c.common)
-	c.ImportersPulpAPI = (*ImportersPulpAPIService)(&c.common)
-	c.ImportersPulpImportCheckAPI = (*ImportersPulpImportCheckAPIService)(&c.common)
-	c.ImportersPulpImportsAPI = (*ImportersPulpImportsAPIService)(&c.common)
-	c.OrphansAPI = (*OrphansAPIService)(&c.common)
-	c.OrphansCleanupAPI = (*OrphansCleanupAPIService)(&c.common)
-	c.PublicationsAPI = (*PublicationsAPIService)(&c.common)
-	c.PublicationsAptAPI = (*PublicationsAptAPIService)(&c.common)
-	c.PublicationsFileAPI = (*PublicationsFileAPIService)(&c.common)
-	c.PublicationsGemAPI = (*PublicationsGemAPIService)(&c.common)
-	c.PublicationsPypiAPI = (*PublicationsPypiAPIService)(&c.common)
-	c.PublicationsRpmAPI = (*PublicationsRpmAPIService)(&c.common)
-	c.PublicationsVerbatimAPI = (*PublicationsVerbatimAPIService)(&c.common)
-	c.PulpAnsibleApiAPI = (*PulpAnsibleApiAPIService)(&c.common)
-	c.PulpAnsibleApiV2CollectionsVersionsAPI = (*PulpAnsibleApiV2CollectionsVersionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3API = (*PulpAnsibleApiV3APIService)(&c.common)
 	c.PulpAnsibleApiV3ArtifactsCollectionsAPI = (*PulpAnsibleApiV3ArtifactsCollectionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3CollectionVersionsAllAPI = (*PulpAnsibleApiV3CollectionVersionsAllAPIService)(&c.common)
-	c.PulpAnsibleApiV3CollectionsAPI = (*PulpAnsibleApiV3CollectionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3CollectionsAllAPI = (*PulpAnsibleApiV3CollectionsAllAPIService)(&c.common)
-	c.PulpAnsibleApiV3CollectionsVersionsAPI = (*PulpAnsibleApiV3CollectionsVersionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3CollectionsVersionsDocsBlobAPI = (*PulpAnsibleApiV3CollectionsVersionsDocsBlobAPIService)(&c.common)
-	c.PulpAnsibleApiV3NamespacesAPI = (*PulpAnsibleApiV3NamespacesAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleClientConfigurationAPI = (*PulpAnsibleApiV3PluginAnsibleClientConfigurationAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsAllCollectionsAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsAllCollectionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsAllVersionsAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsAllVersionsAPIService)(&c.common)
 	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsArtifactsAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsArtifactsAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPI = (*PulpAnsibleApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleContentNamespacesAPI = (*PulpAnsibleApiV3PluginAnsibleContentNamespacesAPIService)(&c.common)
-	c.PulpAnsibleApiV3PluginAnsibleSearchCollectionVersionsAPI = (*PulpAnsibleApiV3PluginAnsibleSearchCollectionVersionsAPIService)(&c.common)
 	c.PulpAnsibleArtifactsCollectionsV3API = (*PulpAnsibleArtifactsCollectionsV3APIService)(&c.common)
-	c.PulpAnsibleDefaultApiAPI = (*PulpAnsibleDefaultApiAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3API = (*PulpAnsibleDefaultApiV3APIService)(&c.common)
 	c.PulpAnsibleDefaultApiV3ArtifactsCollectionsAPI = (*PulpAnsibleDefaultApiV3ArtifactsCollectionsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3CollectionVersionsAllAPI = (*PulpAnsibleDefaultApiV3CollectionVersionsAllAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3CollectionsAPI = (*PulpAnsibleDefaultApiV3CollectionsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3CollectionsAllAPI = (*PulpAnsibleDefaultApiV3CollectionsAllAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3CollectionsVersionsAPI = (*PulpAnsibleDefaultApiV3CollectionsVersionsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3CollectionsVersionsDocsBlobAPI = (*PulpAnsibleDefaultApiV3CollectionsVersionsDocsBlobAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3NamespacesAPI = (*PulpAnsibleDefaultApiV3NamespacesAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleClientConfigurationAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleClientConfigurationAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllCollectionsAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllCollectionsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllVersionsAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsAllVersionsAPIService)(&c.common)
 	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsArtifactsAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsArtifactsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentCollectionsIndexVersionsDocsBlobAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleContentNamespacesAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleContentNamespacesAPIService)(&c.common)
-	c.PulpAnsibleDefaultApiV3PluginAnsibleSearchCollectionVersionsAPI = (*PulpAnsibleDefaultApiV3PluginAnsibleSearchCollectionVersionsAPIService)(&c.common)
-	c.PulpAnsibleTagsAPI = (*PulpAnsibleTagsAPIService)(&c.common)
-	c.PulpContainerNamespacesAPI = (*PulpContainerNamespacesAPIService)(&c.common)
-	c.PulpMavenAPI = (*PulpMavenAPIService)(&c.common)
-	c.PypiAPI = (*PypiAPIService)(&c.common)
-	c.PypiLegacyAPI = (*PypiLegacyAPIService)(&c.common)
-	c.PypiMetadataAPI = (*PypiMetadataAPIService)(&c.common)
-	c.PypiSimpleAPI = (*PypiSimpleAPIService)(&c.common)
-	c.RemotesAPI = (*RemotesAPIService)(&c.common)
-	c.RemotesAptAPI = (*RemotesAptAPIService)(&c.common)
-	c.RemotesCollectionAPI = (*RemotesCollectionAPIService)(&c.common)
-	c.RemotesContainerAPI = (*RemotesContainerAPIService)(&c.common)
-	c.RemotesFileAPI = (*RemotesFileAPIService)(&c.common)
-	c.RemotesGemAPI = (*RemotesGemAPIService)(&c.common)
-	c.RemotesGitAPI = (*RemotesGitAPIService)(&c.common)
-	c.RemotesMavenAPI = (*RemotesMavenAPIService)(&c.common)
 	c.RemotesOstreeAPI = (*RemotesOstreeAPIService)(&c.common)
-	c.RemotesPythonAPI = (*RemotesPythonAPIService)(&c.common)
-	c.RemotesRoleAPI = (*RemotesRoleAPIService)(&c.common)
-	c.RemotesRpmAPI = (*RemotesRpmAPIService)(&c.common)
-	c.RemotesUlnAPI = (*RemotesUlnAPIService)(&c.common)
-	c.RepairAPI = (*RepairAPIService)(&c.common)
-	c.RepositoriesAPI = (*RepositoriesAPIService)(&c.common)
-	c.RepositoriesAnsibleAPI = (*RepositoriesAnsibleAPIService)(&c.common)
-	c.RepositoriesAnsibleVersionsAPI = (*RepositoriesAnsibleVersionsAPIService)(&c.common)
-	c.RepositoriesAptAPI = (*RepositoriesAptAPIService)(&c.common)
-	c.RepositoriesAptVersionsAPI = (*RepositoriesAptVersionsAPIService)(&c.common)
-	c.RepositoriesContainerAPI = (*RepositoriesContainerAPIService)(&c.common)
-	c.RepositoriesContainerPushAPI = (*RepositoriesContainerPushAPIService)(&c.common)
-	c.RepositoriesContainerPushVersionsAPI = (*RepositoriesContainerPushVersionsAPIService)(&c.common)
-	c.RepositoriesContainerVersionsAPI = (*RepositoriesContainerVersionsAPIService)(&c.common)
-	c.RepositoriesFileAPI = (*RepositoriesFileAPIService)(&c.common)
-	c.RepositoriesFileVersionsAPI = (*RepositoriesFileVersionsAPIService)(&c.common)
-	c.RepositoriesGemAPI = (*RepositoriesGemAPIService)(&c.common)
-	c.RepositoriesGemVersionsAPI = (*RepositoriesGemVersionsAPIService)(&c.common)
-	c.RepositoriesMavenAPI = (*RepositoriesMavenAPIService)(&c.common)
-	c.RepositoriesMavenVersionsAPI = (*RepositoriesMavenVersionsAPIService)(&c.common)
 	c.RepositoriesOstreeAPI = (*RepositoriesOstreeAPIService)(&c.common)
 	c.RepositoriesOstreeVersionsAPI = (*RepositoriesOstreeVersionsAPIService)(&c.common)
-	c.RepositoriesPythonAPI = (*RepositoriesPythonAPIService)(&c.common)
-	c.RepositoriesPythonVersionsAPI = (*RepositoriesPythonVersionsAPIService)(&c.common)
-	c.RepositoriesReclaimSpaceAPI = (*RepositoriesReclaimSpaceAPIService)(&c.common)
-	c.RepositoriesRpmAPI = (*RepositoriesRpmAPIService)(&c.common)
-	c.RepositoriesRpmVersionsAPI = (*RepositoriesRpmVersionsAPIService)(&c.common)
-	c.RepositoryVersionsAPI = (*RepositoryVersionsAPIService)(&c.common)
-	c.RolesAPI = (*RolesAPIService)(&c.common)
-	c.RpmCompsAPI = (*RpmCompsAPIService)(&c.common)
-	c.RpmCopyAPI = (*RpmCopyAPIService)(&c.common)
-	c.SigningServicesAPI = (*SigningServicesAPIService)(&c.common)
-	c.StatusAPI = (*StatusAPIService)(&c.common)
 	c.TaskGroupsAPI = (*TaskGroupsAPIService)(&c.common)
 	c.TaskSchedulesAPI = (*TaskSchedulesAPIService)(&c.common)
 	c.TasksAPI = (*TasksAPIService)(&c.common)
-	c.TokenAPI = (*TokenAPIService)(&c.common)
-	c.UploadsAPI = (*UploadsAPIService)(&c.common)
-	c.UpstreamPulpsAPI = (*UpstreamPulpsAPIService)(&c.common)
-	c.UsersAPI = (*UsersAPIService)(&c.common)
-	c.UsersRolesAPI = (*UsersRolesAPIService)(&c.common)
-	c.VersionsAPI = (*VersionsAPIService)(&c.common)
-	c.WorkersAPI = (*WorkersAPIService)(&c.common)
 
 	return c
 }
