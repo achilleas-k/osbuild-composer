@@ -72,6 +72,14 @@ if [[ "$ID" == rhel ]] && sudo subscription-manager status; then
   DISTRO_VERSION=rhel-${VERSION_ID%.*}-cdn
 fi
 
+# EL8 aarch64 builds run out of memory and get killed. A swapfile fixes this.
+if [[ "$PLATFORM_ID" == "platform:el8" ]] && [[ "${ARCH}" == "aarch64" ]]; then
+    dd if=/dev/zero of=/swapfile bs=1M count=1024
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+fi
+
 # Relative path of the repository – used for constructing both the local and
 # remote paths below, so that they're consistent.
 REPO_PATH=osbuild-composer/${DISTRO_VERSION}/${ARCH}/${COMMIT}
