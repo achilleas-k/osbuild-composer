@@ -1,3 +1,5 @@
+//go:build !nopulp
+
 package pulp
 
 import (
