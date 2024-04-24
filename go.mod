@@ -16,7 +16,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.29
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.12
 	github.com/BurntSushi/toml v1.3.2
-	github.com/aws/aws-sdk-go v1.51.25
+	github.com/aws/aws-sdk-go v1.51.26
 	github.com/coreos/go-semver v0.3.1
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
 	github.com/deepmap/oapi-codegen v1.8.2
@@ -50,7 +50,7 @@ require (
 	golang.org/x/oauth2 v0.19.0
 	golang.org/x/sync v0.6.0
 	golang.org/x/sys v0.19.0
-	google.golang.org/api v0.175.0
+	google.golang.org/api v0.176.0
 )
 
 require (
@@ -219,3 +219,5 @@ require (
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/osbuild/images => github.com/achilleas-k/images v0.0.0-20240424223140-a94dd59e9252

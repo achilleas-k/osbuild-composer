@@ -173,6 +173,9 @@ func TestConvert(t *testing.T) {
 					Installer: &InstallerCustomization{
 						Unattended:   true,
 						SudoNopasswd: []string{"%group", "user"},
+						Kickstart: &Kickstart{
+							Contents: "user stuff",
+						},
 					},
 				},
 				Distro: "distro",
@@ -328,6 +331,9 @@ func TestConvert(t *testing.T) {
 					Installer: &iblueprint.InstallerCustomization{
 						Unattended:   true,
 						SudoNopasswd: []string{"%group", "user"},
+						Kickstart: &iblueprint.Kickstart{
+							Contents: "user stuff",
+						},
 					},
 				},
 				Distro: "distro",
