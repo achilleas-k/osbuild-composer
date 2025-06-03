@@ -268,67 +268,58 @@ func TestGetBlueprintFromCustomizations(t *testing.T) {
 	var fileGroup File_Group
 	require.NoError(t, fileGroup.FromFileGroup0("root"))
 
-	var plainPart Partition
-	require.NoError(t, plainPart.FromFilesystemTyped(
-		FilesystemTyped{
-			Type:       common.ToPtr(Plain),
-			Minsize:    nil,
-			FsType:     FilesystemTypedFsTypeXfs,
-			Label:      common.ToPtr("data"),
-			Mountpoint: common.ToPtr("/data"),
+	plainPart := blueprint.PartitionCustomization{
+		Type:    "plain",
+		MinSize: nil,
+		FilesystemTypedCustomization: blueprint.FilesystemTypedCustomization{
+			FSType:     "xfs",
+			Label:      "data",
+			Mountpoint: "/data",
 		},
-	))
+	}
 
-	btrfsSize := "100 MiB"
-
-	var btrfsPart Partition
-	require.NoError(t, btrfsPart.FromBtrfsVolume(
-		BtrfsVolume{
-			Type:    Btrfs,
-			Minsize: &btrfsSize,
-			Subvolumes: []BtrfsSubvolume{
-				{
-					Mountpoint: "/data/db1",
-					Name:       "+subvols/db1",
-				},
-				{
-					Mountpoint: "/data/db2",
-					Name:       "+subvols/db2",
-				},
+	btrfsPart := blueprint.BtrfsVolume{
+		Type:    "btrfs",
+		Minsize: "100 MiB",
+		Subvolumes: []blueprint.BtrfsSubvolume{
+			{
+				Mountpoint: "/data/db1",
+				Name:       "+subvols/db1",
+			},
+			{
+				Mountpoint: "/data/db2",
+				Name:       "+subvols/db2",
 			},
 		},
-	))
+	}
 
 	vgSize := "10 GiB"
 	lvSize := "3 GiB"
 
-	var vgPart Partition
-	require.NoError(t, vgPart.FromVolumeGroup(
-		VolumeGroup{
-			Type:     Lvm,
-			Name:     common.ToPtr("vg000001"),
-			Minsize:  &vgSize,
-			PartType: common.ToPtr("E6D6D379-F507-44C2-A23C-238F2A3DF928"),
-			LogicalVolumes: []LogicalVolume{
-				{
-					FsType:     LogicalVolumeFsTypeExt4,
-					Label:      nil,
-					Minsize:    nil,
-					Mountpoint: common.ToPtr("/"),
-					Name:       common.ToPtr("rootlv"),
-				},
-				{
-					FsType:     LogicalVolumeFsTypeExt4,
-					Label:      common.ToPtr("home"),
-					Minsize:    &lvSize,
-					Mountpoint: common.ToPtr("/home"),
-					Name:       common.ToPtr("homelv"),
-				},
+	vgPart := blueprint.VolumeGroup{
+		Type:     "lvm",
+		Name:     common.ToPtr("vg000001"),
+		Minsize:  &vgSize,
+		PartType: common.ToPtr("E6D6D379-F507-44C2-A23C-238F2A3DF928"),
+		LogicalVolumes: []blueprint.LogicalVolume{
+			{
+				FsType:     "ext4",
+				Label:      nil,
+				Minsize:    nil,
+				Mountpoint: common.ToPtr("/"),
+				Name:       common.ToPtr("rootlv"),
+			},
+			{
+				FsType:     "ext4",
+				Label:      common.ToPtr("home"),
+				Minsize:    &lvSize,
+				Mountpoint: common.ToPtr("/home"),
+				Name:       common.ToPtr("homelv"),
 			},
 		},
-	))
+	}
 
-	diskSize := "20 GiB"
+	// diskSize := "20 GiB"
 
 	// Construct the compose request with customizations
 	cr = ComposeRequest{Customizations: &Customizations{
@@ -462,8 +453,8 @@ func TestGetBlueprintFromCustomizations(t *testing.T) {
 			},
 		},
 		Disk: &Disk{
-			Minsize: &diskSize,
-			Partitions: []Partition{
+			MinSize: 20 * datasizes.GiB,
+			Partitions: []blueprint.PartitionCustomization{
 				plainPart,
 				btrfsPart,
 				vgPart,
@@ -523,68 +514,56 @@ func TestGetBlueprintFromCompose(t *testing.T) {
 	var fileGroup BlueprintFile_Group
 	require.NoError(t, fileGroup.FromBlueprintFileGroup0("root"))
 
-	var plainPart Partition
-	require.NoError(t, plainPart.FromFilesystemTyped(
-		FilesystemTyped{
-			Type:       common.ToPtr(Plain),
-			Minsize:    nil,
-			FsType:     FilesystemTypedFsTypeXfs,
-			Label:      common.ToPtr("data"),
-			Mountpoint: common.ToPtr("/data"),
-		},
-	))
+	plainPart := blueprint.FilesystemTyped{
+		Type:       "plain",
+		Minsize:    nil,
+		FsType:     "xfs",
+		Label:      "data",
+		Mountpoint: "/data",
+	}
 
-	btrfsSize := "100 MiB"
-
-	var btrfsPart Partition
-	require.NoError(t, btrfsPart.FromBtrfsVolume(
-		BtrfsVolume{
-			Type:    Btrfs,
-			Minsize: &btrfsSize,
-			Subvolumes: []BtrfsSubvolume{
-				{
-					Mountpoint: "/data/db1",
-					Name:       "+subvols/db1",
-				},
-				{
-					Mountpoint: "/data/db2",
-					Name:       "+subvols/db2",
-				},
+	btrfsPart := blueprint.BtrfsVolume{
+		Type:    "btrfs",
+		Minsize: "100 MiB",
+		Subvolumes: []blueprint.BtrfsSubvolume{
+			{
+				Mountpoint: "/data/db1",
+				Name:       "+subvols/db1",
+			},
+			{
+				Mountpoint: "/data/db2",
+				Name:       "+subvols/db2",
 			},
 		},
-	))
+	}
 
 	vgSize := "10 GiB"
 	lvSize := "3 GiB"
 
-	var vgPart Partition
-	require.NoError(t, vgPart.FromVolumeGroup(
-		VolumeGroup{
-			Type:     Lvm,
-			Minsize:  &vgSize,
-			Name:     common.ToPtr("vg000001"),
-			PartType: common.ToPtr("E6D6D379-F507-44C2-A23C-238F2A3DF928"),
-			LogicalVolumes: []LogicalVolume{
-				{
-					FsType:     LogicalVolumeFsTypeExt4,
-					Label:      nil,
-					Minsize:    nil,
-					Mountpoint: common.ToPtr("/"),
-					Name:       common.ToPtr("rootlv"),
-				},
-				{
-					FsType:     LogicalVolumeFsTypeExt4,
-					Label:      common.ToPtr("home"),
-					Minsize:    &lvSize,
-					Mountpoint: common.ToPtr("/home"),
-					Name:       common.ToPtr("homelv"),
-				},
+	vgPart := blueprint.VolumeGroup{
+		Type:     "lvm",
+		Name:     common.ToPtr("vg000001"),
+		Minsize:  &vgSize,
+		PartType: common.ToPtr("E6D6D379-F507-44C2-A23C-238F2A3DF928"),
+		LogicalVolumes: []blueprint.LogicalVolume{
+			{
+				FsType:     "ext4",
+				Label:      nil,
+				Minsize:    nil,
+				Mountpoint: common.ToPtr("/"),
+				Name:       common.ToPtr("rootlv"),
+			},
+			{
+				FsType:     "ext4",
+				Label:      common.ToPtr("home"),
+				Minsize:    &lvSize,
+				Mountpoint: common.ToPtr("/home"),
+				Name:       common.ToPtr("homelv"),
 			},
 		},
-	))
+	}
 
 	fsSize := "1099511627776"
-	diskSize := "20 GiB"
 
 	// Construct the compose request with a blueprint
 	cr = ComposeRequest{Blueprint: &Blueprint{
@@ -720,8 +699,8 @@ func TestGetBlueprintFromCompose(t *testing.T) {
 				},
 			},
 			Disk: &Disk{
-				Minsize: &diskSize,
-				Partitions: []Partition{
+				MinSize: 20 * datasizes.GiB,
+				Partitions: []blueprint.PartitionCustomization{
 					plainPart,
 					btrfsPart,
 					vgPart,
