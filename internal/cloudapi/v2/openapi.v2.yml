@@ -2628,7 +2628,6 @@ components:
       properties:
         type:
           type: string
-          default: plain
           enum:
             - plain
         part_type:
@@ -2653,6 +2652,7 @@ components:
     BtrfsVolume:
       type: object
       required:
+        - type
         - subvolumes
       properties:
         type:
@@ -2686,6 +2686,7 @@ components:
     VolumeGroup:
       type: object
       required:
+        - type
         - logical_volumes
       properties:
         type:
