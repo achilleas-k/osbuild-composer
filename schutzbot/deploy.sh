@@ -136,6 +136,20 @@ retry sudo dnf -y install osbuild-tools
 # Save osbuild-composer NVR to a file to be used as CI artifact
 rpm -q osbuild-composer > COMPOSER_NVR
 
+if [[ "${IMAGE_BUILDER_EXPERIMENTAL}" != "" ]]; then
+    greenprint "Adding experimental options to osbuild-composer.service"
+    # Pass any experimental options into the systemd unit
+    cat > experimental-override.conf << EOF
+[Service]
+Environment=IMAGE_BUILDER_EXPERIMENTAL="${IMAGE_BUILDER_EXPERIMENTAL}"
+EOF
+
+    cat experimental-override.conf | sudo systemctl edit --stdin osbuild-composer.service
+    sudo systemctl daemon-reload
+    sudo systemctl cat osbuild-composer.service
+fi
+
+
 if [ "${NIGHTLY:=false}" == "true" ]; then
     # check if we've installed the osbuild-composer RPM from the nightly tree
     # under test or happen to install a newer version from one of the S3 repositories
