@@ -10,11 +10,18 @@ import (
 
 	"github.com/osbuild/images/pkg/osbuild"
 	"github.com/osbuild/osbuild-composer/internal/worker"
+
+	_ "embed"
 )
+
+//go:embed manifest.json
+var bootcManifest string
 
 type hostExecutor struct{}
 
 func (he *hostExecutor) RunOSBuild(manifest []byte, logger logrus.FieldLogger, job worker.Job, opts *osbuild.OSBuildOptions) (*osbuild.Result, error) {
+	fmt.Println("DEV TEST: REPLACING MANIFEST WITH STATIC BOOTC MANIFEST")
+	manifest = []byte(bootcManifest)
 	// MonitorFile needs an *os.File
 	rPipe, wPipe, err := os.Pipe()
 	if err != nil {
